@@ -8,7 +8,7 @@
   "continueLabel": "متابعة",
   "skipAsGuest": "تصفح كزائر",
   "loginTitle": "تسجيل الدخول",
-  "loginSubtitle": "أدخل رقم هاتفك الليبي لاستلام رمز التحقق",
+  "loginSubtitle": "أدخل بريدك الإلكتروني لاستلام رمز التحقق",
   "phoneLabel": "رقم الهاتف",
   "phoneHint": "9XXXXXXXX",
   "phonePrefix": "+218",

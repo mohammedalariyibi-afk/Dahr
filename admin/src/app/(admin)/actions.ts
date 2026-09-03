@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { PUBLIC_ERROR } from "@/lib/public-error";
 import { createClient } from "@/lib/supabase/server";
 
 async function requireAdmin() {
@@ -18,15 +19,15 @@ async function requireAdmin() {
     .maybeSingle();
 
   if (!profile || profile.role !== "admin") {
-    redirect("/login?error=forbidden");
+    redirect(`/login?error=${PUBLIC_ERROR.forbidden}`);
   }
 
   return supabase;
 }
 
-function fail(path: string, message: string): never {
+function fail(path: string, code: string = PUBLIC_ERROR.writeFailed): never {
   const sep = path.includes("?") ? "&" : "?";
-  redirect(`${path}${sep}error=${encodeURIComponent(message)}`);
+  redirect(`${path}${sep}error=${encodeURIComponent(code)}`);
 }
 
 export async function signOut() {
@@ -37,22 +38,24 @@ export async function signOut() {
 
 export async function setVendorApproved(vendorId: string, approved: boolean) {
   const supabase = await requireAdmin();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("vendor_profiles")
     .update({ is_approved: approved })
-    .eq("id", vendorId);
-  if (error) fail("/vendors", error.message);
+    .eq("id", vendorId)
+    .select("id");
+  if (error || !data?.length) fail("/vendors");
   revalidatePath("/vendors");
   revalidatePath("/");
 }
 
 export async function toggleVendorVerified(vendorId: string, verified: boolean) {
   const supabase = await requireAdmin();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("vendor_profiles")
     .update({ is_verified: verified })
-    .eq("id", vendorId);
-  if (error) fail("/vendors", error.message);
+    .eq("id", vendorId)
+    .select("id");
+  if (error || !data?.length) fail("/vendors");
   revalidatePath("/vendors");
   revalidatePath("/");
 }
@@ -62,29 +65,32 @@ export async function updateReportStatus(
   status: "dismissed" | "actioned",
 ) {
   const supabase = await requireAdmin();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("reports")
     .update({ status })
-    .eq("id", reportId);
-  if (error) fail("/reports", error.message);
+    .eq("id", reportId)
+    .select("id");
+  if (error || !data?.length) fail("/reports");
   revalidatePath("/reports");
   revalidatePath("/");
 }
 
 export async function hideReview(reviewId: string, reportId?: string) {
   const supabase = await requireAdmin();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("reviews")
     .update({ is_hidden: true })
-    .eq("id", reviewId);
-  if (error) fail("/reports", error.message);
+    .eq("id", reviewId)
+    .select("id");
+  if (error || !data?.length) fail("/reports");
 
   if (reportId) {
-    const { error: reportError } = await supabase
+    const { data: reportRow, error: reportError } = await supabase
       .from("reports")
       .update({ status: "actioned" })
-      .eq("id", reportId);
-    if (reportError) fail("/reports", reportError.message);
+      .eq("id", reportId)
+      .select("id");
+    if (reportError || !reportRow?.length) fail("/reports");
   }
 
   revalidatePath("/reports");
@@ -100,7 +106,7 @@ export async function setCommissionStatus(
     p_booking_id: bookingId,
     p_status: status,
   });
-  if (error) fail("/commissions", error.message);
+  if (error) fail("/commissions");
   revalidatePath("/commissions");
   revalidatePath("/");
 }

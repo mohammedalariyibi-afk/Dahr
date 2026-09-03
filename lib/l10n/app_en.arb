@@ -8,7 +8,7 @@
   "continueLabel": "Continue",
   "skipAsGuest": "Browse as guest",
   "loginTitle": "Sign in",
-  "loginSubtitle": "Enter your Libyan phone number to receive a code",
+  "loginSubtitle": "Enter your email to receive a one-time code",
   "phoneLabel": "Phone number",
   "phoneHint": "9XXXXXXXX",
   "phonePrefix": "+218",

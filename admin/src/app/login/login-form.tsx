@@ -2,20 +2,20 @@
 
 import { FormEvent, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { PUBLIC_ERROR, publicErrorMessage } from "@/lib/public-error";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
-  const forbidden = searchParams.get("error") === "forbidden";
-  const authError = searchParams.get("error") === "auth";
+  const errorCode = searchParams.get("error");
+  const queryError = publicErrorMessage(errorCode);
+  const forbidden = errorCode === PUBLIC_ERROR.forbidden;
 
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [sent, setSent] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(
-    authError ? "Magic link expired or invalid. Try again." : null,
-  );
+  const [error, setError] = useState<string | null>(queryError);
   const [loading, setLoading] = useState(false);
 
   async function sendOtp(e: FormEvent) {
@@ -35,7 +35,7 @@ export default function LoginForm() {
 
     setLoading(false);
     if (otpError) {
-      setError(otpError.message);
+      setError("Could not send a code. Check the email and try again.");
       return;
     }
     setSent(true);
@@ -56,7 +56,7 @@ export default function LoginForm() {
 
     setLoading(false);
     if (verifyError) {
-      setError(verifyError.message);
+      setError("Invalid or expired code. Try again.");
       return;
     }
     window.location.href = "/";

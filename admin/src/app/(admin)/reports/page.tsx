@@ -49,9 +49,7 @@ export default async function ReportsPage({
 
   if (error) {
     return (
-      <p className="text-sm text-red-700">
-        Failed to load reports: {error.message}
-      </p>
+      <p className="text-sm text-red-700">Could not load reports. Try again.</p>
     );
   }
 

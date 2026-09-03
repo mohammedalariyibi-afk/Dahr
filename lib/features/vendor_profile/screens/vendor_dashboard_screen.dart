@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/models/models.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -23,7 +24,7 @@ class VendorDashboardScreen extends ConsumerWidget {
       body: vendorAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorState(
-          message: e.toString(),
+          message: SafeUserError.of(l10n, e),
           onRetry: () => ref.invalidate(myVendorProfileProvider),
         ),
         data: (vendor) {
@@ -38,7 +39,7 @@ class VendorDashboardScreen extends ConsumerWidget {
           return statsAsync.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) => ErrorState(
-              message: e.toString(),
+              message: SafeUserError.of(l10n, e),
               onRetry: () => ref.invalidate(vendorDashboardStatsProvider),
             ),
             data: (stats) {

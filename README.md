@@ -72,7 +72,7 @@ supabase db reset        # applies all migrations + seed.sql
 
 Copy the printed **API URL** (`http://127.0.0.1:54321`) and **anon/publishable** key into `.env` and `admin/.env.local`.
 
-Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Phone OTP (+218) needs an SMS provider; the Flutter login screen is phone-first with **Continue with email** as fallback.
+Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Phone OTP / Twilio is deferred — the Flutter login screen is **email OTP only**. WhatsApp numbers on vendor listings are for contact, not sign-in.
 
 Seeded local admin: `admin@dahr.ly` (password `password123` only if you enable password auth). Prefer Email OTP via Inbucket. Couple demo: `couple@dahr.ly`.
 
@@ -116,7 +116,7 @@ flutter pub get
 flutter run --dart-define-from-file=.env
 ```
 
-Arabic is the default locale (RTL). Switch language on the first screen. Android cleartext is enabled so local `http://127.0.0.1:54321` works on device/emulator.
+Arabic is the default locale (RTL). Switch language on the first screen. Android cleartext is allowed only for localhost / 127.0.0.1 / 10.0.2.2 so local `http://127.0.0.1:54321` works on a device or emulator. Cloud URLs must be HTTPS.
 
 ## Try the vendor product flow
 

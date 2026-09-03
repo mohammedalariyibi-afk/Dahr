@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Resolves Supabase credentials for Flutter.
@@ -85,5 +87,35 @@ abstract final class DahrEnv {
   }) {
     if (url.trim().isEmpty) return true;
     return placeholderKeys.contains(anonKey.trim());
+  }
+
+  /// HTTPS required except loopback (local `supabase start` / emulator).
+  static bool isAllowedSupabaseUrl(String url) {
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null || uri.host.isEmpty) return false;
+    if (uri.scheme == 'https') return true;
+    if (uri.scheme != 'http') return false;
+    return uri.host == '127.0.0.1' ||
+        uri.host == 'localhost' ||
+        uri.host == '10.0.2.2';
+  }
+
+  /// True for a service_role / secret key that must never ship in the app.
+  static bool looksLikeSecretKey(String key) {
+    final trimmed = key.trim();
+    if (trimmed.startsWith('sb_secret_') ||
+        trimmed.startsWith('sb_service_')) {
+      return true;
+    }
+    final parts = trimmed.split('.');
+    if (parts.length != 3) return false;
+    try {
+      final normalized = base64Url.normalize(parts[1]);
+      final payload = utf8.decode(base64Url.decode(normalized));
+      return payload.contains('"role":"service_role"') ||
+          payload.contains('"role": "service_role"');
+    } catch (_) {
+      return false;
+    }
   }
 }

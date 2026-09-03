@@ -69,6 +69,24 @@ void main() {
   });
 
   group('VendorPhotoStorage', () {
+    test('rejects traversal and non-https public URLs', () {
+      expect(
+        VendorPhotoStorage.objectPathFromPublicUrl(
+          'https://xyz.supabase.co/storage/v1/object/public/vendor-photos/../etc/passwd',
+        ),
+        isNull,
+      );
+      expect(
+        VendorPhotoStorage.objectPathFromPublicUrl(
+          'http://xyz.supabase.co/storage/v1/object/public/vendor-photos/user-1/abc.jpg',
+        ),
+        isNull,
+      );
+      expect(VendorPhotoStorage.isSafeObjectPath('user-1/abc.jpg'), isTrue);
+      expect(VendorPhotoStorage.isOwnedObjectPath('user-1', 'user-1/abc.jpg'), isTrue);
+      expect(VendorPhotoStorage.isOwnedObjectPath('user-1', 'user-2/abc.jpg'), isFalse);
+    });
+
     test('parses public storage url', () {
       const url =
           'https://xyz.supabase.co/storage/v1/object/public/vendor-photos/user-1/abc.jpg';

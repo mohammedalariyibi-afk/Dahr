@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -46,7 +47,7 @@ class VendorPhotosScreen extends ConsumerWidget {
       error: (e, _) => Scaffold(
         appBar: AppBar(title: Text(l10n.vendorPhotosTitle)),
         body: ErrorState(
-          message: e.toString(),
+          message: SafeUserError.of(l10n, e),
           onRetry: () => ref.invalidate(myVendorProfileProvider),
         ),
       ),

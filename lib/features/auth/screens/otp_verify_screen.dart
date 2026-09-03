@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/routing/auth_redirect.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../providers/auth_form_validators.dart';
@@ -29,6 +30,8 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
   bool _loading = false;
   String? _error;
 
+  bool get _isEmail => widget.channel == 'email';
+
   @override
   void dispose() {
     _otpCtrl.dispose();
@@ -37,6 +40,10 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
 
   Future<void> _verify() async {
     final l10n = AppLocalizations.of(context);
+    if (!_isEmail || widget.destination.trim().isEmpty) {
+      setState(() => _error = l10n.errorGeneric);
+      return;
+    }
     final err = AuthFormValidators.validateOtp(_otpCtrl.text);
     if (err != null) {
       setState(() => _error = l10n.invalidOtp);
@@ -48,17 +55,10 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
     });
     try {
       final auth = ref.read(authProvider.notifier);
-      if (widget.channel == 'email') {
-        await auth.verifyEmailOtp(
-          email: widget.destination,
-          token: _otpCtrl.text.trim(),
-        );
-      } else {
-        await auth.verifyPhoneOtp(
-          e164Phone: widget.destination,
-          token: _otpCtrl.text.trim(),
-        );
-      }
+      await auth.verifyEmailOtp(
+        email: widget.destination,
+        token: _otpCtrl.text.trim(),
+      );
       await auth.refreshProfile();
       if (!mounted) return;
       context.go(
@@ -68,18 +68,21 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
         ),
       );
     } catch (e) {
-      setState(() => _error = e.toString());
+      setState(() => _error = SafeUserError.of(l10n, e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _resend() async {
-    final auth = ref.read(authProvider.notifier);
-    if (widget.channel == 'email') {
-      await auth.signInWithEmail(widget.destination);
-    } else {
-      await auth.signInWithPhone(widget.destination);
+    if (!_isEmail || widget.destination.trim().isEmpty) return;
+    try {
+      await ref.read(authProvider.notifier).signInWithEmail(widget.destination);
+    } catch (e) {
+      if (!mounted) return;
+      setState(
+        () => _error = SafeUserError.of(AppLocalizations.of(context), e),
+      );
     }
   }
 
@@ -108,6 +111,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
               controller: _otpCtrl,
               keyboardType: TextInputType.number,
               maxLength: 6,
+              autofillHints: const [AutofillHints.oneTimeCode],
               decoration: InputDecoration(
                 labelText: l10n.otpLabel,
                 counterText: '',

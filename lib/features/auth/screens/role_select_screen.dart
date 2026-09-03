@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/models/enums.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
@@ -27,8 +28,9 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
       context.go('/auth/profile-setup');
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text(SafeUserError.of(l10n, e))),
         );
       }
     } finally {

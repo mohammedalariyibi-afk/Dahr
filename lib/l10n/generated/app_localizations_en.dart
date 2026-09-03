@@ -33,8 +33,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTitle => 'Sign in';
 
   @override
-  String get loginSubtitle =>
-      'Enter your Libyan phone number to receive a code';
+  String get loginSubtitle => 'Enter your email to receive a one-time code';
 
   @override
   String get phoneLabel => 'Phone number';

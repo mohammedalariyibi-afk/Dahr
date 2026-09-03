@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/models.dart';
+import '../security/auth_role_write.dart';
 import '../supabase/supabase_client.dart';
+import '../supabase/write_guard.dart';
 
 enum AuthFlowStatus {
   unknown,
@@ -92,7 +94,7 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<Profile?> fetchProfile(String userId) async {
     final row = await DahrSupabase.client
         .from('profiles')
-        .select()
+        .select('id, full_name, role, city, wedding_date, locale, created_at')
         .eq('id', userId)
         .maybeSingle();
     if (row == null) return null;
@@ -103,25 +105,10 @@ class AuthController extends StateNotifier<AppAuthState> {
     await _syncFromSession(DahrSupabase.auth.currentSession);
   }
 
-  Future<void> signInWithPhone(String e164Phone) async {
-    await DahrSupabase.auth.signInWithOtp(phone: e164Phone);
-  }
-
   Future<void> signInWithEmail(String email) async {
     await DahrSupabase.auth.signInWithOtp(
       email: email.trim(),
       shouldCreateUser: true,
-    );
-  }
-
-  Future<AuthResponse> verifyPhoneOtp({
-    required String e164Phone,
-    required String token,
-  }) {
-    return DahrSupabase.auth.verifyOTP(
-      phone: e164Phone,
-      token: token,
-      type: OtpType.sms,
     );
   }
 
@@ -139,10 +126,12 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<void> setRole(UserRole role) async {
     final uid = DahrSupabase.currentUserId;
     if (uid == null) throw StateError('Not signed in');
-    await DahrSupabase.client.from('profiles').upsert({
-      'id': uid,
-      'role': role.name,
-    });
+    final payload = AuthRoleWrite.upsertPayload(userId: uid, role: role);
+    final rows = await DahrSupabase.client
+        .from('profiles')
+        .upsert(payload)
+        .select('id, role');
+    requireMutatedRows(rows);
     // Keep a complete profile authenticated (e.g. consumer becoming vendor).
     await refreshProfile();
   }
@@ -163,7 +152,9 @@ class AuthController extends StateNotifier<AppAuthState> {
         'wedding_date': weddingDate.toIso8601String().split('T').first,
       if (locale != null) 'locale': locale,
     };
-    await DahrSupabase.client.from('profiles').upsert(payload);
+    final rows =
+        await DahrSupabase.client.from('profiles').upsert(payload).select('id');
+    requireMutatedRows(rows);
     await refreshProfile();
   }
 

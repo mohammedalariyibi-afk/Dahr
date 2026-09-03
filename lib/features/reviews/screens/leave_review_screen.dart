@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -36,15 +37,7 @@ class _LeaveReviewScreenState extends ConsumerState<LeaveReviewScreen> {
   }
 
   String _errorLabel(AppLocalizations l10n, Object error) {
-    final key = error is StateError ? error.message : error.toString();
-    switch (key) {
-      case 'review_not_completed':
-        return l10n.reviewNotCompleted;
-      case 'already_reviewed':
-        return l10n.alreadyReviewed;
-      default:
-        return error.toString();
-    }
+    return SafeUserError.of(l10n, error);
   }
 
   Future<void> _submit(BookingRequest booking) async {
@@ -73,7 +66,11 @@ class _LeaveReviewScreenState extends ConsumerState<LeaveReviewScreen> {
     }
     setState(() => _loading = true);
     try {
-      await DahrSupabase.client.from('reviews').insert(payload.toJson());
+      await DahrSupabase.client
+          .from('reviews')
+          .insert(payload.toJson())
+          .select('id')
+          .single();
       ref.invalidate(consumerBookingsProvider);
       ref.invalidate(bookingByIdProvider(widget.bookingRequestId));
       if (!mounted) return;
@@ -102,7 +99,7 @@ class _LeaveReviewScreenState extends ConsumerState<LeaveReviewScreen> {
       body: bookingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorState(
-          message: e.toString(),
+          message: SafeUserError.of(l10n, e),
           onRetry: () =>
               ref.invalidate(bookingByIdProvider(widget.bookingRequestId)),
         ),

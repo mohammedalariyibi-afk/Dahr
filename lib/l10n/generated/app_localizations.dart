@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'أدخل رقم هاتفك الليبي لاستلام رمز التحقق'**
+  /// **'أدخل بريدك الإلكتروني لاستلام رمز التحقق'**
   String get loginSubtitle;
 
   /// No description provided for @phoneLabel.

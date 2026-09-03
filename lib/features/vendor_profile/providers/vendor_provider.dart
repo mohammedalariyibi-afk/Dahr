@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/supabase/supabase_client.dart';
+import '../../../core/supabase/write_guard.dart';
 
 final myVendorProfileProvider = FutureProvider<VendorProfile?>((ref) async {
   final auth = ref.watch(authProvider);
@@ -137,15 +138,19 @@ class VendorAvailabilityNotifier
 
   Future<void> upsertDate(DateTime date, AvailabilityStatus status) async {
     final vendor = await ref.read(myVendorProfileProvider.future);
-    if (vendor == null) return;
-    await DahrSupabase.client.from('availability').upsert(
+    if (vendor == null) throw StateError('not_vendor');
+    final rows = await DahrSupabase.client
+        .from('availability')
+        .upsert(
           AvailabilityCalendar.upsertJson(
             vendorId: vendor.id,
             date: date,
             status: status,
           ),
           onConflict: 'vendor_id,date',
-        );
+        )
+        .select('id');
+    requireMutatedRows(rows);
     ref.invalidate(vendorDashboardStatsProvider);
     ref.invalidateSelf();
   }
@@ -174,6 +179,10 @@ Future<VendorPhoto> uploadVendorPhoto({
   required int sortOrder,
   String contentType = 'image/jpeg',
 }) async {
+  final uid = DahrSupabase.currentUserId;
+  if (uid == null || uid != userId) {
+    throw StateError('write_rejected');
+  }
   final path = VendorPhotoStorage.objectPath(userId, const Uuid().v4());
   await DahrSupabase.client.storage.from(VendorPhotoStorage.bucket).uploadBinary(
         path,
@@ -196,9 +205,17 @@ Future<VendorPhoto> uploadVendorPhoto({
 }
 
 Future<void> deleteVendorPhoto(VendorPhoto photo) async {
+  final uid = DahrSupabase.currentUserId;
   final path = VendorPhotoStorage.objectPathFromPublicUrl(photo.storageUrl);
-  await DahrSupabase.client.from('vendor_photos').delete().eq('id', photo.id);
-  if (path != null && path.isNotEmpty) {
+  final rows = await DahrSupabase.client
+      .from('vendor_photos')
+      .delete()
+      .eq('id', photo.id)
+      .select('id');
+  requireMutatedRows(rows);
+  if (uid != null &&
+      path != null &&
+      VendorPhotoStorage.isOwnedObjectPath(uid, path)) {
     await DahrSupabase.client.storage
         .from(VendorPhotoStorage.bucket)
         .remove([path]);
@@ -207,9 +224,12 @@ Future<void> deleteVendorPhoto(VendorPhoto photo) async {
 
 Future<void> persistPhotoOrder(List<VendorPhoto> photos) async {
   for (final photo in photos) {
-    await DahrSupabase.client
+    final rows = await DahrSupabase.client
         .from('vendor_photos')
-        .update({'sort_order': photo.sortOrder}).eq('id', photo.id);
+        .update({'sort_order': photo.sortOrder})
+        .eq('id', photo.id)
+        .select('id');
+    requireMutatedRows(rows);
   }
 }
 
@@ -230,7 +250,9 @@ class VendorPhotosNotifier extends AsyncNotifier<List<VendorPhoto>> {
   Future<void> addBytes(Uint8List bytes, {String contentType = 'image/jpeg'}) async {
     final auth = ref.read(authProvider);
     final vendor = await ref.read(myVendorProfileProvider.future);
-    if (vendor == null || !auth.isLoggedIn) return;
+    if (vendor == null || !auth.isLoggedIn) {
+      throw StateError('not_vendor');
+    }
     final current = state.valueOrNull ?? [];
     final photo = await uploadVendorPhoto(
       vendorId: vendor.id,

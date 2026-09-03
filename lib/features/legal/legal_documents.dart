@@ -72,7 +72,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'Accounts and sign-in',
         body:
-            'You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to a Libyan phone number or an email address. We store the account id, phone and/or email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), and whether you use Dahr as a couple or a vendor. We do not use passwords in the consumer app.',
+            'You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to your email address. Phone OTP is not used. We store the account id and email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), and whether you use Dahr as a couple or a vendor. Vendor listings also store a WhatsApp phone number for contact. We do not use passwords in the consumer app.',
       ),
       LegalSection(
         heading: 'Vendor listings and photos',
@@ -151,7 +151,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'Accounts',
         body:
-            'You are responsible for the phone number or email you use to sign in. Keep OTP codes private. One person per account. Do not impersonate another vendor or couple. We may suspend accounts that abuse the service or submit false listings.',
+            'You are responsible for the email you use to sign in. Keep OTP codes private. One person per account. Do not impersonate another vendor or couple. We may suspend accounts that abuse the service or submit false listings.',
       ),
       LegalSection(
         heading: 'Couples',
@@ -225,7 +225,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'الحسابات وتسجيل الدخول',
         body:
-            'يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى رقم هاتف ليبي أو بريد إلكتروني. نخزّن معرّف الحساب، والهاتف و/أو البريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين.',
+            'يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى بريدك الإلكتروني. لا نستخدم رمز هاتف لتسجيل الدخول. نخزّن معرّف الحساب والبريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد. عروض المورّدين تخزّن أيضاً رقم واتساب للتواصل. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين.',
       ),
       LegalSection(
         heading: 'عروض المورّدين والصور',
@@ -304,7 +304,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'الحسابات',
         body:
-            'أنت مسؤول عن رقم الهاتف أو البريد الذي تستخدمه لتسجيل الدخول. احتفظ برموز OTP لنفسك. حساب واحد لكل شخص. لا تنتحل صفة مورّد أو زوجين آخرين. قد نعلّق الحسابات التي تسيء استخدام الخدمة أو تقدّم عروضاً غير صحيحة.',
+            'أنت مسؤول عن البريد الإلكتروني الذي تستخدمه لتسجيل الدخول. احتفظ برموز OTP لنفسك. حساب واحد لكل شخص. لا تنتحل صفة مورّد أو زوجين آخرين. قد نعلّق الحسابات التي تسيء استخدام الخدمة أو تقدّم عروضاً غير صحيحة.',
       ),
       LegalSection(
         heading: 'الأزواج',

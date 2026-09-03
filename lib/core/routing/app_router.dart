@@ -62,8 +62,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/auth/otp',
         builder: (context, state) {
           final extra = state.extra as Map<String, String>? ?? {};
+          final channel = extra['channel'] == 'email' ? 'email' : '';
           return OtpVerifyScreen(
-            channel: extra['channel'] ?? 'phone',
+            channel: channel,
             destination: extra['destination'] ?? '',
             returnTo: extra['returnTo'],
           );

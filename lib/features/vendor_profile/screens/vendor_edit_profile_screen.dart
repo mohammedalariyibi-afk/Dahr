@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/supabase/supabase_client.dart';
+import '../../../core/supabase/write_guard.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../providers/vendor_provider.dart';
@@ -102,10 +104,12 @@ class _VendorEditProfileScreenState
     setState(() => _loading = true);
     try {
       final json = payload.toJson()..remove('profile_id');
-      await DahrSupabase.client
+      final rows = await DahrSupabase.client
           .from('vendor_profiles')
           .update(json)
-          .eq('id', _vendorId!);
+          .eq('id', _vendorId!)
+          .select('id');
+      requireMutatedRows(rows);
       ref.invalidate(myVendorProfileProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -114,7 +118,7 @@ class _VendorEditProfileScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text(SafeUserError.of(l10n, e))),
         );
       }
     } finally {
@@ -131,7 +135,9 @@ class _VendorEditProfileScreenState
       appBar: AppBar(title: Text(l10n.editVendorProfile)),
       body: vendorAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => ErrorState(message: e.toString()),
+        error: (e, _) => ErrorState(
+          message: SafeUserError.of(AppLocalizations.of(context), e),
+        ),
         data: (vendor) {
           if (vendor == null) {
             return EmptyState(
