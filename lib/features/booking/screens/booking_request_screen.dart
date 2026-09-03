@@ -32,10 +32,11 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
   }
 
   String _errorLabel(AppLocalizations l10n, Object error) {
+    if (BookingDateConflict.matches(error)) {
+      return l10n.bookingDateBookedError;
+    }
     final key = error is StateError ? error.message : error.toString();
     switch (key) {
-      case 'event_date_booked':
-        return l10n.bookingDateBookedError;
       case 'event_date_past':
       case 'vendor_required':
       case 'consumer_required':

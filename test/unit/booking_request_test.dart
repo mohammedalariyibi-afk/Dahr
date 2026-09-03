@@ -104,6 +104,22 @@ void main() {
     });
   });
 
+  group('BookingDateConflict', () {
+    test('matches client validation key and live trigger exception', () {
+      expect(BookingDateConflict.clientKey, 'event_date_booked');
+      expect(BookingDateConflict.dbException, 'date_unavailable');
+      expect(BookingDateConflict.matches(StateError('event_date_booked')), isTrue);
+      expect(
+        BookingDateConflict.matches(
+          Exception('PostgrestException(message: date_unavailable, code: P0001)'),
+        ),
+        isTrue,
+      );
+      expect(BookingDateConflict.matches(StateError('event_date_past')), isFalse);
+      expect(BookingDateConflict.matches('quoted_amount_required'), isFalse);
+    });
+  });
+
   group('AcceptBookingPayload', () {
     test('requires a quote greater than zero', () {
       expect(

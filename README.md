@@ -58,8 +58,9 @@ Migrations (applied in filename order):
 - `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% vendor commission, `accept_booking_request` RPC
 - `supabase/migrations/20260903120000_revoke_anon_definer_rpcs.sql` — split public-read RLS; revoke anon EXECUTE on admin/vendor helpers (already applied on live Dahr LY)
 - `supabase/migrations/20260903140000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
+- `supabase/migrations/20260903184000_overnight_security_hardening.sql` — revoke `reject_booking_if_date_booked` (trigger only); replace `profile_public` with `security_invoker=true` view of `id,full_name`; `profiles_select_public_names` for review/vendor/booking display names (already applied on live Dahr LY)
 
-**Security note:** Guest browse still works (approved vendors, photos, availability, and `increment_vendor_views`). Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions) are not anon RPCs — `authenticated` only, or no client EXECUTE.
+**Security note:** Guest browse still works (approved vendors, photos, availability, and `increment_vendor_views`). Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions including `reject_booking_if_date_booked`) are not anon RPCs — `authenticated` only, or no client EXECUTE. Do **not** re-grant `is_admin` / `owns_vendor` to anon (live once had `grant_rls_helpers_to_anon`; that must stay revoked).
 
 ### Local (`supabase start`)
 
@@ -83,7 +84,7 @@ URL: `https://cccusktgxrizfwpixddu.supabase.co`
 
 ```bash
 supabase link --project-ref cccusktgxrizfwpixddu
-supabase db push         # applies delete_own_account if init + booking_commission + revoke_anon_definer_rpcs are already on Dahr LY
+supabase db push         # applies overnight_security_hardening if commission + revoke + delete_own_account are already on Dahr LY
 # seed.sql is optional on cloud (SQL editor); do not rewrite schema
 ```
 
