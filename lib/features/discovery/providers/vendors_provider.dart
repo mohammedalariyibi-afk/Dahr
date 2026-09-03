@@ -192,28 +192,69 @@ final vendorDetailProvider =
       .maybeSingle();
   if (row == null) throw StateError('Vendor not found');
 
-  // Fire-and-forget view increment
-  // ignore: unawaited_futures
-  DahrSupabase.client.rpc('increment_vendor_views', params: {
-    'p_vendor_id': id,
-  });
+  _countVendorView(id);
 
   final vendor = VendorProfile.fromJson(Map<String, dynamic>.from(row));
   final withRatings = await _withRatings([vendor]);
   return withRatings.first;
 });
 
+/// Vendors already viewed on this run of the app.
+final _countedVendorViews = <String>{};
+
+/// `increment_vendor_views` is an anon RPC with no server-side limit, so one
+/// view per vendor per app run keeps a re-render from inflating the count.
+void _countVendorView(String vendorId) {
+  if (!_countedVendorViews.add(vendorId)) return;
+  // A Postgrest builder only sends its request once something subscribes, so
+  // the terminal `then` is what fires this; the count must never surface as
+  // an error on the detail screen.
+  DahrSupabase.client
+      .rpc('increment_vendor_views', params: {'p_vendor_id': vendorId})
+      .then((_) {}, onError: (_) {});
+}
+
 final vendorReviewsProvider =
     FutureProvider.family<List<Review>, String>((ref, vendorId) async {
   final rows = await DahrSupabase.client
       .from('reviews')
-      .select('*, profiles(full_name)')
+      .select()
       .eq('vendor_id', vendorId)
       .eq('is_hidden', false)
       .order('created_at', ascending: false);
-      return (rows as List)
-          .map((e) => Review.fromJson(Map<String, dynamic>.from(e as Map)))
-          .toList()
-          .where((r) => r.isVisibleToPublic)
-          .toList();
+  final reviews = (rows as List)
+      .map((e) => Review.fromJson(Map<String, dynamic>.from(e as Map)))
+      .where((r) => r.isVisibleToPublic)
+      .toList();
+  return _withConsumerNames(reviews);
 });
+
+/// Attaches review author names.
+///
+/// `profiles` RLS only exposes your own row, so embedding that table returns
+/// a null name for every other author (and for every author when the reader
+/// is a guest). Display names live in the `profile_public` view.
+Future<List<Review>> _withConsumerNames(List<Review> reviews) async {
+  if (reviews.isEmpty) return reviews;
+
+  final ids = {for (final r in reviews) r.consumerId}.toList();
+  final rows = await DahrSupabase.client
+      .from('profile_public')
+      .select('id, full_name')
+      .inFilter('id', ids);
+
+  final names = <String, String>{};
+  for (final raw in rows as List) {
+    final row = Map<String, dynamic>.from(raw as Map);
+    final id = row['id'] as String?;
+    final name = (row['full_name'] as String?)?.trim();
+    if (id != null && name != null && name.isNotEmpty) {
+      names[id] = name;
+    }
+  }
+
+  return [
+    for (final review in reviews)
+      review.withConsumerName(names[review.consumerId]),
+  ];
+}
