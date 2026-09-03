@@ -1,11 +1,15 @@
 # Store screenshots (App Store / Play)
 
-Full-color store set (Ice Blue UI + vivid venue photos). Design-truth Stitch exports live separately under the design pack.
+Full-color store set with **دهر** brand chrome (Ice Blue UI + vivid venue photos).
 
-- `01-email-otp.png` — MD5 `8cbe2b760f7eb26b74f381ec2681aae9`
-- `02-otp-verify.png` — MD5 `0401bce561ffe5b9c28cad87aa2bd4a5`
-- `03-discover.png` — MD5 `40599a5e8484aeec0a4562aede9b0c45`
-- `04-vendor-detail.png` — MD5 `bf9234ef5f5a1296b4e70cd366481180`
-- `05-booking-request.png` — MD5 `515b4232b1da63e06416944dfe5e7d56`
-- `06-vendor-inbox.png` — MD5 `222adacd00b4697ddf4d38dc567bc55d`
-- `play-feature-graphic-1024x500.png` — MD5 `9665e1b038ecb6ea5dfd118603ce7bf0` (Google Play feature graphic 1024×500)
+| File | MD5 | Notes |
+|------|-----|-------|
+| `01-email-otp.png` | `93c4198fec53ea5f848ec6fdc7bfa6bb` | phone frame 750×1624 |
+| `02-otp-verify.png` | `4acd52824822e832fc0bce31e071dc56` | phone frame 750×1624 |
+| `03-discover.png` | `85b5f7566f0db1eba3bb86a3e0640d25` | phone frame 750×1624 |
+| `04-vendor-detail.png` | `f148542c0a47d3e74b0730ee305acd2c` | phone frame 750×1624 |
+| `05-booking-request.png` | `8e2863a595633e366a791450b0c20981` | phone frame 750×1624 |
+| `06-vendor-inbox.png` | `9e6f507518ed327eb1b20ad3d0737877` | phone frame 750×1624 |
+| `play-feature-graphic-1024x500.png` | `5c0741d0fb7d173486e201da0e141043` | Play feature graphic 1024×500 |
+
+Known follow-up: phone frames are still 750×1624 (aspect ~2.165:1). Re-export to Play-legal aspect (e.g. 1080×1920) and App Store 6.9″ sizes before console upload.
