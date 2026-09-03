@@ -1,32 +1,53 @@
 import 'package:flutter/material.dart';
 
-/// Dahr brand palette — warm cream, deep burgundy, gold accents.
-/// Use only these tokens; never hardcode colors in screens.
+/// Dahr brand palette — Mohammed’s locked Stitch system:
+/// Ice Blue glass on Slate 950.
+///
+/// Use these tokens; do not hardcode cream / burgundy / gold (retired).
 abstract final class AppColors {
-  static const Color cream = Color(0xFFF7F1E8);
-  static const Color creamDark = Color(0xFFEDE4D6);
-  static const Color surface = Color(0xFFFFFBF6);
-  static const Color burgundy = Color(0xFF6B1E2F);
-  static const Color burgundyDark = Color(0xFF4A1420);
-  static const Color burgundySoft = Color(0xFF8B3A4A);
-  static const Color gold = Color(0xFFC4A35A);
-  static const Color goldLight = Color(0xFFD4BC7A);
-  static const Color goldDark = Color(0xFF9A7B3C);
-  static const Color ink = Color(0xFF2C2420);
-  static const Color inkMuted = Color(0xFF6B5E56);
-  static const Color inkFaint = Color(0xFF9A8E85);
-  static const Color border = Color(0xFFE0D5C8);
-  static const Color success = Color(0xFF3D6B4F);
-  static const Color warning = Color(0xFFB8860B);
-  static const Color error = Color(0xFFA33A3A);
-  static const Color favorite = Color(0xFFA33A3A);
-  static const Color star = Color(0xFFC4A35A);
-  static const Color skeletonBase = Color(0xFFE8DFD2);
-  static const Color skeletonHighlight = Color(0xFFF5EFE6);
-  static const Color onBurgundy = Color(0xFFFFFBF6);
-  static const Color onGold = Color(0xFF2C2420);
-  static const Color chipSelectedBg = Color(0xFF6B1E2F);
-  static const Color chipSelectedFg = Color(0xFFFFFBF6);
-  static const Color chipBg = Color(0xFFEDE4D6);
-  static const Color chipFg = Color(0xFF2C2420);
+  // --- Stitch source of truth ---
+  static const Color iceBlue = Color(0xFF7DD3FC);
+  static const Color iceBlueGlow = Color.fromRGBO(125, 211, 252, 0.1);
+  static const Color iceBlueHover = Color.fromRGBO(125, 211, 252, 0.2);
+  static const Color appBg = Color(0xFF020617);
+  static const Color badgeBg = Color.fromRGBO(15, 23, 42, 0.8);
+  static const Color glassBg = Color.fromRGBO(255, 255, 255, 0.05);
+  static const Color glassBorder = Color.fromRGBO(255, 255, 255, 0.10);
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFFE2E8F0);
+  static const Color textMuted = Color(0xFFCBD5E1);
+  static const Color textDim = Color(0xFF94A3B8);
+
+  /// Dark ink on ice-blue fills (logos-as-buttons, selected chips, avatars).
+  static const Color onPrimary = appBg;
+
+  // --- Semantic (dark-surface) ---
+  static const Color success = Color(0xFF34D399);
+  static const Color warning = Color(0xFFFBBF24);
+  static const Color error = Color(0xFFF87171);
+  static const Color favorite = Color(0xFFF87171);
+  static const Color star = iceBlue;
+  static const Color skeletonBase = Color.fromRGBO(255, 255, 255, 0.04);
+  static const Color skeletonHighlight = iceBlueGlow;
+  static const Color chipSelectedBg = iceBlueGlow;
+  static const Color chipSelectedFg = iceBlue;
+  static const Color chipBg = glassBg;
+  static const Color chipFg = textMuted;
+
+  // --- Remapped aliases so existing screens pick up the Stitch look ---
+  static const Color cream = appBg;
+  static const Color creamDark = glassBg;
+  static const Color surface = glassBg;
+  static const Color burgundy = iceBlue;
+  static const Color burgundyDark = iceBlue;
+  static const Color burgundySoft = iceBlueHover;
+  static const Color gold = iceBlue;
+  static const Color goldLight = iceBlueGlow;
+  static const Color goldDark = iceBlue;
+  static const Color ink = textPrimary;
+  static const Color inkMuted = textMuted;
+  static const Color inkFaint = textDim;
+  static const Color border = glassBorder;
+  static const Color onBurgundy = onPrimary;
+  static const Color onGold = onPrimary;
 }

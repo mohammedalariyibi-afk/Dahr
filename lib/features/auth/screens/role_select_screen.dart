@@ -151,7 +151,7 @@ class _RoleCard extends StatelessWidget {
               Icon(
                 icon,
                 size: 36,
-                color: selected ? AppColors.gold : AppColors.burgundy,
+                color: selected ? AppColors.onPrimary : AppColors.iceBlue,
               ),
               const SizedBox(width: 16),
               Expanded(

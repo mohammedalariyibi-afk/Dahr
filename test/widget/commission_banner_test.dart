@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dahr/core/theme/app_theme.dart';
 import 'package:dahr/l10n/generated/app_localizations.dart';
 import 'package:dahr/shared/widgets/commission_banner.dart';
 
@@ -9,6 +10,7 @@ void main() {
     Locale locale = const Locale('en'),
   }) {
     return MaterialApp(
+      theme: AppTheme.dark,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

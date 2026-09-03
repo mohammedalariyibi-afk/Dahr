@@ -18,7 +18,9 @@ class DahrApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Dahr',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
+      theme: AppTheme.dark,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.dark,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localeResolutionCallback: (deviceLocale, supported) {

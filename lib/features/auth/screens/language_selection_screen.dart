@@ -113,7 +113,7 @@ class _LangTile extends StatelessWidget {
                 ),
               ),
               if (selected)
-                const Icon(Icons.check_circle, color: AppColors.gold),
+                const Icon(Icons.check_circle, color: AppColors.onPrimary),
             ],
           ),
         ),
