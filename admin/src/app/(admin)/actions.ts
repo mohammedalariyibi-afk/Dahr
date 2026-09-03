@@ -2,9 +2,24 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {
+  AuditEntry,
+  LOG_ADMIN_ACTION_RPC,
+  auditRpcArgs,
+  commissionAction,
+  reportStatusAction,
+  vendorApprovalAction,
+  vendorVerificationAction,
+} from "@/lib/audit-log";
 import { PUBLIC_ERROR } from "@/lib/public-error";
-import { adminHideReviewPatch } from "@/lib/review-write";
+import {
+  HIDE_REVIEW_RPC,
+  RPC_MISSING_CODE,
+  adminHideReviewPatch,
+} from "@/lib/review-write";
 import { createClient } from "@/lib/supabase/server";
+
+type AdminClient = Awaited<ReturnType<typeof createClient>>;
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -31,6 +46,18 @@ function fail(path: string, code: string = PUBLIC_ERROR.writeFailed): never {
   redirect(`${path}${sep}error=${encodeURIComponent(code)}`);
 }
 
+/**
+ * The decision itself has already been committed, so a missing audit row must
+ * not undo it or block the operator — the log is still append-only in SQL.
+ */
+async function logAdminAction(supabase: AdminClient, entry: AuditEntry) {
+  try {
+    await supabase.rpc(LOG_ADMIN_ACTION_RPC, auditRpcArgs(entry));
+  } catch {
+    // Ignored on purpose (see above).
+  }
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
@@ -45,6 +72,11 @@ export async function setVendorApproved(vendorId: string, approved: boolean) {
     .eq("id", vendorId)
     .select("id");
   if (error || !data?.length) fail("/vendors");
+  await logAdminAction(supabase, {
+    action: vendorApprovalAction(approved),
+    targetType: "vendor",
+    targetId: vendorId,
+  });
   revalidatePath("/vendors");
   revalidatePath("/");
 }
@@ -57,6 +89,11 @@ export async function toggleVendorVerified(vendorId: string, verified: boolean) 
     .eq("id", vendorId)
     .select("id");
   if (error || !data?.length) fail("/vendors");
+  await logAdminAction(supabase, {
+    action: vendorVerificationAction(verified),
+    targetType: "vendor",
+    targetId: vendorId,
+  });
   revalidatePath("/vendors");
   revalidatePath("/");
 }
@@ -72,26 +109,56 @@ export async function updateReportStatus(
     .eq("id", reportId)
     .select("id");
   if (error || !data?.length) fail("/reports");
+  await logAdminAction(supabase, {
+    action: reportStatusAction(status),
+    targetType: "report",
+    targetId: reportId,
+  });
   revalidatePath("/reports");
   revalidatePath("/");
 }
 
 export async function hideReview(reviewId: string, reportId?: string) {
   const supabase = await requireAdmin();
-  const { data, error } = await supabase
-    .from("reviews")
-    .update(adminHideReviewPatch())
-    .eq("id", reviewId)
-    .select("id");
-  if (error || !data?.length) fail("/reports");
 
-  if (reportId) {
-    const { data: reportRow, error: reportError } = await supabase
-      .from("reports")
-      .update({ status: "actioned" })
-      .eq("id", reportId)
+  // One transaction, so a hidden review can never be left on an open report.
+  const { error: rpcError } = await supabase.rpc(HIDE_REVIEW_RPC, {
+    p_review_id: reviewId,
+    p_report_id: reportId ?? null,
+  });
+
+  if (rpcError && rpcError.code !== RPC_MISSING_CODE) fail("/reports");
+
+  // Dahr LY has not been migrated yet: fall back to the two sequential writes.
+  if (rpcError) {
+    const { data, error } = await supabase
+      .from("reviews")
+      .update(adminHideReviewPatch())
+      .eq("id", reviewId)
       .select("id");
-    if (reportError || !reportRow?.length) fail("/reports");
+    if (error || !data?.length) fail("/reports");
+
+    await logAdminAction(supabase, {
+      action: "review_hidden",
+      targetType: "review",
+      targetId: reviewId,
+      detail: { report_id: reportId ?? null },
+    });
+
+    if (reportId) {
+      const { data: reportRow, error: reportError } = await supabase
+        .from("reports")
+        .update({ status: "actioned" })
+        .eq("id", reportId)
+        .select("id");
+      if (reportError || !reportRow?.length) fail("/reports");
+      await logAdminAction(supabase, {
+        action: "report_actioned",
+        targetType: "report",
+        targetId: reportId,
+        detail: { review_id: reviewId },
+      });
+    }
   }
 
   revalidatePath("/reports");
@@ -108,6 +175,11 @@ export async function setCommissionStatus(
     p_status: status,
   });
   if (error) fail("/commissions");
+  await logAdminAction(supabase, {
+    action: commissionAction(status),
+    targetType: "booking",
+    targetId: bookingId,
+  });
   revalidatePath("/commissions");
   revalidatePath("/");
 }
