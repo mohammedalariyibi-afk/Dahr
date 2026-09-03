@@ -1177,6 +1177,54 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الصور'**
   String get photoCountStat;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In ar, this message translates to:
+  /// **'سياسة الخصوصية'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfUse.
+  ///
+  /// In ar, this message translates to:
+  /// **'شروط الاستخدام'**
+  String get termsOfUse;
+
+  /// No description provided for @legalStartingNotice.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيان أوّلي — وليس استشارة قانونية.'**
+  String get legalStartingNotice;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الحساب'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف حسابك؟'**
+  String get deleteAccountTitle;
+
+  /// No description provided for @deleteAccountBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيُحذف حساب دهر نهائياً. إذا كنت مورّداً فسيُزال عرضك وصورك. لا يمكن التراجع عن هذا.'**
+  String get deleteAccountBody;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الحساب'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deleteAccountFailed.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعذر حذف الحساب. حاول مرة أخرى أو راسل mohammedalariyibi@gmail.com.'**
+  String get deleteAccountFailed;
 }
 
 class _AppLocalizationsDelegate

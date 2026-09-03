@@ -1,7 +1,7 @@
 import '../providers/auth_provider.dart';
 
 /// Routes that require a signed-in session. Discover, vendor detail, profile,
-/// and auth screens stay open to guests.
+/// legal screens, and auth screens stay open to guests.
 const kAuthProtectedPrefixes = [
   '/favorites',
   '/bookings',
@@ -34,12 +34,14 @@ String? resolveAuthRedirect({
   final onLogin = location == '/auth/login';
   final onRole = location == '/auth/role';
   final onProfileSetup = location == '/auth/profile-setup';
+  final onLegal = location.startsWith('/legal');
 
   // Incomplete onboarding must finish before browsing.
-  if (status == AuthFlowStatus.needsRole && !onRole) {
+  // Legal screens stay reachable (store reviewers and the user).
+  if (status == AuthFlowStatus.needsRole && !onRole && !onLegal) {
     return '/auth/role';
   }
-  if (status == AuthFlowStatus.needsProfile && !onProfileSetup) {
+  if (status == AuthFlowStatus.needsProfile && !onProfileSetup && !onLegal) {
     return '/auth/profile-setup';
   }
 

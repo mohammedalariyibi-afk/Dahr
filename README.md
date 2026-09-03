@@ -54,6 +54,7 @@ Migrations (applied in filename order):
 
 - `supabase/migrations/20260328000001_init_schema.sql` — core schema, RLS, `vendor-photos` bucket
 - `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% vendor commission, `accept_booking_request` RPC
+- `supabase/migrations/20260903120000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
 
 ### Local (`supabase start`)
 
@@ -144,6 +145,11 @@ npm run dev
 
 Open http://localhost:3000 — only users with `profiles.role = 'admin'` can access Dashboard / Vendors / Commissions / Reports.
 
+Public store URLs (no admin login):
+
+- Privacy: `http://localhost:3000/privacy` (deployed: `{ADMIN_ORIGIN}/privacy`)
+- Terms: `http://localhost:3000/terms` (deployed: `{ADMIN_ORIGIN}/terms`)
+
 Add Auth redirect URL: `http://localhost:3000/auth/callback`.
 
 ### Admin flows
@@ -174,6 +180,21 @@ Add Auth redirect URL: `http://localhost:3000/auth/callback`.
 Couples still settle with the vendor off-platform (WhatsApp). When a vendor **accepts** a request they must enter a quoted amount in LYD. The database stores `quoted_amount_lyd`, computes `commission_amount_lyd` at 10%, and sets `commission_status = unpaid`. Completing a booking does **not** mark the commission paid.
 
 Admins record offline collection on **Commissions**: **Mark paid** or **Waive**. That is the only way a vendor’s 10% is marked paid in v1.
+
+## Store listing (Apple / Google Play)
+
+Use the **deployed admin origin** for the public URLs reviewers ask for:
+
+| Field | URL / path |
+|-------|-------------|
+| Privacy policy | `{ADMIN_ORIGIN}/privacy` |
+| Terms of use | `{ADMIN_ORIGIN}/terms` |
+
+In the Flutter app the same documents are under Profile → Privacy policy / Terms of use (`/legal/privacy`, `/legal/terms`), Arabic default and English.
+
+**Account deletion (guideline 5.1.1(v)):** signed-in users delete from **Profile → Delete account** (confirm dialog). No support email is required. The app calls the `delete_own_account` RPC, which deletes `auth.users` for `auth.uid()` only (cascade `profiles`, vendor listing/photos as FKs allow). Fallback if the in-app flow fails: email `mohammedalariyibi@gmail.com` from the same phone or email as the account.
+
+Copy is a **starting policy**, not law-firm work. Operator: Mohammed Alariyibi. Backend: Dahr LY, `eu-west-1`. No card data is stored.
 
 ## Demo seed
 

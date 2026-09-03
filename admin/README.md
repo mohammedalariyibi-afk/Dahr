@@ -9,3 +9,5 @@ npm run dev
 ```
 
 Open http://localhost:3000. Only `profiles.role = 'admin'` can access Dashboard / Vendors / Commissions / Reports. Add Auth redirect URL `http://localhost:3000/auth/callback`.
+
+Public legal pages (no login): `/privacy` and `/terms`.

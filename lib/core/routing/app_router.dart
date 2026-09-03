@@ -24,6 +24,8 @@ import '../../features/vendor_profile/screens/vendor_availability_screen.dart';
 import '../../features/vendor_profile/screens/vendor_edit_profile_screen.dart';
 import '../../features/vendor_profile/screens/vendor_photos_screen.dart';
 import '../../features/auth/screens/profile_tab_screen.dart';
+import '../../features/legal/legal_documents.dart';
+import '../../features/legal/screens/legal_document_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -163,6 +165,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/vendor-tools/photos',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, __) => const VendorPhotosScreen(),
+      ),
+      GoRoute(
+        path: '/legal/privacy',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, __) => const LegalDocumentScreen(
+          kind: LegalDocumentKind.privacy,
+        ),
+      ),
+      GoRoute(
+        path: '/legal/terms',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, __) => const LegalDocumentScreen(
+          kind: LegalDocumentKind.terms,
+        ),
       ),
     ],
   );

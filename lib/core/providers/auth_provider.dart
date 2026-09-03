@@ -180,6 +180,30 @@ class AuthController extends StateNotifier<AppAuthState> {
     state = const AppAuthState(status: AuthFlowStatus.unauthenticated);
   }
 
+  /// Deletes the signed-in auth user via SECURITY DEFINER RPC.
+  /// Best-effort Storage cleanup first — owning objects blocks auth delete.
+  Future<void> deleteAccount() async {
+    final uid = DahrSupabase.currentUserId;
+    if (uid == null) throw StateError('Not signed in');
+
+    try {
+      final listed = await DahrSupabase.client.storage
+          .from(VendorPhotoStorage.bucket)
+          .list(path: uid);
+      if (listed.isNotEmpty) {
+        await DahrSupabase.client.storage.from(VendorPhotoStorage.bucket).remove(
+              listed.map((f) => '$uid/${f.name}').toList(),
+            );
+      }
+    } catch (_) {
+      // RPC still deletes storage.objects metadata for this uid prefix.
+    }
+
+    // RPC name must match DeleteAccountRpcSpec — no user-id argument.
+    await DahrSupabase.client.rpc('delete_own_account');
+    await signOut();
+  }
+
   @override
   void dispose() {
     _authSub.cancel();

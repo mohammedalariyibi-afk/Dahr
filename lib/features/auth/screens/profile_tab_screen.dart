@@ -8,9 +8,28 @@ import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import 'delete_account_dialog.dart';
 
 class ProfileTabScreen extends ConsumerWidget {
   const ProfileTabScreen({super.key});
+
+  Future<void> _deleteAccount(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmation = await showDeleteAccountDialog(
+      context: context,
+      isSignedIn: ref.read(authProvider).isLoggedIn,
+    );
+    if (!confirmation.shouldCallRpc) return;
+    try {
+      await ref.read(authProvider.notifier).deleteAccount();
+      if (context.mounted) context.go('/auth/language');
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.deleteAccountFailed)),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -109,6 +128,17 @@ class ProfileTabScreen extends ConsumerWidget {
               onTap: () => context.push('/vendor-tools/onboarding'),
             ),
           ],
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined),
+            title: Text(l10n.privacyPolicy),
+            onTap: () => context.push(AppConstants.privacyPath),
+          ),
+          ListTile(
+            leading: const Icon(Icons.description_outlined),
+            title: Text(l10n.termsOfUse),
+            onTap: () => context.push(AppConstants.termsPath),
+          ),
           if (auth.isLoggedIn) ...[
             const Divider(),
             ListTile(
@@ -121,6 +151,17 @@ class ProfileTabScreen extends ConsumerWidget {
                 await ref.read(authProvider.notifier).signOut();
                 if (context.mounted) context.go('/auth/language');
               },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.delete_forever_outlined,
+                color: AppColors.error,
+              ),
+              title: Text(
+                l10n.deleteAccount,
+                style: const TextStyle(color: AppColors.error),
+              ),
+              onTap: () => _deleteAccount(context, ref),
             ),
           ],
         ],

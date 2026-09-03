@@ -17,12 +17,14 @@ void main() {
   });
 
   group('guest vs signed-in guards', () {
-    test('guest may browse discover, vendor detail, profile, and auth', () {
+    test('guest may browse discover, vendor detail, profile, legal, and auth', () {
       const guest = AuthFlowStatus.unauthenticated;
       for (final loc in [
         '/discover',
         '/vendor/abc',
         '/profile',
+        '/legal/privacy',
+        '/legal/terms',
         '/auth/language',
         '/auth/login',
         '/auth/otp',
@@ -204,6 +206,25 @@ void main() {
           uri: Uri.parse('/discover'),
         ),
         '/auth/profile-setup',
+      );
+    });
+
+    test('legal screens stay open during onboarding', () {
+      expect(
+        resolveAuthRedirect(
+          location: '/legal/privacy',
+          status: AuthFlowStatus.needsRole,
+          uri: Uri.parse('/legal/privacy'),
+        ),
+        isNull,
+      );
+      expect(
+        resolveAuthRedirect(
+          location: '/legal/terms',
+          status: AuthFlowStatus.needsProfile,
+          uri: Uri.parse('/legal/terms'),
+        ),
+        isNull,
       );
     });
 
