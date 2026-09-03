@@ -1,6 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'dahr_env_rules.dart';
 
 /// Resolves Supabase credentials for Flutter.
 ///
@@ -17,12 +17,10 @@ abstract final class DahrEnv {
   static const compileTimePublishableKey =
       String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
 
-  static const placeholderKeys = {
-    '',
-    'your-local-anon-key',
-    'your-anon-key',
-    'your-publishable-key',
-  };
+  static const dahrLyProjectRef = DahrEnvRules.dahrLyProjectRef;
+  static const dahrLyHost = DahrEnvRules.dahrLyHost;
+  static const dahrLyUrl = DahrEnvRules.dahrLyUrl;
+  static const placeholderKeys = DahrEnvRules.placeholderKeys;
 
   static const envExampleAsset = '.env.example';
 
@@ -38,37 +36,25 @@ abstract final class DahrEnv {
     return dotenv.env;
   }
 
-  static String firstNonEmpty(Iterable<String?> values) {
-    for (final value in values) {
-      if (value == null) continue;
-      final trimmed = value.trim();
-      if (trimmed.isNotEmpty) return trimmed;
-    }
-    return '';
-  }
+  static String firstNonEmpty(Iterable<String?> values) =>
+      DahrEnvRules.firstNonEmpty(values);
 
   static String resolveUrl({
     required Map<String, String?> env,
     String dartUrl = '',
-  }) {
-    return firstNonEmpty([
-      dartUrl,
-      env['SUPABASE_URL'],
-    ]);
-  }
+  }) =>
+      DahrEnvRules.resolveUrl(env: env, dartUrl: dartUrl);
 
   static String resolveAnonKey({
     required Map<String, String?> env,
     String dartAnonKey = '',
     String dartPublishableKey = '',
-  }) {
-    return firstNonEmpty([
-      dartAnonKey,
-      dartPublishableKey,
-      env['SUPABASE_ANON_KEY'],
-      env['SUPABASE_PUBLISHABLE_KEY'],
-    ]);
-  }
+  }) =>
+      DahrEnvRules.resolveAnonKey(
+        env: env,
+        dartAnonKey: dartAnonKey,
+        dartPublishableKey: dartPublishableKey,
+      );
 
   static String get supabaseUrl => resolveUrl(
         env: _dotenvMap,
@@ -84,38 +70,27 @@ abstract final class DahrEnv {
   static bool isMissingOrPlaceholder({
     required String url,
     required String anonKey,
-  }) {
-    if (url.trim().isEmpty) return true;
-    return placeholderKeys.contains(anonKey.trim());
-  }
+  }) =>
+      DahrEnvRules.isMissingOrPlaceholder(url: url, anonKey: anonKey);
 
   /// HTTPS required except loopback (local `supabase start` / emulator).
-  static bool isAllowedSupabaseUrl(String url) {
-    final uri = Uri.tryParse(url.trim());
-    if (uri == null || uri.host.isEmpty) return false;
-    if (uri.scheme == 'https') return true;
-    if (uri.scheme != 'http') return false;
-    return uri.host == '127.0.0.1' ||
-        uri.host == 'localhost' ||
-        uri.host == '10.0.2.2';
-  }
+  static bool isAllowedSupabaseUrl(String url) =>
+      DahrEnvRules.isAllowedSupabaseUrl(url);
 
   /// True for a service_role / secret key that must never ship in the app.
-  static bool looksLikeSecretKey(String key) {
-    final trimmed = key.trim();
-    if (trimmed.startsWith('sb_secret_') ||
-        trimmed.startsWith('sb_service_')) {
-      return true;
-    }
-    final parts = trimmed.split('.');
-    if (parts.length != 3) return false;
-    try {
-      final normalized = base64Url.normalize(parts[1]);
-      final payload = utf8.decode(base64Url.decode(normalized));
-      return payload.contains('"role":"service_role"') ||
-          payload.contains('"role": "service_role"');
-    } catch (_) {
-      return false;
-    }
-  }
+  static bool looksLikeSecretKey(String key) =>
+      DahrEnvRules.looksLikeSecretKey(key);
+
+  /// Store / Play AAB builds must target live Dahr LY over HTTPS.
+  static bool isDahrLyStoreUrl(String url) =>
+      DahrEnvRules.isDahrLyStoreUrl(url);
+
+  /// Non-null reason a `.env` / dart-define file must not be used for a
+  /// store build. Runtime [isAllowedSupabaseUrl] still allows loopback for
+  /// local `flutter run --release`.
+  static String? storeReleaseBlocker({
+    required String url,
+    required String anonKey,
+  }) =>
+      DahrEnvRules.storeReleaseBlocker(url: url, anonKey: anonKey);
 }

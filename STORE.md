@@ -24,16 +24,18 @@ This file is the submit checklist. Listing copy lives in [`docs/store-listing.md
 
 ## Public URLs (reviewers)
 
-Replace `{ADMIN_ORIGIN}` with the deployed Next.js admin origin (no trailing slash):
+Use the GitHub Pages copies (same AR+EN starting policy as the app / admin). **Do not** put `dahr.ly` or Vercel in the store consoles — those origins 404 today.
 
 | Field | URL |
 |-------|-----|
-| Privacy policy | `{ADMIN_ORIGIN}/privacy` |
-| Terms of use | `{ADMIN_ORIGIN}/terms` |
+| Privacy policy | `https://mohammedalariyibi-afk.github.io/Dahr/privacy` |
+| Terms of use | `https://mohammedalariyibi-afk.github.io/Dahr/terms` |
 
-Those routes are **already on `main`** (admin App Router pages). In-app copies: Profile → Privacy policy / Terms of use (`/legal/privacy`, `/legal/terms`).
+Static files live in `legal-pages/`. Merge to `main` runs [`.github/workflows/pages.yml`](.github/workflows/pages.yml). After merge, if Pages is still 404: GitHub → **Settings → Pages → Source: GitHub Actions**.
 
-Local check: `http://localhost:3000/privacy` and `http://localhost:3000/terms`.
+In-app copies stay at Profile → Privacy policy / Terms of use (`/legal/privacy`, `/legal/terms`). Those do **not** satisfy Play / App Store public-URL fields.
+
+Admin App Router `/privacy` and `/terms` still work locally (`http://localhost:3000/privacy`). They are not the store URLs.
 
 ## Auth (what to declare)
 
@@ -73,8 +75,8 @@ Couples pay vendors **off-platform** (often WhatsApp). Currency shown in-app is 
 
 - Languages: **Arabic** (default, RTL) and **English**
 - Prices: **LYD**
-- iOS orientations: iPhone **portrait**; iPad all orientations (Flutter default is universal `TARGETED_DEVICE_FAMILY = 1,2`)
-- For Saturday: either capture **iPad 13″** screenshots too, or set the Xcode target to **iPhone only** (`TARGETED_DEVICE_FAMILY = 1`) before archive so iPad screenshots are not required
+- iOS orientations: iPhone **portrait**
+- iOS target is **iPhone only** (`TARGETED_DEVICE_FAMILY = 1` in `ios/Runner.xcodeproj/project.pbxproj`). App Store will not ask for 13″ iPad screenshots.
 
 ## Packaged screenshots
 
@@ -90,7 +92,7 @@ Ready-to-upload phone frames live in `docs/store-shots/` (full-color Ice Blue UI
 5. `05-booking-request.png`
 6. `06-vendor-inbox.png`
 
-See `docs/store-shots/README.md` for MD5s. Capture more sizes (iPad / Play feature graphic) from these if Connect requires them.
+See `docs/store-shots/README.md` for MD5s. Play feature graphic is already in that folder.
 
 ## Screenshots to capture (both stores)
 
@@ -113,7 +115,7 @@ Do not screenshot debug banners, `.env` URLs, or `127.0.0.1`.
 1. Create app **Dahr**. Package name **`com.dahr.dahr`** (must match `applicationId`; cannot change later).
 2. Default language: Arabic. Add English listing (copy in `docs/store-listing.md`).
 3. Category: **Events** or **Lifestyle**. Tags: wedding, booking, Libya.
-4. Privacy policy URL: `{ADMIN_ORIGIN}/privacy`.
+4. Privacy policy URL: `https://mohammedalariyibi-afk.github.io/Dahr/privacy`.
 5. Contact: WhatsApp number + `mohammedalariyibi@gmail.com`.
 6. **Data safety** (declare; do not invent extra trackers):
    - Account: email (Email OTP)
@@ -126,21 +128,22 @@ Do not screenshot debug banners, `.env` URLs, or `127.0.0.1`.
 8. Target audience: **18+** (adults arranging a wedding).
 9. Ads: **No**. In-app products: **No**.
 10. Photos/videos permission: vendors upload listing photos (`image_picker`).
-11. Sign the **upload** AAB with Mohammed’s upload keystore (see Signing). This repo uses debug signing only so `flutter run --release` works locally.
+11. Sign the **upload** AAB with Mohammed’s upload keystore (see Signing). Gradle already wires `signingConfigs.release` from local `android/key.properties`. Without that file, release still uses debug signing so `flutter run --release` works locally.
 12. Production track → submit. Mohammed must accept Play policies and pay the developer fee if not already done.
 
 ```bash
+dart run tool/check_store_env.dart
 flutter build appbundle --dart-define-from-file=.env
 # Output: build/app/outputs/bundle/release/app-release.aab
 ```
 
-Use Dahr LY `SUPABASE_URL` / `SUPABASE_ANON_KEY` in that `.env` (never Zeen, never `service_role`).
+`.env` must use `SUPABASE_URL=https://cccusktgxrizfwpixddu.supabase.co` and the Dahr LY **anon / publishable** key (`SUPABASE_ANON_KEY`, alias `SUPABASE_PUBLISHABLE_KEY`). The preflight fails on a missing file, `.env.example` placeholders, the wrong project, or a `service_role` key. Never Zeen.
 
 ## App Store Connect
 
 1. Register bundle id **`com.dahr.dahr`** in the Apple Developer account (Identifiers).
 2. Create app **Dahr**. Bundle id `com.dahr.dahr`. SKU e.g. `dahr-ios`. Primary language Arabic; add English.
-3. Privacy policy URL: `{ADMIN_ORIGIN}/privacy`. Terms: `{ADMIN_ORIGIN}/terms` (App Store Review Information and/or EULA / license URL).
+3. Privacy policy URL: `https://mohammedalariyibi-afk.github.io/Dahr/privacy`. Terms: `https://mohammedalariyibi-afk.github.io/Dahr/terms` (App Store Review Information and/or EULA / license URL).
 4. App Privacy nutrition labels — same facts as Play Data safety. Account deletion: in-app Profile path.
 5. Age rating: 18+ / the questionnaire equivalent for a wedding marketplace.
 6. Pricing: **Free**. In-app purchases: **none**.
@@ -170,7 +173,7 @@ Android (Play):
    keytool -genkey -v -keystore ~/dahr-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias dahr
    ```
 
-2. Create `android/key.properties` locally (gitignored):
+2. Copy `android/key.properties.example` to `android/key.properties` (gitignored) and fill real values:
 
    ```
    storePassword=...
@@ -179,7 +182,14 @@ Android (Play):
    storeFile=/absolute/path/to/dahr-upload.jks
    ```
 
-3. Wire `signingConfigs.release` in `android/app/build.gradle.kts` to that file when you are ready to upload. Until then the template uses **debug** signing on the release build type so local `flutter run --release` still works. **Do not commit** `key.properties` or the `.jks`.
+   `storeFile` must be an **absolute** path (Gradle does not expand `~`).
+
+3. Gradle already reads that file: when it exists, release builds use `signingConfigs.release`. When it is absent, release uses debug signing so local `flutter run --release` still works. **Do not commit** `key.properties` or the `.jks`. Then:
+
+   ```bash
+   dart run tool/check_store_env.dart
+   flutter build appbundle --dart-define-from-file=.env
+   ```
 
 iOS:
 

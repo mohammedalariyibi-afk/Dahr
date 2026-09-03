@@ -1,0 +1,116 @@
+:root {
+  color-scheme: dark;
+  --ice: #7dd3fc;
+  --bg: #020617;
+  --text: #ffffff;
+  --muted: #cbd5e1;
+  --dim: #94a3b8;
+  --glass: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Source Sans 3", "Segoe UI", "Noto Naskh Arabic", sans-serif;
+  line-height: 1.65;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.wrap {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.brand {
+  margin: 0;
+  color: var(--ice);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tag {
+  margin: 0.25rem 0 0;
+  color: var(--dim);
+  font-size: 0.95rem;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin: 1.25rem 0 2rem;
+}
+
+nav a {
+  color: var(--ice);
+  text-underline-offset: 0.2em;
+}
+
+article + article {
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--border);
+}
+
+h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.85rem;
+}
+
+.updated {
+  margin: 0 0 1.25rem;
+  color: var(--dim);
+  font-style: italic;
+}
+
+h2 {
+  margin: 1.75rem 0 0.4rem;
+  color: var(--ice);
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0 0 0.85rem;
+}
+
+.home-list {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0 0;
+}
+
+.home-list li {
+  margin: 0 0 0.85rem;
+}
+
+.home-list a {
+  display: block;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--glass);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.home-list a:hover,
+.home-list a:focus {
+  border-color: var(--ice);
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.95rem;
+}

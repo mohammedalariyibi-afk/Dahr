@@ -8,7 +8,6 @@
 build/
 *.iml
 .idea/
-*.lock
 
 # Env / secrets
 .env

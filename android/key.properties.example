@@ -1,0 +1,13 @@
+# Local Play upload signing. Copy to android/key.properties (gitignored).
+# Generate the JKS on Mohammed's machine only — never commit the keystore
+# or a filled-in key.properties. See STORE.md § Signing.
+#
+#   keytool -genkey -v -keystore ~/dahr-upload.jks -keyalg RSA -keysize 2048 \
+#     -validity 10000 -alias dahr
+#
+# storeFile must be an absolute path (Gradle does not expand ~).
+
+storePassword=replace-with-store-password
+keyPassword=replace-with-key-password
+keyAlias=dahr
+storeFile=/absolute/path/to/dahr-upload.jks
