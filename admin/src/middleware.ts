@@ -29,7 +29,9 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const response = PUBLIC_PATHS.includes(path)
-    ? NextResponse.next({ request: { headers: withHeaders(request.headers, requestHeaders) } })
+    ? NextResponse.next({
+        request: { headers: withHeaders(request.headers, requestHeaders) },
+      })
     : await updateSession(request, requestHeaders);
 
   response.headers.set("Content-Security-Policy", csp);
