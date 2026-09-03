@@ -76,7 +76,7 @@ supabase db reset        # applies all migrations + seed.sql
 
 Copy the printed **API URL** (`http://127.0.0.1:54321`) and **anon/publishable** key into `.env` and `admin/.env.local`.
 
-Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Flutter and admin sign-in are **Email OTP only** (no SMS / phone-first path). Do not enable Twilio/SMS for store submit.
+Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Flutter and admin sign-in are **Email OTP only** (no SMS / phone-first path). Do not enable SMS for store submit.
 
 Seeded local admin: `admin@dahr.ly` (password `password123` only if you enable password auth). Prefer Email OTP via Inbucket. Couple demo: `couple@dahr.ly`.
 

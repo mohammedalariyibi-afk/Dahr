@@ -77,7 +77,7 @@ export default async function CommissionsPage({
   if (error) {
     return (
       <p className="text-sm text-red-700">
-        Failed to load commissions: {error.message}
+        Could not load commissions. Try again.
       </p>
     );
   }

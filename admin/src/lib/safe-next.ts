@@ -1,12 +1,35 @@
-/** Only in-app relative paths (blocks open redirects on /auth/callback). */
-export function safeAdminNextPath(raw: string | null | undefined): string {
+/**
+ * Auth callback `next` must stay on this origin as a relative path.
+ * Rejects protocol-relative URLs, userinfo tricks, and backslashes.
+ */
+export function safeNextPath(raw: string | null | undefined): string {
   if (!raw) return "/";
-  let decoded = raw;
+  let value = raw.trim();
   try {
-    decoded = decodeURIComponent(raw);
+    value = decodeURIComponent(value);
   } catch {
     return "/";
   }
-  if (!decoded.startsWith("/") || decoded.startsWith("//")) return "/";
-  return decoded;
+  if (!value.startsWith("/")) return "/";
+  if (value.startsWith("//")) return "/";
+  if (value.includes("://") || value.includes("\\") || value.includes("@")) {
+    return "/";
+  }
+  if (value.includes("\0")) return "/";
+  return value;
+}
+
+/** Alias used by the overnight-audit admin routes. */
+export const safeAdminNextPath = safeNextPath;
+
+export function safeRedirectUrl(
+  origin: string,
+  next: string | null | undefined,
+): URL {
+  const path = safeNextPath(next);
+  const url = new URL(path, origin);
+  if (url.origin !== origin) {
+    return new URL("/", origin);
+  }
+  return url;
 }

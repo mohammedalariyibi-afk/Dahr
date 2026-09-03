@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/dahr_env.dart';
+import '../security/secure_local_storage.dart';
 
 abstract final class DahrSupabase {
   static Future<void> initialize() async {
@@ -16,7 +17,28 @@ abstract final class DahrSupabase {
         'Use local `supabase start` or the Dahr LY project — do not use Zeen.',
       );
     }
-    await Supabase.initialize(url: url, publishableKey: anonKey);
+    if (!DahrEnv.isAllowedSupabaseUrl(url)) {
+      throw StateError(
+        'SUPABASE_URL must be HTTPS (http is only allowed for localhost / '
+        '127.0.0.1 / 10.0.2.2).',
+      );
+    }
+    if (DahrEnv.looksLikeSecretKey(anonKey)) {
+      throw StateError(
+        'SUPABASE_ANON_KEY looks like a secret/service_role key. '
+        'Use the anon / publishable key only.',
+      );
+    }
+    await Supabase.initialize(
+      url: url,
+      publishableKey: anonKey,
+      authOptions: FlutterAuthClientOptions(
+        authFlowType: AuthFlowType.pkce,
+        detectSessionInUri: false,
+        localStorage: DahrSessionStorage.localStorageFor(url),
+        pkceAsyncStorage: DahrSessionStorage.pkceStorage(),
+      ),
+    );
   }
 
   static SupabaseClient get client => Supabase.instance.client;

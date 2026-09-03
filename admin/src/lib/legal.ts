@@ -34,7 +34,7 @@ const privacyEn: LegalDocument = {
     },
     {
       heading: "Accounts and sign-in",
-      body: "You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to your email address. We store the account id and email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), and whether you use Dahr as a couple or a vendor. We do not use passwords in the consumer app. Vendors may also store a WhatsApp number on their listing.",
+      body: "You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to your email address. Phone OTP is not used. We store the account id and email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), and whether you use Dahr as a couple or a vendor. We do not use passwords in the consumer app. Vendors may also store a WhatsApp number on their listing.",
     },
     {
       heading: "Vendor listings and photos",
@@ -158,7 +158,7 @@ const privacyAr: LegalDocument = {
     },
     {
       heading: "الحسابات وتسجيل الدخول",
-      body: "يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى بريدك الإلكتروني. نخزّن معرّف الحساب والبريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين. قد يخزّن المورّد أيضاً رقم واتساب في عرضه.",
+      body: "يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى بريدك الإلكتروني. لا نستخدم رمز هاتف لتسجيل الدخول. نخزّن معرّف الحساب والبريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين. قد يخزّن المورّد أيضاً رقم واتساب في عرضه.",
     },
     {
       heading: "عروض المورّدين والصور",

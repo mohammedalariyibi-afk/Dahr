@@ -44,11 +44,28 @@ abstract final class VendorPhotoStorage {
 
   /// Extracts `{userId}/{file}` from a public Storage URL.
   static String? objectPathFromPublicUrl(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || uri.scheme != 'https') return null;
     final i = url.indexOf(_publicMarker);
     if (i < 0) return null;
     final rest = url.substring(i + _publicMarker.length).split('?').first;
     if (rest.isEmpty) return null;
-    return Uri.decodeFull(rest);
+    final path = Uri.decodeFull(rest);
+    if (!isSafeObjectPath(path)) return null;
+    return path;
+  }
+
+  static bool isSafeObjectPath(String path) {
+    if (path.isEmpty || path.startsWith('/') || path.contains('..')) {
+      return false;
+    }
+    final parts = path.split('/');
+    return parts.length == 2 && parts[0].isNotEmpty && parts[1].isNotEmpty;
+  }
+
+  static bool isOwnedObjectPath(String userId, String path) {
+    if (userId.isEmpty || !isSafeObjectPath(path)) return false;
+    return path.startsWith('$userId/');
   }
 
   /// Reorders [photos] and rewrites `sort_order` to 0..n-1.

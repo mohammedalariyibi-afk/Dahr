@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/supabase/supabase_client.dart';
+import '../../../core/supabase/write_guard.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../providers/vendor_provider.dart';
 
@@ -101,10 +103,14 @@ class _VendorOnboardingScreenState
     setState(() => _loading = true);
     try {
       await ref.read(authProvider.notifier).setRole(UserRole.vendor);
-      await DahrSupabase.client.from('vendor_profiles').upsert(
+      final rows = await DahrSupabase.client
+          .from('vendor_profiles')
+          .upsert(
             payload.toJson(),
             onConflict: 'profile_id',
-          );
+          )
+          .select('id');
+      requireMutatedRows(rows);
       ref.invalidate(myVendorProfileProvider);
       ref.invalidate(vendorDashboardStatsProvider);
       if (!mounted) return;
@@ -115,7 +121,7 @@ class _VendorOnboardingScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text(SafeUserError.of(l10n, e))),
         );
       }
     } finally {

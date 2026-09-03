@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/models.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -29,9 +30,16 @@ class VendorAvailabilityScreen extends ConsumerWidget {
             lastDate: last,
           );
           if (picked == null) return;
-          await ref
-              .read(vendorAvailabilityProvider.notifier)
-              .toggleDate(picked);
+          try {
+            await ref
+                .read(vendorAvailabilityProvider.notifier)
+                .toggleDate(picked);
+          } catch (e) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(SafeUserError.of(l10n, e))),
+            );
+          }
         },
         icon: const Icon(Icons.event),
         label: Text(l10n.markBooked),
@@ -39,7 +47,7 @@ class VendorAvailabilityScreen extends ConsumerWidget {
       body: async.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorState(
-          message: e.toString(),
+          message: SafeUserError.of(l10n, e),
           onRetry: () => ref.read(vendorAvailabilityProvider.notifier).refresh(),
         ),
         data: (slots) {

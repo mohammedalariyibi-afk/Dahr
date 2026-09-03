@@ -1,5 +1,8 @@
+import { publicErrorMessage } from "@/lib/public-error";
+
 export function ActionError({ message }: { message?: string | string[] }) {
-  const text = Array.isArray(message) ? message[0] : message;
+  const raw = Array.isArray(message) ? message[0] : message;
+  const text = publicErrorMessage(raw);
   if (!text) return null;
 
   return (

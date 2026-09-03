@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../providers/auth_form_validators.dart';
@@ -54,7 +55,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
       );
     } catch (e) {
-      setState(() => _error = e.toString());
+      setState(() => _error = SafeUserError.of(l10n, e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }

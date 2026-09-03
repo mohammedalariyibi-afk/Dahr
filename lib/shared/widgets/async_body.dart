@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/security/safe_user_error.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/generated/app_localizations.dart';
 
@@ -82,7 +83,7 @@ class ErrorState extends StatelessWidget {
             const Icon(Icons.error_outline, size: 56, color: AppColors.error),
             const SizedBox(height: 16),
             Text(
-              message ?? l10n.errorGeneric,
+              SafeUserError.displayMessage(l10n, message),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
@@ -194,7 +195,7 @@ class AsyncBody<T> extends StatelessWidget {
     return value.when(
       loading: () => skeleton ?? const SkeletonList(),
       error: (e, _) => ErrorState(
-        message: e.toString(),
+        message: SafeUserError.of(AppLocalizations.of(context), e),
         onRetry: onRetry,
       ),
       data: (data) {

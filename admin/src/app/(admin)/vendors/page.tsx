@@ -77,9 +77,7 @@ export default async function VendorsPage({
 
   if (error) {
     return (
-      <p className="text-sm text-red-700">
-        Failed to load vendors: {error.message}
-      </p>
+      <p className="text-sm text-red-700">Could not load vendors. Try again.</p>
     );
   }
 

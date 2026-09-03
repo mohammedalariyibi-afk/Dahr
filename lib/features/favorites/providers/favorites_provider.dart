@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/supabase/supabase_client.dart';
+import '../../../core/supabase/write_guard.dart';
+import '../../../l10n/generated/app_localizations.dart';
 
 final favoriteVendorIdsProvider = FutureProvider<Set<String>>((ref) async {
   final auth = ref.watch(authProvider);
@@ -75,16 +78,22 @@ class FavoritesNotifier extends AsyncNotifier<Set<String>> {
 
     try {
       if (removing) {
-        await DahrSupabase.client
+        final rows = await DahrSupabase.client
             .from('favorites')
             .delete()
             .eq('consumer_id', uid)
-            .eq('vendor_id', vendorId);
+            .eq('vendor_id', vendorId)
+            .select('id');
+        requireMutatedRows(rows);
       } else {
-        await DahrSupabase.client.from('favorites').insert({
-          'consumer_id': uid,
-          'vendor_id': vendorId,
-        });
+        final rows = await DahrSupabase.client
+            .from('favorites')
+            .insert({
+              'consumer_id': uid,
+              'vendor_id': vendorId,
+            })
+            .select('id');
+        requireMutatedRows(rows);
       }
       ref.invalidate(favoriteVendorIdsProvider);
       ref.invalidate(favoriteVendorsProvider);
@@ -97,8 +106,9 @@ class FavoritesNotifier extends AsyncNotifier<Set<String>> {
       }
       state = AsyncData(current);
       if (context != null && context.mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text(SafeUserError.of(l10n, e))),
         );
       }
     }

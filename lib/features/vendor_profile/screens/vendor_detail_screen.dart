@@ -7,6 +7,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/whatsapp.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -132,7 +133,7 @@ class _VendorDetailScreenState extends ConsumerState<VendorDetailScreen> {
       body: vendorAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => ErrorState(
-          message: e.toString(),
+          message: SafeUserError.of(l10n, e),
           onRetry: () => ref.invalidate(vendorDetailProvider(vendorId)),
         ),
         data: (vendor) {
@@ -307,7 +308,7 @@ class _VendorDetailScreenState extends ConsumerState<VendorDetailScreen> {
                           child: LinearProgressIndicator(),
                         ),
                         error: (e, _) => Text(
-                          e.toString(),
+                          SafeUserError.of(l10n, e),
                           style: const TextStyle(color: AppColors.error),
                         ),
                         data: (reviews) {

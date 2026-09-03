@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/models/models.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -77,11 +78,11 @@ class VendorInboxScreen extends ConsumerWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.acceptQuoteSuccess)),
       );
-    } catch (_) {
+    } catch (e) {
       if (!context.mounted) return;
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorGeneric)),
+        SnackBar(content: Text(SafeUserError.of(l10n, e))),
       );
     }
   }
@@ -96,11 +97,11 @@ class VendorInboxScreen extends ConsumerWidget {
       await ref
           .read(vendorInboxProvider.notifier)
           .updateStatus(bookingId, status);
-    } catch (_) {
+    } catch (e) {
       if (!context.mounted) return;
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorGeneric)),
+        SnackBar(content: Text(SafeUserError.of(l10n, e))),
       );
     }
   }

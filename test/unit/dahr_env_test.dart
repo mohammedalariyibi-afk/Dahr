@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -111,5 +112,31 @@ void main() {
       ),
       isTrue,
     );
+  });
+
+  group('DahrEnv URL and key safety', () {
+    test('allows https cloud and loopback http only', () {
+      expect(
+        DahrEnv.isAllowedSupabaseUrl('https://cccusktgxrizfwpixddu.supabase.co'),
+        isTrue,
+      );
+      expect(DahrEnv.isAllowedSupabaseUrl('http://127.0.0.1:54321'), isTrue);
+      expect(DahrEnv.isAllowedSupabaseUrl('http://10.0.2.2:54321'), isTrue);
+      expect(
+        DahrEnv.isAllowedSupabaseUrl('http://cccusktgxrizfwpixddu.supabase.co'),
+        isFalse,
+      );
+      expect(DahrEnv.isAllowedSupabaseUrl('ftp://127.0.0.1'), isFalse);
+    });
+
+    test('rejects service_role JWTs and sb_secret keys', () {
+      expect(DahrEnv.looksLikeSecretKey('sb_secret_abc'), isTrue);
+      const header = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+      final payload = base64Url.encode(
+        utf8.encode('{"role":"service_role","iss":"supabase"}'),
+      );
+      expect(DahrEnv.looksLikeSecretKey('$header.$payload.sig'), isTrue);
+      expect(DahrEnv.looksLikeSecretKey('anon-not-a-jwt'), isFalse);
+    });
   });
 }

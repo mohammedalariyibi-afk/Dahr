@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../vendor_profile/providers/vendor_provider.dart';
 import '../providers/booking_provider.dart';
@@ -35,15 +36,7 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
     if (BookingDateConflict.matches(error)) {
       return l10n.bookingDateBookedError;
     }
-    final key = error is StateError ? error.message : error.toString();
-    switch (key) {
-      case 'event_date_past':
-      case 'vendor_required':
-      case 'consumer_required':
-        return l10n.requiredField;
-      default:
-        return error.toString();
-    }
+    return SafeUserError.of(l10n, error);
   }
 
   Future<void> _pickDate(Set<String> bookedKeys) async {
@@ -141,7 +134,8 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
             const SizedBox(height: 8),
             bookedAsync.when(
               loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text(e.toString()),
+              error: (e, _) =>
+                  Text(SafeUserError.of(l10n, e)),
               data: (keys) {
                 if (keys.isEmpty) {
                   return Text(l10n.noBookedDates);
