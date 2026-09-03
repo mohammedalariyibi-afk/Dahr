@@ -167,9 +167,23 @@ class BookingRequestPayload {
     if (message.length > 2000) return 'message_too_long';
     if (bookedDateKeys != null &&
         AvailabilityCalendar.isBookedDate(eventDate, bookedDateKeys)) {
-      return 'event_date_booked';
+      return BookingDateConflict.clientKey;
     }
     return null;
+  }
+}
+
+/// Client validation key plus the live trigger exception
+/// (`reject_booking_if_date_booked` raises `date_unavailable`).
+abstract final class BookingDateConflict {
+  static const clientKey = 'event_date_booked';
+  static const dbException = 'date_unavailable';
+
+  static bool matches(Object error) {
+    final text = error is StateError ? error.message : error.toString();
+    return text == clientKey ||
+        text.contains(clientKey) ||
+        text.contains(dbException);
   }
 }
 

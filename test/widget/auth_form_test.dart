@@ -24,11 +24,16 @@ void main() {
   group('AuthFormValidators email', () {
     test('accepts valid email', () {
       expect(AuthFormValidators.validateEmail('a@b.com'), isNull);
+      expect(AuthFormValidators.validateEmail('  couple@dahr.ly  '), isNull);
+      expect(AuthLoginSpec.primaryChannel, 'email');
+      expect(AuthLoginSpec.supportsPhoneOtp, isFalse);
     });
 
     test('rejects invalid email', () {
       expect(AuthFormValidators.validateEmail(''), 'required');
       expect(AuthFormValidators.validateEmail('not-an-email'), 'invalid_email');
+      expect(AuthFormValidators.validateEmail('no-at-sign'), 'invalid_email');
+      expect(AuthFormValidators.validateEmail('missing.tld@host'), 'invalid_email');
     });
   });
 

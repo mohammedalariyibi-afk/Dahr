@@ -34,7 +34,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginSubtitle =>
-      'Enter your Libyan phone number to receive a code';
+      'Enter your email to receive a one-time sign-in code';
 
   @override
   String get phoneLabel => 'Phone number';
@@ -64,7 +64,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpTitle => 'Verify code';
 
   @override
-  String get otpSubtitle => 'Enter the code we sent you';
+  String get otpSubtitle => 'Enter the code we sent to your email';
 
   @override
   String get otpLabel => 'Verification code';

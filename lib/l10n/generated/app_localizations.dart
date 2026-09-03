@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'أدخل رقم هاتفك الليبي لاستلام رمز التحقق'**
+  /// **'أدخل بريدك الإلكتروني لاستلام رمز الدخول لمرة واحدة'**
   String get loginSubtitle;
 
   /// No description provided for @phoneLabel.
@@ -209,7 +209,7 @@ abstract class AppLocalizations {
   /// No description provided for @otpSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'أدخل الرمز الذي أرسلناه إليك'**
+  /// **'أدخل الرمز الذي أرسلناه إلى بريدك الإلكتروني'**
   String get otpSubtitle;
 
   /// No description provided for @otpLabel.
