@@ -29,7 +29,7 @@ Upload order suggestion: email OTP → OTP verify → Discover → vendor detail
 
 1. App **Dahr**, package `com.dahr.dahr`, Arabic default + English listing.
 2. Paste short/long descriptions from `docs/store-listing.md`.
-3. Upload phone shots from `docs/store-shots/`. Add Play **1024×500** feature graphic if not ready (Designer).
+3. Upload phone shots from `docs/store-shots/`. Upload Play **1024×500** feature graphic: `docs/store-shots/play-feature-graphic-1024x500.png`.
 4. Privacy URL `{ADMIN_ORIGIN}/privacy`. Data safety: account deletion in-app (Profile).
 5. Contact: WhatsApp + `mohammedalariyibi@gmail.com`.
 6. No IAP / no ads SDKs.
