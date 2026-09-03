@@ -68,7 +68,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
         ),
       );
     } catch (e) {
-      setState(() => _error = SafeUserError.of(l10n, e));
+      if (mounted) setState(() => _error = SafeUserError.of(l10n, e));
     } finally {
       if (mounted) setState(() => _loading = false);
     }

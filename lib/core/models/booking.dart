@@ -54,8 +54,8 @@ class BookingRequest {
 
     Review? review;
     final reviewRaw = json['reviews'] ?? json['review'];
-    if (reviewRaw is Map<String, dynamic>) {
-      review = Review.fromJson(reviewRaw);
+    if (reviewRaw is Map) {
+      review = Review.fromJson(Map<String, dynamic>.from(reviewRaw));
     } else if (reviewRaw is List && reviewRaw.isNotEmpty) {
       final first = reviewRaw.first;
       if (first is Map<String, dynamic>) {
