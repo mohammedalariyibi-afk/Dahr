@@ -293,8 +293,20 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
               onRetry: () => ref.read(vendorsProvider.notifier).refresh(),
               emptyWhen: (list) => list.isEmpty,
               empty: EmptyState(
-                message: l10n.emptyDefault,
+                title: l10n.discoverEmptyTitle,
+                message: filters.hasNarrowing
+                    ? l10n.discoverEmptyFiltered
+                    : l10n.discoverEmptyBody,
                 icon: Icons.storefront_outlined,
+                actionLabel:
+                    filters.hasNarrowing ? l10n.clearFilters : null,
+                onAction: filters.hasNarrowing
+                    ? () {
+                        ref.read(vendorFiltersProvider.notifier).clear();
+                        _searchCtrl.clear();
+                        setState(() {});
+                      }
+                    : null,
               ),
               builder: (context, vendors) {
                 return RefreshIndicator(

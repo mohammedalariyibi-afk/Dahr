@@ -9,12 +9,14 @@ class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
     required this.message,
+    this.title,
     this.icon = Icons.inbox_outlined,
     this.actionLabel,
     this.onAction,
   });
 
   final String message;
+  final String? title;
   final IconData icon;
   final String? actionLabel;
   final VoidCallback? onAction;
@@ -27,8 +29,20 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: AppColors.inkFaint),
-            const SizedBox(height: 16),
+            Icon(icon, size: 64, color: AppColors.gold),
+            if (title != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                title!,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: AppColors.burgundy,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+            ] else
+              const SizedBox(height: 16),
             Text(
               message,
               textAlign: TextAlign.center,

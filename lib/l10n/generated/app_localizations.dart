@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'أدخل بريدك الإلكتروني لاستلام رمز التحقق'**
+  /// **'أدخل بريدك الإلكتروني لاستلام رمز الدخول لمرة واحدة'**
   String get loginSubtitle;
 
   /// No description provided for @phoneLabel.
@@ -209,7 +209,7 @@ abstract class AppLocalizations {
   /// No description provided for @otpSubtitle.
   ///
   /// In ar, this message translates to:
-  /// **'أدخل الرمز الذي أرسلناه إليك'**
+  /// **'أدخل الرمز الذي أرسلناه إلى بريدك الإلكتروني'**
   String get otpSubtitle;
 
   /// No description provided for @otpLabel.
@@ -1225,6 +1225,120 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'تعذر حذف الحساب. حاول مرة أخرى أو راسل mohammedalariyibi@gmail.com.'**
   String get deleteAccountFailed;
+
+  /// No description provided for @discoverEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد مورّدون هنا'**
+  String get discoverEmptyTitle;
+
+  /// No description provided for @discoverEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيظهر هنا المورّدون المعتمدون في طرابلس وبنغازي.'**
+  String get discoverEmptyBody;
+
+  /// No description provided for @discoverEmptyFiltered.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يوجد مورّدون مطابقون لهذه التصفية. جرّب مدينة أو تصنيفاً أو سعراً آخر.'**
+  String get discoverEmptyFiltered;
+
+  /// No description provided for @favoritesEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد مفضلات بعد'**
+  String get favoritesEmptyTitle;
+
+  /// No description provided for @favoritesEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'احفظ مورّدين من الاكتشاف لتجدهم لاحقاً.'**
+  String get favoritesEmptyBody;
+
+  /// No description provided for @browseDiscover.
+  ///
+  /// In ar, this message translates to:
+  /// **'تصفح الاكتشاف'**
+  String get browseDiscover;
+
+  /// No description provided for @bookingsEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد حجوزات بعد'**
+  String get bookingsEmptyTitle;
+
+  /// No description provided for @bookingsEmptyBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'اطلب حجزاً من مورّد في الاكتشاف.'**
+  String get bookingsEmptyBody;
+
+  /// No description provided for @inboxEmptyTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد طلبات'**
+  String get inboxEmptyTitle;
+
+  /// No description provided for @inboxEmptyAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'عندما يطلب الأزواج تاريخاً سيظهر هنا.'**
+  String get inboxEmptyAll;
+
+  /// No description provided for @inboxEmptyPending.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد طلبات معلّقة. راجع التصفيات الأخرى للحجوزات المقبولة.'**
+  String get inboxEmptyPending;
+
+  /// No description provided for @inboxEmptyAccepted.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد حجوزات مقبولة في هذه التصفية.'**
+  String get inboxEmptyAccepted;
+
+  /// No description provided for @inboxEmptyDeclined.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد طلبات مرفوضة في هذه التصفية.'**
+  String get inboxEmptyDeclined;
+
+  /// No description provided for @inboxEmptyCompleted.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد حجوزات مكتملة في هذه التصفية.'**
+  String get inboxEmptyCompleted;
+
+  /// No description provided for @commissionBannerTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'العمولة المستحقة لدهر'**
+  String get commissionBannerTitle;
+
+  /// No description provided for @commissionBannerBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'المجموع غير المدفوع: {amount}'**
+  String commissionBannerBody(String amount);
+
+  /// No description provided for @commissionBannerHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'يسجّل دهر هذا كمبلغ غير مدفوع. يعلّمه المشرف مدفوعاً بعد التحصيل خارج التطبيق.'**
+  String get commissionBannerHint;
+
+  /// No description provided for @acceptQuoteSuccess.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم قبول الحجز. سُجّلت عمولة 10٪ كغير مدفوعة.'**
+  String get acceptQuoteSuccess;
+
+  /// No description provided for @roleNotAssignable.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.'**
+  String get roleNotAssignable;
 }
 
 class _AppLocalizationsDelegate

@@ -94,7 +94,24 @@ void main() {
         VendorPhotoStorage.objectPathFromPublicUrl(url),
         'user-1/abc.jpg',
       );
+      expect(
+        VendorPhotoStorage.objectPathFromPublicUrl('$url?token=1'),
+        'user-1/abc.jpg',
+      );
+      expect(
+        VendorPhotoStorage.objectPath(
+          '11111111-1111-1111-1111-111111111111',
+          'abc',
+        ),
+        '11111111-1111-1111-1111-111111111111/abc.jpg',
+      );
       expect(VendorPhotoStorage.objectPathFromPublicUrl('https://example.com'), isNull);
+      expect(
+        VendorPhotoStorage.objectPathFromPublicUrl(
+          'https://xyz.supabase.co/storage/v1/object/sign/vendor-photos/user-1/abc.jpg',
+        ),
+        isNull,
+      );
     });
 
     test('reorders photos and rewrites sort_order', () {

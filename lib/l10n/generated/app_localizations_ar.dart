@@ -33,7 +33,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginTitle => 'تسجيل الدخول';
 
   @override
-  String get loginSubtitle => 'أدخل بريدك الإلكتروني لاستلام رمز التحقق';
+  String get loginSubtitle => 'أدخل بريدك الإلكتروني لاستلام رمز الدخول لمرة واحدة';
 
   @override
   String get phoneLabel => 'رقم الهاتف';
@@ -63,7 +63,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get otpTitle => 'تحقق من الرمز';
 
   @override
-  String get otpSubtitle => 'أدخل الرمز الذي أرسلناه إليك';
+  String get otpSubtitle => 'أدخل الرمز الذي أرسلناه إلى بريدك الإلكتروني';
 
   @override
   String get otpLabel => 'رمز التحقق';
@@ -577,4 +577,69 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get deleteAccountFailed =>
       'تعذر حذف الحساب. حاول مرة أخرى أو راسل mohammedalariyibi@gmail.com.';
+
+  @override
+  String get discoverEmptyTitle => 'لا يوجد مورّدون هنا';
+
+  @override
+  String get discoverEmptyBody =>
+      'سيظهر هنا المورّدون المعتمدون في طرابلس وبنغازي.';
+
+  @override
+  String get discoverEmptyFiltered =>
+      'لا يوجد مورّدون مطابقون لهذه التصفية. جرّب مدينة أو تصنيفاً أو سعراً آخر.';
+
+  @override
+  String get favoritesEmptyTitle => 'لا توجد مفضلات بعد';
+
+  @override
+  String get favoritesEmptyBody => 'احفظ مورّدين من الاكتشاف لتجدهم لاحقاً.';
+
+  @override
+  String get browseDiscover => 'تصفح الاكتشاف';
+
+  @override
+  String get bookingsEmptyTitle => 'لا توجد حجوزات بعد';
+
+  @override
+  String get bookingsEmptyBody => 'اطلب حجزاً من مورّد في الاكتشاف.';
+
+  @override
+  String get inboxEmptyTitle => 'لا توجد طلبات';
+
+  @override
+  String get inboxEmptyAll => 'عندما يطلب الأزواج تاريخاً سيظهر هنا.';
+
+  @override
+  String get inboxEmptyPending =>
+      'لا توجد طلبات معلّقة. راجع التصفيات الأخرى للحجوزات المقبولة.';
+
+  @override
+  String get inboxEmptyAccepted => 'لا توجد حجوزات مقبولة في هذه التصفية.';
+
+  @override
+  String get inboxEmptyDeclined => 'لا توجد طلبات مرفوضة في هذه التصفية.';
+
+  @override
+  String get inboxEmptyCompleted => 'لا توجد حجوزات مكتملة في هذه التصفية.';
+
+  @override
+  String get commissionBannerTitle => 'العمولة المستحقة لدهر';
+
+  @override
+  String commissionBannerBody(String amount) {
+    return 'المجموع غير المدفوع: $amount';
+  }
+
+  @override
+  String get commissionBannerHint =>
+      'يسجّل دهر هذا كمبلغ غير مدفوع. يعلّمه المشرف مدفوعاً بعد التحصيل خارج التطبيق.';
+
+  @override
+  String get acceptQuoteSuccess =>
+      'تم قبول الحجز. سُجّلت عمولة 10٪ كغير مدفوعة.';
+
+  @override
+  String get roleNotAssignable =>
+      'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.';
 }

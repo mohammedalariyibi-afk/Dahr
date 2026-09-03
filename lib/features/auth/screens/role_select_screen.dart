@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/models/enums.dart';
+import '../../../core/models/profile_role_write.dart';
 import '../../../core/providers/auth_provider.dart';
-import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
@@ -19,6 +19,13 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
   UserRole? _selected;
   bool _loading = false;
 
+  String _errorLabel(AppLocalizations l10n, Object error) {
+    if (error is StateError && error.message == 'role_not_assignable') {
+      return l10n.roleNotAssignable;
+    }
+    return l10n.errorGeneric;
+  }
+
   Future<void> _continue() async {
     if (_selected == null) return;
     setState(() => _loading = true);
@@ -30,11 +37,30 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
       if (mounted) {
         final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(SafeUserError.of(l10n, e))),
+          SnackBar(content: Text(_errorLabel(l10n, e))),
         );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  _RoleCopy _copyFor(UserRole role, AppLocalizations l10n) {
+    switch (role) {
+      case UserRole.consumer:
+        return _RoleCopy(
+          title: l10n.roleConsumer,
+          subtitle: l10n.roleConsumerDesc,
+          icon: Icons.search_rounded,
+        );
+      case UserRole.vendor:
+        return _RoleCopy(
+          title: l10n.roleVendor,
+          subtitle: l10n.roleVendorDesc,
+          icon: Icons.storefront_rounded,
+        );
+      case UserRole.admin:
+        throw StateError('role_not_assignable');
     }
   }
 
@@ -49,21 +75,21 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _RoleCard(
-              title: l10n.roleConsumer,
-              subtitle: l10n.roleConsumerDesc,
-              icon: Icons.search_rounded,
-              selected: _selected == UserRole.consumer,
-              onTap: () => setState(() => _selected = UserRole.consumer),
-            ),
-            const SizedBox(height: 16),
-            _RoleCard(
-              title: l10n.roleVendor,
-              subtitle: l10n.roleVendorDesc,
-              icon: Icons.storefront_rounded,
-              selected: _selected == UserRole.vendor,
-              onTap: () => setState(() => _selected = UserRole.vendor),
-            ),
+            for (final role in RoleSelectOptions.choices) ...[
+              Builder(
+                builder: (context) {
+                  final copy = _copyFor(role, l10n);
+                  return _RoleCard(
+                    title: copy.title,
+                    subtitle: copy.subtitle,
+                    icon: copy.icon,
+                    selected: _selected == role,
+                    onTap: () => setState(() => _selected = role),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
             const Spacer(),
             FilledButton(
               onPressed: _selected == null || _loading ? null : _continue,
@@ -74,6 +100,18 @@ class _RoleSelectScreenState extends ConsumerState<RoleSelectScreen> {
       ),
     );
   }
+}
+
+class _RoleCopy {
+  const _RoleCopy({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
 }
 
 class _RoleCard extends StatelessWidget {

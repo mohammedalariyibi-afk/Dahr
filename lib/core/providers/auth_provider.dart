@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/models.dart';
-import '../security/auth_role_write.dart';
 import '../supabase/supabase_client.dart';
 import '../supabase/write_guard.dart';
 
@@ -126,7 +125,7 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<void> setRole(UserRole role) async {
     final uid = DahrSupabase.currentUserId;
     if (uid == null) throw StateError('Not signed in');
-    final payload = AuthRoleWrite.upsertPayload(userId: uid, role: role);
+    final payload = ProfileRoleWrite.upsertPayload(userId: uid, role: role);
     final rows = await DahrSupabase.client
         .from('profiles')
         .upsert(payload)

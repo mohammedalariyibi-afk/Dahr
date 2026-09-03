@@ -15,7 +15,6 @@ void main() {
         covers(doc, [
           LegalFacts.startingPolicyEn,
           'OTP',
-          'phone',
           'email',
           'vendor-photos',
           'WhatsApp',
@@ -31,6 +30,11 @@ void main() {
       );
       expect(doc.fullText.toLowerCase(), contains('does not store card numbers'));
       expect(doc.fullText.toLowerCase(), isNot(contains('zeen')));
+      expect(
+        doc.fullText.toLowerCase(),
+        isNot(contains('libyan phone number or an email')),
+      );
+      expect(doc.fullText.toLowerCase(), isNot(contains('phone-first')));
     });
 
     test('AR covers the same topics', () {

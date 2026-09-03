@@ -1,3 +1,4 @@
+import '../models/booking.dart';
 import '../../l10n/generated/app_localizations.dart';
 
 /// Maps known validation keys to copy. Everything else is a generic message
@@ -24,6 +25,9 @@ abstract final class SafeUserError {
   };
 
   static String of(AppLocalizations l10n, Object error) {
+    if (BookingDateConflict.matches(error)) {
+      return l10n.bookingDateBookedError;
+    }
     if (error is StateError) {
       return fromKey(l10n, error.message);
     }
@@ -58,6 +62,7 @@ abstract final class SafeUserError {
       case 'price_range_invalid':
         return l10n.priceRangeInvalid;
       case 'role_not_assignable':
+        return l10n.roleNotAssignable;
       case 'write_rejected':
       case 'not_vendor':
         return l10n.errorGeneric;

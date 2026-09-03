@@ -46,6 +46,10 @@ class VendorDashboardScreen extends ConsumerWidget {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
+                  VendorCommissionBanner(
+                    unpaidTotalLyd: stats.unpaidCommissionLyd,
+                    margin: EdgeInsets.zero,
+                  ),
                   if (!vendor.isApproved)
                     Card(
                       color: AppColors.creamDark,

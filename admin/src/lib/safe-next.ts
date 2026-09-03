@@ -19,7 +19,13 @@ export function safeNextPath(raw: string | null | undefined): string {
   return value;
 }
 
-export function safeRedirectUrl(origin: string, next: string | null | undefined): URL {
+/** Alias used by the overnight-audit admin routes. */
+export const safeAdminNextPath = safeNextPath;
+
+export function safeRedirectUrl(
+  origin: string,
+  next: string | null | undefined,
+): URL {
   const path = safeNextPath(next);
   const url = new URL(path, origin);
   if (url.origin !== origin) {

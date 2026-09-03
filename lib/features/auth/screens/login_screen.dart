@@ -39,8 +39,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final err = AuthFormValidators.validateEmail(_emailCtrl.text);
       if (err != null) {
         setState(() {
-          _error =
-              err == 'invalid_email' ? l10n.invalidEmail : l10n.requiredField;
+          _error = err == 'invalid_email' ? l10n.invalidEmail : l10n.requiredField;
           _loading = false;
         });
         return;
@@ -48,11 +47,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final email = _emailCtrl.text.trim();
       await ref.read(authProvider.notifier).signInWithEmail(email);
       if (!mounted) return;
-      context.push('/auth/otp', extra: {
-        'channel': 'email',
-        'destination': email,
-        if (widget.returnTo != null) 'returnTo': widget.returnTo!,
-      });
+      context.push(
+        '/auth/otp',
+        extra: AuthLoginSpec.otpExtra(
+          email: email,
+          returnTo: widget.returnTo,
+        ),
+      );
     } catch (e) {
       setState(() => _error = SafeUserError.of(l10n, e));
     } finally {

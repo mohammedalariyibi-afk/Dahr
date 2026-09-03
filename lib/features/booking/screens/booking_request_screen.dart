@@ -33,7 +33,10 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
   }
 
   String _errorLabel(AppLocalizations l10n, Object error) {
-    return SafeUserError.of(l10n, error is StateError ? error : error);
+    if (BookingDateConflict.matches(error)) {
+      return l10n.bookingDateBookedError;
+    }
+    return SafeUserError.of(l10n, error);
   }
 
   Future<void> _pickDate(Set<String> bookedKeys) async {

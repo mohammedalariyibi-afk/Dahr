@@ -58,7 +58,7 @@ final vendorDashboardStatsProvider =
   }
   final rows = await DahrSupabase.client
       .from('booking_requests')
-      .select()
+      .select(BookingSelect.vendor)
       .eq('vendor_id', vendor.id)
       .order('created_at', ascending: false);
   final bookings = (rows as List)
