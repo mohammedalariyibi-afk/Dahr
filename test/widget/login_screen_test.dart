@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dahr/core/theme/app_theme.dart';
 import 'package:dahr/features/auth/screens/login_screen.dart';
 import 'package:dahr/l10n/generated/app_localizations.dart';
 
@@ -8,6 +9,7 @@ void main() {
   Widget host({Locale locale = const Locale('en')}) {
     return ProviderScope(
       child: MaterialApp(
+        theme: AppTheme.dark,
         locale: locale,
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

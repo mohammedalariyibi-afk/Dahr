@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dahr/core/theme/app_theme.dart';
 import 'package:dahr/l10n/generated/app_localizations.dart';
 import 'package:dahr/shared/widgets/async_body.dart';
 
 void main() {
   Widget host({required Widget child, Locale locale = const Locale('en')}) {
     return MaterialApp(
+      theme: AppTheme.dark,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

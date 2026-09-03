@@ -173,7 +173,7 @@ Add Auth redirect URL: `http://localhost:3000/auth/callback`.
 |------|--------|
 | State | Riverpod only |
 | Navigation | go_router + auth guards |
-| Theme | Material 3 in `lib/core/theme` (cream / burgundy / gold, LYD) |
+| Theme | Material 3 in `lib/core/theme` (Ice Blue glass on Slate 950, LYD) |
 | i18n | ARB + handwritten `lib/l10n/generated` fallback |
 | Images | Supabase Storage bucket `vendor-photos` |
 | Contact | WhatsApp deep link (`wa.me`) — no in-app chat |

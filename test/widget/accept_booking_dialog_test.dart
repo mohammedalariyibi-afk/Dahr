@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:dahr/core/theme/app_theme.dart';
 import 'package:dahr/features/vendor_profile/widgets/accept_booking_dialog.dart';
 import 'package:dahr/l10n/generated/app_localizations.dart';
 
 void main() {
   Widget host({required ValueChanged<double?> onResult}) {
     return MaterialApp(
+      theme: AppTheme.dark,
       locale: const Locale('en'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,

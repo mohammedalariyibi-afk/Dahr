@@ -74,9 +74,9 @@ class VerifiedBadge extends StatelessWidget {
         vertical: compact ? 2 : 4,
       ),
       decoration: BoxDecoration(
-        color: AppColors.gold.withValues(alpha: 0.2),
+        color: AppColors.iceBlueGlow,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.gold),
+        border: Border.all(color: AppColors.iceBlue),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -84,7 +84,7 @@ class VerifiedBadge extends StatelessWidget {
           Icon(
             Icons.verified_rounded,
             size: compact ? 14 : 16,
-            color: AppColors.goldDark,
+            color: AppColors.iceBlue,
           ),
           if (!compact) ...[
             const SizedBox(width: 4),
@@ -93,7 +93,7 @@ class VerifiedBadge extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.goldDark,
+                color: AppColors.iceBlue,
               ),
             ),
           ],
@@ -116,14 +116,14 @@ class PriceRangeBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.creamDark,
+        color: AppColors.badgeBg,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
         style: const TextStyle(
           fontWeight: FontWeight.w600,
-          color: AppColors.burgundy,
+          color: AppColors.iceBlue,
           fontSize: 13,
         ),
       ),
