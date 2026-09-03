@@ -207,8 +207,8 @@ class VendorProfile {
     final photos = <VendorPhoto>[];
     if (photosRaw is List) {
       for (final p in photosRaw) {
-        if (p is Map<String, dynamic>) {
-          photos.add(VendorPhoto.fromJson(p));
+        if (p is Map) {
+          photos.add(VendorPhoto.fromJson(Map<String, dynamic>.from(p)));
         }
       }
       photos.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));

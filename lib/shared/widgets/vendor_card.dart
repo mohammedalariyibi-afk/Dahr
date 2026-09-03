@@ -129,7 +129,10 @@ class VendorCard extends StatelessWidget {
                         ),
                         if (vendor.isVerified) ...[
                           const SizedBox(width: 6),
-                          const VerifiedBadge(compact: true),
+                          VerifiedBadge(
+                            compact: true,
+                            label: l10n.verified,
+                          ),
                         ],
                       ],
                     ),

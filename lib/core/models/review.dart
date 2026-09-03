@@ -26,8 +26,8 @@ class Review {
   factory Review.fromJson(Map<String, dynamic> json) {
     String? name;
     final profile = json['profiles'];
-    if (profile is Map<String, dynamic>) {
-      name = profile['full_name'] as String?;
+    if (profile is Map) {
+      name = Map<String, dynamic>.from(profile)['full_name'] as String?;
     }
 
     return Review(
