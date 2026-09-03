@@ -1,3 +1,5 @@
+Saturday operator runbook: [`docs/store-submit-checklist.md`](docs/store-submit-checklist.md).
+
 # Dahr store packaging — App Store & Google Play
 
 Ship target: **Saturday 5 September 2026**. Operator: Mohammed Alariyibi.
