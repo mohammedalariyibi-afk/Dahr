@@ -1,13 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 
+import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/supabase/supabase_client.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../providers/vendor_provider.dart';
@@ -32,9 +30,7 @@ class _VendorEditProfileScreenState
   CityCode _city = CityCode.tripoli;
   bool _loaded = false;
   bool _loading = false;
-  bool _uploadingPhoto = false;
   String? _vendorId;
-  List<VendorPhoto> _photos = [];
 
   void _hydrate(VendorProfile v) {
     if (_loaded) return;
@@ -47,7 +43,6 @@ class _VendorEditProfileScreenState
     _servicesCtrl.text = v.services.join(', ');
     _category = v.category;
     _city = v.city;
-    _photos = List.of(v.photos);
     _loaded = true;
   }
 
@@ -62,30 +57,59 @@ class _VendorEditProfileScreenState
     super.dispose();
   }
 
+  String _errorLabel(AppLocalizations l10n, String key) {
+    switch (key) {
+      case 'business_name_required':
+        return l10n.businessNameRequired;
+      case 'description_required':
+        return l10n.descriptionRequired;
+      case 'whatsapp_required':
+        return l10n.whatsappRequired;
+      case 'whatsapp_invalid':
+        return l10n.invalidWhatsapp;
+      case 'price_range_required':
+        return l10n.priceRangeRequired;
+      case 'price_range_invalid':
+        return l10n.priceRangeInvalid;
+      default:
+        return l10n.requiredField;
+    }
+  }
+
   Future<void> _save() async {
     if (_vendorId == null) return;
+    final l10n = AppLocalizations.of(context);
+    final auth = ref.read(authProvider);
+    if (!auth.isLoggedIn) return;
+    final payload = VendorOnboardingPayload.fromInput(
+      profileId: auth.session!.user.id,
+      businessName: _nameCtrl.text,
+      category: _category,
+      city: _city,
+      description: _descCtrl.text,
+      whatsappNumber: _waCtrl.text,
+      priceMinRaw: _minCtrl.text,
+      priceMaxRaw: _maxCtrl.text,
+      servicesRaw: _servicesCtrl.text,
+    );
+    final error = payload.validate();
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_errorLabel(l10n, error))),
+      );
+      return;
+    }
     setState(() => _loading = true);
     try {
-      final services = _servicesCtrl.text
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-      await DahrSupabase.client.from('vendor_profiles').update({
-        'business_name': _nameCtrl.text.trim(),
-        'category': _category.name,
-        'city': _city.name,
-        'description': _descCtrl.text.trim(),
-        'price_min': double.tryParse(_minCtrl.text),
-        'price_max': double.tryParse(_maxCtrl.text),
-        'whatsapp_number':
-            _waCtrl.text.trim().isEmpty ? null : _waCtrl.text.trim(),
-        'services': services,
-      }).eq('id', _vendorId!);
+      final json = payload.toJson()..remove('profile_id');
+      await DahrSupabase.client
+          .from('vendor_profiles')
+          .update(json)
+          .eq('id', _vendorId!);
       ref.invalidate(myVendorProfileProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).saveChanges)),
+        SnackBar(content: Text(l10n.saveChanges)),
       );
     } catch (e) {
       if (mounted) {
@@ -95,55 +119,6 @@ class _VendorEditProfileScreenState
       }
     } finally {
       if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _addPhoto() async {
-    final l10n = AppLocalizations.of(context);
-    final auth = ref.read(authProvider);
-    if (_vendorId == null || !auth.isLoggedIn) return;
-
-    final picker = ImagePicker();
-    final file = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 1600,
-      imageQuality: 75,
-    );
-    if (file == null) return;
-
-    setState(() => _uploadingPhoto = true);
-    try {
-      final bytes = await file.readAsBytes();
-      final photo = await uploadVendorPhoto(
-        vendorId: _vendorId!,
-        userId: auth.session!.user.id,
-        bytes: bytes,
-        sortOrder: _photos.length,
-      );
-      setState(() => _photos = [..._photos, photo]);
-      ref.invalidate(myVendorProfileProvider);
-    } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.photoUploadFailed)),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _uploadingPhoto = false);
-    }
-  }
-
-  Future<void> _removePhoto(VendorPhoto photo) async {
-    try {
-      await deleteVendorPhoto(photo);
-      setState(() => _photos = _photos.where((p) => p.id != photo.id).toList());
-      ref.invalidate(myVendorProfileProvider);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
-      }
     }
   }
 
@@ -171,74 +146,15 @@ class _VendorEditProfileScreenState
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
-                  l10n.photosLabel,
-                  style: Theme.of(context).textTheme.titleMedium,
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.photo_library_outlined),
+                  title: Text(l10n.managePhotos),
+                  subtitle: Text('${vendor.photos.length}'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/vendor-tools/photos'),
                 ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 96,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      ..._photos.map(
-                        (p) => Padding(
-                          padding: const EdgeInsetsDirectional.only(end: 8),
-                          child: Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: CachedNetworkImage(
-                                  imageUrl: p.storageUrl,
-                                  width: 96,
-                                  height: 96,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                top: 2,
-                                right: 2,
-                                child: IconButton(
-                                  iconSize: 18,
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: Colors.black54,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.all(4),
-                                    minimumSize: const Size(28, 28),
-                                  ),
-                                  onPressed: () => _removePhoto(p),
-                                  icon: const Icon(Icons.close),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      OutlinedButton(
-                        onPressed: _uploadingPhoto ? null : _addPhoto,
-                        style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(96, 96),
-                          foregroundColor: AppColors.burgundy,
-                        ),
-                        child: _uploadingPhoto
-                            ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(Icons.add_a_photo_outlined),
-                                  const SizedBox(height: 4),
-                                  Text(l10n.addPhoto, textAlign: TextAlign.center),
-                                ],
-                              ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _nameCtrl,
                   decoration:
@@ -246,12 +162,15 @@ class _VendorEditProfileScreenState
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<VendorCategory>(
-                  value: _category,
+                  key: ValueKey(_category),
+                  initialValue: _category,
                   decoration: InputDecoration(labelText: l10n.categoryLabel),
                   items: VendorCategory.values
                       .map(
-                        (c) =>
-                            DropdownMenuItem(value: c, child: Text(c.name)),
+                        (c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(localizedCategory(l10n, c)),
+                        ),
                       )
                       .toList(),
                   onChanged: (v) {
@@ -260,7 +179,8 @@ class _VendorEditProfileScreenState
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<CityCode>(
-                  value: _city,
+                  key: ValueKey(_city),
+                  initialValue: _city,
                   decoration: InputDecoration(labelText: l10n.cityLabel),
                   items: [
                     DropdownMenuItem(
@@ -286,6 +206,7 @@ class _VendorEditProfileScreenState
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _waCtrl,
+                  keyboardType: TextInputType.phone,
                   decoration:
                       InputDecoration(labelText: l10n.whatsappNumberLabel),
                 ),

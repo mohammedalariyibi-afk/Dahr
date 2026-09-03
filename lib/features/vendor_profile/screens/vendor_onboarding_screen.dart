@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/supabase/supabase_client.dart';
@@ -27,6 +28,7 @@ class _VendorOnboardingScreenState
   VendorCategory _category = VendorCategory.other;
   CityCode _city = CityCode.tripoli;
   bool _loading = false;
+  bool _hydrated = false;
 
   @override
   void dispose() {
@@ -39,6 +41,38 @@ class _VendorOnboardingScreenState
     super.dispose();
   }
 
+  String _errorLabel(AppLocalizations l10n, String key) {
+    switch (key) {
+      case 'business_name_required':
+        return l10n.businessNameRequired;
+      case 'description_required':
+        return l10n.descriptionRequired;
+      case 'whatsapp_required':
+        return l10n.whatsappRequired;
+      case 'whatsapp_invalid':
+        return l10n.invalidWhatsapp;
+      case 'price_range_required':
+        return l10n.priceRangeRequired;
+      case 'price_range_invalid':
+        return l10n.priceRangeInvalid;
+      default:
+        return l10n.requiredField;
+    }
+  }
+
+  void _hydrateIfNeeded(VendorProfile? existing) {
+    if (_hydrated || existing == null) return;
+    _hydrated = true;
+    _nameCtrl.text = existing.businessName;
+    _descCtrl.text = existing.description;
+    _waCtrl.text = existing.whatsappNumber ?? '';
+    _minCtrl.text = existing.priceMin?.toString() ?? '';
+    _maxCtrl.text = existing.priceMax?.toString() ?? '';
+    _servicesCtrl.text = existing.services.join(', ');
+    _category = existing.category;
+    _city = existing.city;
+  }
+
   Future<void> _submit() async {
     final l10n = AppLocalizations.of(context);
     final auth = ref.read(authProvider);
@@ -46,35 +80,33 @@ class _VendorOnboardingScreenState
       context.push('/auth/login');
       return;
     }
-    if (_nameCtrl.text.trim().isEmpty) {
+    final payload = VendorOnboardingPayload.fromInput(
+      profileId: auth.session!.user.id,
+      businessName: _nameCtrl.text,
+      category: _category,
+      city: _city,
+      description: _descCtrl.text,
+      whatsappNumber: _waCtrl.text,
+      priceMinRaw: _minCtrl.text,
+      priceMaxRaw: _maxCtrl.text,
+      servicesRaw: _servicesCtrl.text,
+    );
+    final error = payload.validate();
+    if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.requiredField)),
+        SnackBar(content: Text(_errorLabel(l10n, error))),
       );
       return;
     }
     setState(() => _loading = true);
     try {
-      // Ensure role is vendor
       await ref.read(authProvider.notifier).setRole(UserRole.vendor);
-      final services = _servicesCtrl.text
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty)
-          .toList();
-      await DahrSupabase.client.from('vendor_profiles').upsert({
-        'profile_id': auth.session!.user.id,
-        'business_name': _nameCtrl.text.trim(),
-        'category': _category.name,
-        'city': _city.name,
-        'description': _descCtrl.text.trim(),
-        'price_min': double.tryParse(_minCtrl.text),
-        'price_max': double.tryParse(_maxCtrl.text),
-        'whatsapp_number': _waCtrl.text.trim().isEmpty
-            ? null
-            : _waCtrl.text.trim(),
-        'services': services,
-      }, onConflict: 'profile_id');
+      await DahrSupabase.client.from('vendor_profiles').upsert(
+            payload.toJson(),
+            onConflict: 'profile_id',
+          );
       ref.invalidate(myVendorProfileProvider);
+      ref.invalidate(vendorDashboardStatsProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.onboardingPending)),
@@ -94,6 +126,8 @@ class _VendorOnboardingScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final existing = ref.watch(myVendorProfileProvider).valueOrNull;
+    _hydrateIfNeeded(existing);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vendorOnboardingTitle)),
@@ -108,10 +142,16 @@ class _VendorOnboardingScreenState
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<VendorCategory>(
-              value: _category,
+              key: ValueKey(_category),
+              initialValue: _category,
               decoration: InputDecoration(labelText: l10n.categoryLabel),
               items: VendorCategory.values
-                  .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                  .map(
+                    (c) => DropdownMenuItem(
+                      value: c,
+                      child: Text(localizedCategory(l10n, c)),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _category = v);
@@ -119,7 +159,8 @@ class _VendorOnboardingScreenState
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<CityCode>(
-              value: _city,
+              key: ValueKey(_city),
+              initialValue: _city,
               decoration: InputDecoration(labelText: l10n.cityLabel),
               items: [
                 DropdownMenuItem(
@@ -144,6 +185,7 @@ class _VendorOnboardingScreenState
             const SizedBox(height: 16),
             TextFormField(
               controller: _waCtrl,
+              keyboardType: TextInputType.phone,
               decoration: InputDecoration(labelText: l10n.whatsappNumberLabel),
             ),
             const SizedBox(height: 16),

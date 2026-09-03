@@ -53,6 +53,7 @@ class VendorInboxScreen extends ConsumerWidget {
               bookingId: booking.id,
               quotedAmountLyd: quoted,
             ),
+            booking: booking,
           );
     } catch (e) {
       if (!context.mounted) return;
@@ -84,98 +85,183 @@ class VendorInboxScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(vendorInboxProvider);
+    final filter = ref.watch(vendorInboxFilterProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vendorInbox)),
-      body: AsyncBody<List<BookingRequest>>(
-        value: async,
-        onRetry: () => ref.read(vendorInboxProvider.notifier).refresh(),
-        emptyWhen: (list) => list.isEmpty,
-        empty: EmptyState(
-          message: l10n.noInboxItems,
-          icon: Icons.inbox_outlined,
-        ),
-        builder: (context, bookings) {
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: bookings.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (context, i) {
-              final b = bookings[i];
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        b.eventDate.toIso8601String().split('T').first,
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      Text(_statusLabel(l10n, b.status)),
-                      if (b.message.isNotEmpty) Text(b.message),
-                      if (b.guestCount != null)
-                        Text('${l10n.guestCountLabel}: ${b.guestCount}'),
-                      if (b.quotedAmountLyd != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          '${l10n.quotedAmountDisplay}: '
-                          '${AppConstants.formatPrice(b.quotedAmountLyd)}',
-                        ),
-                        Text(
-                          '${l10n.commissionDueLabel}: '
-                          '${AppConstants.formatPrice(b.commissionAmountLyd)}',
-                        ),
-                        if (b.commissionStatus != null)
-                          Text(
-                            '${l10n.commissionStatusLabel}: '
-                            '${_commissionLabel(l10n, b.commissionStatus)}',
-                          ),
-                      ],
-                      const SizedBox(height: 8),
-                      if (b.status == BookingStatus.pending)
-                        Row(
+      body: Column(
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+            child: Row(
+              children: [
+                _FilterChip(
+                  label: l10n.inboxFilterAll,
+                  selected: filter == null,
+                  onTap: () => ref
+                      .read(vendorInboxFilterProvider.notifier)
+                      .state = null,
+                ),
+                _FilterChip(
+                  label: l10n.statusPending,
+                  selected: filter == BookingStatus.pending,
+                  onTap: () => ref
+                      .read(vendorInboxFilterProvider.notifier)
+                      .state = BookingStatus.pending,
+                ),
+                _FilterChip(
+                  label: l10n.statusAccepted,
+                  selected: filter == BookingStatus.accepted,
+                  onTap: () => ref
+                      .read(vendorInboxFilterProvider.notifier)
+                      .state = BookingStatus.accepted,
+                ),
+                _FilterChip(
+                  label: l10n.statusDeclined,
+                  selected: filter == BookingStatus.declined,
+                  onTap: () => ref
+                      .read(vendorInboxFilterProvider.notifier)
+                      .state = BookingStatus.declined,
+                ),
+                _FilterChip(
+                  label: l10n.statusCompleted,
+                  selected: filter == BookingStatus.completed,
+                  onTap: () => ref
+                      .read(vendorInboxFilterProvider.notifier)
+                      .state = BookingStatus.completed,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: AsyncBody<List<BookingRequest>>(
+              value: async,
+              onRetry: () => ref.read(vendorInboxProvider.notifier).refresh(),
+              emptyWhen: (list) =>
+                  list.where((b) => filter == null || b.status == filter).isEmpty,
+              empty: EmptyState(
+                message: l10n.noInboxItems,
+                icon: Icons.inbox_outlined,
+              ),
+              builder: (context, bookings) {
+                final visible = filter == null
+                    ? bookings
+                    : bookings.where((b) => b.status == filter).toList();
+                return ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: visible.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (context, i) {
+                    final b = visible[i];
+                    return Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(
-                              child: OutlinedButton(
+                            Text(
+                              AvailabilityCalendar.dateKey(b.eventDate),
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                            Text(_statusLabel(l10n, b.status)),
+                            if (b.message.isNotEmpty) Text(b.message),
+                            if (b.guestCount != null)
+                              Text('${l10n.guestCountLabel}: ${b.guestCount}'),
+                            if (b.quotedAmountLyd != null) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '${l10n.quotedAmountDisplay}: '
+                                '${AppConstants.formatPrice(b.quotedAmountLyd)}',
+                              ),
+                              Text(
+                                '${l10n.commissionDueLabel}: '
+                                '${AppConstants.formatPrice(b.commissionAmountLyd)}',
+                              ),
+                              if (b.commissionStatus != null)
+                                Text(
+                                  '${l10n.commissionStatusLabel}: '
+                                  '${_commissionLabel(l10n, b.commissionStatus)}',
+                                ),
+                            ],
+                            const SizedBox(height: 8),
+                            if (b.status == BookingStatus.pending)
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      onPressed: () => _setStatus(
+                                        context,
+                                        ref,
+                                        b.id,
+                                        BookingStatus.declined,
+                                      ),
+                                      child: Text(l10n.decline),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: FilledButton(
+                                      onPressed: () =>
+                                          _accept(context, ref, b),
+                                      child: Text(l10n.accept),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            if (b.status == BookingStatus.accepted)
+                              FilledButton(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: AppColors.success,
+                                ),
                                 onPressed: () => _setStatus(
                                   context,
                                   ref,
                                   b.id,
-                                  BookingStatus.declined,
+                                  BookingStatus.completed,
                                 ),
-                                child: Text(l10n.decline),
+                                child: Text(l10n.complete),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: FilledButton(
-                                onPressed: () => _accept(context, ref, b),
-                                child: Text(l10n.accept),
-                              ),
-                            ),
                           ],
                         ),
-                      if (b.status == BookingStatus.accepted)
-                        FilledButton(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: AppColors.success,
-                          ),
-                          onPressed: () => _setStatus(
-                            context,
-                            ref,
-                            b.id,
-                            BookingStatus.completed,
-                          ),
-                          child: Text(l10n.complete),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-        },
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: 8),
+      child: FilterChip(
+        label: Text(label),
+        selected: selected,
+        onSelected: (_) => onTap(),
+        selectedColor: AppColors.burgundy,
+        labelStyle: TextStyle(
+          color: selected ? AppColors.onBurgundy : AppColors.ink,
+          fontWeight: FontWeight.w600,
+        ),
+        checkmarkColor: AppColors.onBurgundy,
       ),
     );
   }

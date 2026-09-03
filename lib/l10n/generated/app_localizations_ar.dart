@@ -476,4 +476,79 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get commissionStatusLabel => 'حالة العمولة';
+
+  @override
+  String get bookedDatesTitle => 'التواريخ المحجوزة';
+
+  @override
+  String get dateUnavailable => 'هذا التاريخ محجوز';
+
+  @override
+  String get noBookedDates => 'لا توجد تواريخ محجوزة';
+
+  @override
+  String get managePhotos => 'إدارة الصور';
+
+  @override
+  String get nextBookedDates => 'أقرب التواريخ المحجوزة';
+
+  @override
+  String get noUpcomingBooked => 'لا توجد تواريخ محجوزة قادمة';
+
+  @override
+  String get inboxFilterAll => 'الكل';
+
+  @override
+  String get reviewNotCompleted => 'يمكنك التقييم بعد اكتمال الحجز';
+
+  @override
+  String get alreadyReviewed => 'لقد قيّمت هذا الحجز مسبقاً';
+
+  @override
+  String get priceRangeRequired => 'أدخل نطاق السعر بالدينار الليبي';
+
+  @override
+  String get priceRangeInvalid =>
+      'يجب أن يكون السعر الأعلى أكبر من أو يساوي السعر الأدنى';
+
+  @override
+  String get whatsappRequired => 'رقم واتساب مطلوب';
+
+  @override
+  String get invalidWhatsapp => 'أدخل رقم واتساب ليبي صالح';
+
+  @override
+  String get descriptionRequired => 'الوصف مطلوب';
+
+  @override
+  String get businessNameRequired => 'اسم النشاط مطلوب';
+
+  @override
+  String get reorderPhotosHint =>
+      'اضغط مع السحب لإعادة الترتيب. الصورة الأولى هي الغلاف.';
+
+  @override
+  String get deletePhoto => 'حذف الصورة';
+
+  @override
+  String get photosEmpty => 'أضف صوراً لأعمالك';
+
+  @override
+  String get coverPhoto => 'الغلاف';
+
+  @override
+  String get vendorPhotosTitle => 'المعرض';
+
+  @override
+  String get toggleAvailabilityHint =>
+      'اضغط على تاريخ لتعيينه محجوزاً أو متاحاً';
+
+  @override
+  String get setupVendorListing => 'أكمل إعداد عرضك';
+
+  @override
+  String get bookingDateBookedError => 'اختر تاريخاً غير محجوز';
+
+  @override
+  String get photoCountStat => 'الصور';
 }

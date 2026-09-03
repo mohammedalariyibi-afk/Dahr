@@ -20,7 +20,7 @@ class ConsumerBookingsNotifier extends AsyncNotifier<List<BookingRequest>> {
     final uid = auth.session!.user.id;
     final rows = await DahrSupabase.client
         .from('booking_requests')
-        .select('*, vendor_profiles(*, vendor_photos(*))')
+        .select('*, vendor_profiles(*, vendor_photos(*)), reviews(*)')
         .eq('consumer_id', uid)
         .order('created_at', ascending: false);
     return (rows as List)
@@ -33,8 +33,11 @@ class ConsumerBookingsNotifier extends AsyncNotifier<List<BookingRequest>> {
     state = await AsyncValue.guard(_fetch);
   }
 
-  Future<BookingRequest> submit(BookingRequestPayload payload) async {
-    final error = payload.validate();
+  Future<BookingRequest> submit(
+    BookingRequestPayload payload, {
+    Iterable<String>? bookedDateKeys,
+  }) async {
+    final error = payload.validate(bookedDateKeys: bookedDateKeys);
     if (error != null) throw StateError(error);
     final row = await DahrSupabase.client
         .from('booking_requests')
@@ -90,13 +93,29 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
     _invalidateRelated();
   }
 
-  Future<void> acceptBooking(AcceptBookingPayload payload) async {
+  Future<void> acceptBooking(
+    AcceptBookingPayload payload, {
+    BookingRequest? booking,
+  }) async {
     final error = payload.validate();
     if (error != null) throw StateError(error);
     await DahrSupabase.client.rpc(
       'accept_booking_request',
       params: payload.toRpcParams(),
     );
+    final vendorId = booking?.vendorId;
+    final eventDate = booking?.eventDate;
+    if (vendorId != null && vendorId.isNotEmpty && eventDate != null) {
+      await DahrSupabase.client.from('availability').upsert(
+            AvailabilityCalendar.upsertJson(
+              vendorId: vendorId,
+              date: eventDate,
+              status: AvailabilityStatus.booked,
+            ),
+            onConflict: 'vendor_id,date',
+          );
+      ref.invalidate(vendorAvailabilityProvider);
+    }
     _invalidateRelated();
   }
 
@@ -105,3 +124,18 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
     state = await AsyncValue.guard(_fetch);
   }
 }
+
+final bookingByIdProvider =
+    FutureProvider.family<BookingRequest?, String>((ref, id) async {
+  final row = await DahrSupabase.client
+      .from('booking_requests')
+      .select('*, reviews(*)')
+      .eq('id', id)
+      .maybeSingle();
+  if (row == null) return null;
+  return BookingRequest.fromJson(Map<String, dynamic>.from(row));
+});
+
+/// Null filter = all statuses. Default pending so new requests are front.
+final vendorInboxFilterProvider =
+    StateProvider<BookingStatus?>((ref) => BookingStatus.pending);

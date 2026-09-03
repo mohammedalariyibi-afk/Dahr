@@ -21,6 +21,7 @@ import '../../features/vendor_profile/screens/vendor_dashboard_screen.dart';
 import '../../features/vendor_profile/screens/vendor_inbox_screen.dart';
 import '../../features/vendor_profile/screens/vendor_availability_screen.dart';
 import '../../features/vendor_profile/screens/vendor_edit_profile_screen.dart';
+import '../../features/vendor_profile/screens/vendor_photos_screen.dart';
 import '../../features/auth/screens/profile_tab_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -204,6 +205,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/vendor-tools/edit',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (_, __) => const VendorEditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/vendor-tools/photos',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, __) => const VendorPhotosScreen(),
       ),
     ],
   );

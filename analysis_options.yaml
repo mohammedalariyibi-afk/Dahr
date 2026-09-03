@@ -10,3 +10,6 @@ analyzer:
   exclude:
     - admin/**
     - .tools/**
+    - build/**
+    - android/**
+    - ios/**

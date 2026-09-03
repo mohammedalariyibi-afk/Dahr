@@ -477,4 +477,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commissionStatusLabel => 'Commission status';
+
+  @override
+  String get bookedDatesTitle => 'Booked dates';
+
+  @override
+  String get dateUnavailable => 'This date is already booked';
+
+  @override
+  String get noBookedDates => 'No booked dates';
+
+  @override
+  String get managePhotos => 'Manage photos';
+
+  @override
+  String get nextBookedDates => 'Upcoming booked dates';
+
+  @override
+  String get noUpcomingBooked => 'No upcoming booked dates';
+
+  @override
+  String get inboxFilterAll => 'All';
+
+  @override
+  String get reviewNotCompleted =>
+      'You can leave a review after the booking is completed';
+
+  @override
+  String get alreadyReviewed => 'You already reviewed this booking';
+
+  @override
+  String get priceRangeRequired => 'Enter a price range in LYD';
+
+  @override
+  String get priceRangeInvalid => 'Max price must be at least the min price';
+
+  @override
+  String get whatsappRequired => 'WhatsApp number is required';
+
+  @override
+  String get invalidWhatsapp => 'Enter a valid Libyan WhatsApp number';
+
+  @override
+  String get descriptionRequired => 'Description is required';
+
+  @override
+  String get businessNameRequired => 'Business name is required';
+
+  @override
+  String get reorderPhotosHint =>
+      'Hold and drag to reorder. The first photo is the cover.';
+
+  @override
+  String get deletePhoto => 'Delete photo';
+
+  @override
+  String get photosEmpty => 'Add photos of your work';
+
+  @override
+  String get coverPhoto => 'Cover';
+
+  @override
+  String get vendorPhotosTitle => 'Gallery';
+
+  @override
+  String get toggleAvailabilityHint =>
+      'Tap a date to mark it booked or available';
+
+  @override
+  String get setupVendorListing => 'Finish setting up your listing';
+
+  @override
+  String get bookingDateBookedError =>
+      'Choose a date that is not already booked';
+
+  @override
+  String get photoCountStat => 'Photos';
 }
