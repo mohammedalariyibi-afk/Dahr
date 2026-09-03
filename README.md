@@ -59,6 +59,7 @@ Migrations (applied in filename order):
 - `supabase/migrations/20260903120000_revoke_anon_definer_rpcs.sql` — split public-read RLS; revoke anon EXECUTE on admin/vendor helpers (already applied on live Dahr LY)
 - `supabase/migrations/20260903140000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
 - `supabase/migrations/20260903184000_overnight_security_hardening.sql` — revoke `reject_booking_if_date_booked` (trigger only); replace `profile_public` with `security_invoker=true` view of `id,full_name`; `profiles_select_public_names` for review/vendor/booking display names (already applied on live Dahr LY)
+- `supabase/migrations/20260903190000_freeze_admin_role_and_private_profile_rows.sql` — freeze `profiles.role` (non-admins cannot self-promote); drop `profiles_select_public_names`; display names via `private.public_profile_rows()` + `profile_public` invoker/barrier view. **Already on live** (Syber’s two migrations); this repo file is combined so local `db reset` matches. Do **not** re-apply on Dahr LY. Does not touch `vendor-photos`.
 
 **Security note:** Guest browse still works (approved vendors, photos, availability, and `increment_vendor_views`). Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions including `reject_booking_if_date_booked`) are not anon RPCs — `authenticated` only, or no client EXECUTE. Do **not** re-grant `is_admin` / `owns_vendor` to anon (live once had `grant_rls_helpers_to_anon`; that must stay revoked).
 
@@ -84,7 +85,7 @@ URL: `https://cccusktgxrizfwpixddu.supabase.co`
 
 ```bash
 supabase link --project-ref cccusktgxrizfwpixddu
-supabase db push         # applies overnight_security_hardening if commission + revoke + delete_own_account are already on Dahr LY
+supabase db push         # do not re-push overnight_security_hardening or freeze_admin_role_and_private_profile_rows — already on Dahr LY
 # seed.sql is optional on cloud (SQL editor); do not rewrite schema
 ```
 
