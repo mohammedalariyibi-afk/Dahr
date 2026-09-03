@@ -120,6 +120,7 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
             onConflict: 'vendor_id,date',
           );
       ref.invalidate(vendorAvailabilityProvider);
+      ref.invalidate(vendorBookedDatesProvider);
     }
     _invalidateRelated();
   }

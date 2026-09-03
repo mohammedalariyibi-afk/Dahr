@@ -166,6 +166,9 @@ class VendorAvailabilityNotifier
         .select('id');
     requireMutatedRows(rows);
     ref.invalidate(vendorDashboardStatsProvider);
+    // Couples read booked dates from this family; without it they keep seeing
+    // the stale set and can request a date the vendor just blocked.
+    ref.invalidate(vendorBookedDatesProvider);
     ref.invalidateSelf();
   }
 
