@@ -1,14 +1,20 @@
 -- Split public-read policies so anon does not need EXECUTE on is_admin/owns_vendor.
 -- Then revoke trigger/helper RPCs from anon (and from authenticated where they are not API).
 -- Matches live Dahr LY migration `revoke_anon_definer_rpcs` (already applied on cloud).
+-- DROP the new policy names too so this file is safe to re-run when those
+-- policies already exist but this version is not in schema_migrations.
 
 DROP POLICY IF EXISTS vendors_public_read_approved ON public.vendor_profiles;
+DROP POLICY IF EXISTS vendors_select_approved ON public.vendor_profiles;
+DROP POLICY IF EXISTS vendors_select_own_or_admin ON public.vendor_profiles;
 CREATE POLICY vendors_select_approved ON public.vendor_profiles
   FOR SELECT USING (is_approved = true);
 CREATE POLICY vendors_select_own_or_admin ON public.vendor_profiles
   FOR SELECT USING (profile_id = auth.uid() OR public.is_admin());
 
 DROP POLICY IF EXISTS photos_public_read ON public.vendor_photos;
+DROP POLICY IF EXISTS photos_select_approved_vendor ON public.vendor_photos;
+DROP POLICY IF EXISTS photos_select_owner_or_admin ON public.vendor_photos;
 CREATE POLICY photos_select_approved_vendor ON public.vendor_photos
   FOR SELECT USING (
     EXISTS (
@@ -20,6 +26,8 @@ CREATE POLICY photos_select_owner_or_admin ON public.vendor_photos
   FOR SELECT USING (public.owns_vendor(vendor_id) OR public.is_admin());
 
 DROP POLICY IF EXISTS availability_public_read ON public.availability;
+DROP POLICY IF EXISTS availability_select_approved_vendor ON public.availability;
+DROP POLICY IF EXISTS availability_select_owner_or_admin ON public.availability;
 CREATE POLICY availability_select_approved_vendor ON public.availability
   FOR SELECT USING (
     EXISTS (

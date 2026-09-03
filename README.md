@@ -83,7 +83,7 @@ URL: `https://cccusktgxrizfwpixddu.supabase.co`
 
 ```bash
 supabase link --project-ref cccusktgxrizfwpixddu
-supabase db push         # applies delete_own_account if init + booking_commission + revoke_anon_definer_rpcs are already on Dahr LY
+supabase db push         # records revoke_anon if needed (idempotent if policies already exist), then delete_own_account
 # seed.sql is optional on cloud (SQL editor); do not rewrite schema
 ```
 
