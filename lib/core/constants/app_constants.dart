@@ -4,6 +4,11 @@ abstract final class AppConstants {
   static const String phoneCountryCode = '+218';
   static const String defaultLocale = 'ar';
   static const String englishLocale = 'en';
+  static const String supportEmail = 'mohammedalariyibi@gmail.com';
+  static const String privacyPath = '/legal/privacy';
+  static const String termsPath = '/legal/terms';
+  static const String publicPrivacyPath = '/privacy';
+  static const String publicTermsPath = '/terms';
 
   /// Libya mobile: after +218, typically 9 digits starting with 9.
   static const int libyaLocalPhoneLength = 9;

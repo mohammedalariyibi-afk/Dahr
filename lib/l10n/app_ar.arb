@@ -179,5 +179,13 @@
   "toggleAvailabilityHint": "اضغط على تاريخ لتعيينه محجوزاً أو متاحاً",
   "setupVendorListing": "أكمل إعداد عرضك",
   "bookingDateBookedError": "اختر تاريخاً غير محجوز",
-  "photoCountStat": "الصور"
+  "photoCountStat": "الصور",
+  "privacyPolicy": "سياسة الخصوصية",
+  "termsOfUse": "شروط الاستخدام",
+  "legalStartingNotice": "بيان أوّلي — وليس استشارة قانونية.",
+  "deleteAccount": "حذف الحساب",
+  "deleteAccountTitle": "حذف حسابك؟",
+  "deleteAccountBody": "سيُحذف حساب دهر نهائياً. إذا كنت مورّداً فسيُزال عرضك وصورك. لا يمكن التراجع عن هذا.",
+  "deleteAccountConfirm": "حذف الحساب",
+  "deleteAccountFailed": "تعذر حذف الحساب. حاول مرة أخرى أو راسل mohammedalariyibi@gmail.com."
 }

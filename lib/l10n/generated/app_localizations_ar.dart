@@ -551,4 +551,30 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get photoCountStat => 'الصور';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get termsOfUse => 'شروط الاستخدام';
+
+  @override
+  String get legalStartingNotice => 'بيان أوّلي — وليس استشارة قانونية.';
+
+  @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountTitle => 'حذف حسابك؟';
+
+  @override
+  String get deleteAccountBody =>
+      'سيُحذف حساب دهر نهائياً. إذا كنت مورّداً فسيُزال عرضك وصورك. لا يمكن التراجع عن هذا.';
+
+  @override
+  String get deleteAccountConfirm => 'حذف الحساب';
+
+  @override
+  String get deleteAccountFailed =>
+      'تعذر حذف الحساب. حاول مرة أخرى أو راسل mohammedalariyibi@gmail.com.';
 }

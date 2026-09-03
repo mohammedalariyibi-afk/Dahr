@@ -553,4 +553,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get photoCountStat => 'Photos';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get termsOfUse => 'Terms of use';
+
+  @override
+  String get legalStartingNotice => 'Starting policy — not legal advice.';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountBody =>
+      'This permanently deletes your Dahr account. If you are a vendor, your listing and photos are removed. You cannot undo this.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete account';
+
+  @override
+  String get deleteAccountFailed =>
+      'Could not delete the account. Try again or email mohammedalariyibi@gmail.com.';
 }

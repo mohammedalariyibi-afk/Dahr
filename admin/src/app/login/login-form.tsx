@@ -164,6 +164,15 @@ export default function LoginForm() {
           )}
           {error && <p className="mt-4 text-sm text-red-700">{error}</p>}
         </div>
+        <p className="mt-6 text-center text-xs text-[var(--muted)]">
+          <a href="/privacy" className="underline underline-offset-2">
+            Privacy
+          </a>
+          {" · "}
+          <a href="/terms" className="underline underline-offset-2">
+            Terms
+          </a>
+        </p>
       </div>
     </main>
   );
