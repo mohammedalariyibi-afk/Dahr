@@ -1,6 +1,8 @@
 export 'enums.dart';
 export 'profile.dart';
+export 'profile_role_write.dart';
 export 'vendor.dart';
 export 'booking.dart';
+export 'booking_select.dart';
 export 'review.dart';
 export 'commission.dart';

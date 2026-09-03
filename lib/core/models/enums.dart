@@ -3,6 +3,10 @@ enum UserRole {
   vendor,
   admin;
 
+  /// Roles the Flutter client may write. Admin is operator-only.
+  bool get isClientAssignable =>
+      this == UserRole.consumer || this == UserRole.vendor;
+
   static UserRole fromString(String? value) {
     return UserRole.values.firstWhere(
       (e) => e.name == value,

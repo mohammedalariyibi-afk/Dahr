@@ -50,8 +50,11 @@ class ConsumerBookingsScreen extends ConsumerWidget {
         onRetry: () => ref.read(consumerBookingsProvider.notifier).refresh(),
         emptyWhen: (list) => list.isEmpty,
         empty: EmptyState(
-          message: l10n.noBookings,
+          title: l10n.bookingsEmptyTitle,
+          message: l10n.bookingsEmptyBody,
           icon: Icons.event_busy_outlined,
+          actionLabel: l10n.browseDiscover,
+          onAction: () => context.go('/discover'),
         ),
         builder: (context, bookings) {
           return ListView.separated(
