@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 
 const CATEGORY_LABELS: Record<string, string> = {
   venues: "Venues",
@@ -19,12 +20,17 @@ export default async function DashboardPage() {
     { count: vendorCount },
     { count: userCount },
     { data: bookingRows },
+    { data: commissionRows },
   ] = await Promise.all([
     supabase
       .from("vendor_profiles")
       .select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("booking_requests").select("id, vendor_profiles(category)"),
+    supabase
+      .from("booking_requests")
+      .select("commission_status, commission_amount_lyd")
+      .eq("commission_status", "unpaid"),
   ]);
 
   const byCategory = new Map<string, number>();
@@ -46,18 +52,27 @@ export default async function DashboardPage() {
     count: byCategory.get(key) ?? 0,
   }));
 
+  const unpaidCommission = (commissionRows ?? []).reduce((sum, row) => {
+    return sum + Number(row.commission_amount_lyd ?? 0);
+  }, 0);
+
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-display text-3xl text-[var(--ink)]">Dashboard</h1>
         <p className="mt-1 text-sm text-[var(--muted)]">
-          Overview of vendors, users, and booking demand
+          Overview of vendors, users, booking demand, and vendor commission
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <StatCard label="Total vendors" value={vendorCount ?? 0} />
         <StatCard label="Total users" value={userCount ?? 0} />
+        <StatCard
+          label="Unpaid commission"
+          value={`${unpaidCommission.toFixed(2)} LYD`}
+          href="/commissions"
+        />
       </div>
 
       <section>
@@ -92,13 +107,38 @@ export default async function DashboardPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+function StatCard({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: number | string;
+  href?: string;
+}) {
+  const inner = (
+    <>
       <p className="text-sm text-[var(--muted)]">{label}</p>
-      <p className="mt-2 font-display text-4xl text-[var(--burgundy)] tabular-nums">
+      <p className="mt-2 font-display text-3xl text-[var(--burgundy)] tabular-nums sm:text-4xl">
         {value}
       </p>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 transition hover:border-[var(--burgundy)]"
+      >
+        {inner}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
+      {inner}
     </div>
   );
 }

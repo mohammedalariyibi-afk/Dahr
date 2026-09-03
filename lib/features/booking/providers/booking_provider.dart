@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/supabase/supabase_client.dart';
+import '../../vendor_profile/providers/vendor_provider.dart';
 
 final consumerBookingsProvider =
     AsyncNotifierProvider<ConsumerBookingsNotifier, List<BookingRequest>>(
@@ -75,11 +76,28 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
         .toList();
   }
 
+  void _invalidateRelated() {
+    ref.invalidateSelf();
+    ref.invalidate(vendorDashboardStatsProvider);
+  }
+
+  /// Decline or complete only. Accepting requires a quote — use [acceptBooking].
   Future<void> updateStatus(String bookingId, BookingStatus status) async {
+    AcceptBookingPayload.assertNotBareAccept(status);
     await DahrSupabase.client
         .from('booking_requests')
         .update({'status': status.name}).eq('id', bookingId);
-    ref.invalidateSelf();
+    _invalidateRelated();
+  }
+
+  Future<void> acceptBooking(AcceptBookingPayload payload) async {
+    final error = payload.validate();
+    if (error != null) throw StateError(error);
+    await DahrSupabase.client.rpc(
+      'accept_booking_request',
+      params: payload.toRpcParams(),
+    );
+    _invalidateRelated();
   }
 
   Future<void> refresh() async {

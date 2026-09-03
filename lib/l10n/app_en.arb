@@ -140,5 +140,20 @@
   "requiredField": "This field is required",
   "photosLabel": "Photos",
   "addPhoto": "Add photo",
-  "photoUploadFailed": "Could not upload photo"
+  "photoUploadFailed": "Could not upload photo",
+  "quotedAmountLabel": "Quoted amount (LYD)",
+  "quotedAmountHint": "Amount agreed with the couple",
+  "commissionDueLabel": "Dahr commission (10%)",
+  "acceptBookingTitle": "Accept booking",
+  "confirmAccept": "Confirm accept",
+  "quotedAmountRequired": "Enter a quoted amount greater than 0",
+  "commissionUnpaid": "Unpaid",
+  "commissionPaid": "Paid",
+  "commissionWaived": "Waived",
+  "unpaidCommissionOwed": "Commission owed to Dahr",
+  "noUnpaidCommission": "No unpaid commission",
+  "quotedAmountDisplay": "Quote",
+  "commissionNoteVendor": "You pay 10% of this quote to Dahr (collected offline).",
+  "invalidQuotedAmount": "Enter a valid amount in LYD",
+  "commissionStatusLabel": "Commission status"
 }

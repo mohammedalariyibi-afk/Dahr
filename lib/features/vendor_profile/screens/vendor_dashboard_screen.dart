@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -46,19 +47,64 @@ class VendorDashboardScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               _StatTile(
                 label: l10n.views,
-                value: '${stats['views'] ?? 0}',
+                value: '${stats.views}',
                 icon: Icons.visibility_outlined,
               ),
               _StatTile(
                 label: l10n.pendingRequests,
-                value: '${stats['pending'] ?? 0}',
+                value: '${stats.pending}',
                 icon: Icons.hourglass_empty,
               ),
               _StatTile(
                 label: l10n.acceptedRequests,
-                value: '${stats['accepted'] ?? 0}',
+                value: '${stats.accepted}',
                 icon: Icons.check_circle_outline,
               ),
+              _StatTile(
+                label: l10n.unpaidCommissionOwed,
+                value: AppConstants.formatPrice(stats.unpaidCommissionLyd),
+                icon: Icons.account_balance_wallet_outlined,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.unpaidCommissionOwed,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              if (stats.unpaidBookings.isEmpty)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(l10n.noUnpaidCommission),
+                  ),
+                )
+              else
+                ...stats.unpaidBookings.map(
+                  (b) => Card(
+                    child: ListTile(
+                      title: Text(
+                        b.eventDate.toIso8601String().split('T').first,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        '${l10n.quotedAmountDisplay}: '
+                        '${AppConstants.formatPrice(b.quotedAmountLyd)}\n'
+                        '${l10n.commissionDueLabel}: '
+                        '${AppConstants.formatPrice(b.commissionAmountLyd)}',
+                      ),
+                      isThreeLine: true,
+                      trailing: Text(
+                        l10n.commissionUnpaid,
+                        style: const TextStyle(
+                          color: AppColors.warning,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: () => context.go('/inbox'),
@@ -99,12 +145,15 @@ class _StatTile extends StatelessWidget {
       child: ListTile(
         leading: Icon(icon, color: AppColors.burgundy),
         title: Text(label),
-        trailing: Text(
-          value,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: AppColors.burgundy,
-                fontWeight: FontWeight.w800,
-              ),
+        trailing: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppColors.burgundy,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
         ),
       ),
     );

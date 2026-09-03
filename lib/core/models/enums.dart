@@ -61,6 +61,20 @@ enum BookingStatus {
   }
 }
 
+enum CommissionStatus {
+  unpaid,
+  paid,
+  waived;
+
+  static CommissionStatus? tryParse(String? value) {
+    if (value == null || value.isEmpty) return null;
+    for (final s in CommissionStatus.values) {
+      if (s.name == value) return s;
+    }
+    return null;
+  }
+}
+
 enum AvailabilityStatus {
   available,
   booked;

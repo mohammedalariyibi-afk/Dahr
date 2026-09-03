@@ -73,3 +73,17 @@ export async function hideReview(reviewId: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/reports");
 }
+
+export async function setCommissionStatus(
+  bookingId: string,
+  status: "paid" | "waived",
+) {
+  const supabase = await requireAdmin();
+  const { error } = await supabase.rpc("set_booking_commission_status", {
+    p_booking_id: bookingId,
+    p_status: status,
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/commissions");
+  revalidatePath("/");
+}
