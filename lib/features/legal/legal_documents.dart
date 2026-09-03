@@ -1,6 +1,7 @@
 /// Starting-policy legal copy (AR + EN). Not law-firm work.
 ///
 /// Web pages in `admin/src/lib/legal.ts` should stay aligned with this file.
+library;
 
 class LegalSection {
   const LegalSection({required this.heading, required this.body});
