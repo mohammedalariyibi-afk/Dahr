@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { CATEGORY_LABELS, firstEmbed, formatLyd } from "@/lib/admin";
+import { PUBLIC_ERROR, publicErrorMessage } from "@/lib/public-error";
 import Link from "next/link";
 
 const BOOKING_STATUSES = ["pending", "accepted", "declined", "completed"] as const;
@@ -34,13 +35,15 @@ export default async function DashboardPage() {
       .eq("status", "open"),
   ]);
 
-  const queryError =
-    vendorsTotal.error?.message ||
-    vendorsPending.error?.message ||
-    usersTotal.error?.message ||
-    bookingsResult.error?.message ||
-    commissionResult.error?.message ||
-    reportsOpen.error?.message;
+  // Never render PostgREST text: it names tables, policies, and columns.
+  const queryFailed = [
+    vendorsTotal.error,
+    vendorsPending.error,
+    usersTotal.error,
+    bookingsResult.error,
+    commissionResult.error,
+    reportsOpen.error,
+  ].some((e) => e !== null && e !== undefined);
 
   const byCategory = new Map<string, number>();
   const byStatus = new Map<string, number>();
@@ -77,9 +80,9 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {queryError ? (
+      {queryFailed ? (
         <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">
-          Some stats failed to load: {queryError}
+          {publicErrorMessage(PUBLIC_ERROR.loadFailed)}
         </p>
       ) : null}
 
