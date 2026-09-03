@@ -23,10 +23,12 @@ dahr/
 
 ## Prerequisites
 
-- Flutter SDK 3.24+ ([install](https://docs.flutter.dev/get-started/install))
+- Flutter SDK 3.47+ ([install](https://docs.flutter.dev/get-started/install)) — Dart `>=3.5.0 <4.0.0`; photo reorder uses `onReorderItem` (3.44+)
 - Node.js 20+ (admin)
 - [Supabase CLI](https://supabase.com/docs/guides/cli) (local backend)
 - Docker (for local Supabase)
+
+CI runs `flutter analyze lib test` and `flutter test` on pull requests and pushes to `main` (no secrets, no live Dahr LY).
 
 ## Environment files
 
@@ -54,7 +56,10 @@ Migrations (applied in filename order):
 
 - `supabase/migrations/20260328000001_init_schema.sql` — core schema, RLS, `vendor-photos` bucket
 - `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% vendor commission, `accept_booking_request` RPC
+- `supabase/migrations/20260903120000_revoke_anon_definer_rpcs.sql` — split public-read RLS; revoke anon EXECUTE on admin/vendor helpers (already applied on live Dahr LY)
 - `supabase/migrations/20260903140000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
+
+**Security note:** Guest browse still works (approved vendors, photos, availability, and `increment_vendor_views`). Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions) are not anon RPCs — `authenticated` only, or no client EXECUTE.
 
 ### Local (`supabase start`)
 
@@ -62,7 +67,7 @@ Migrations (applied in filename order):
 # From repo root
 supabase start
 supabase status          # API URL + anon (publishable) key
-supabase db reset        # applies both migrations + seed.sql
+supabase db reset        # applies all migrations + seed.sql
 ```
 
 Copy the printed **API URL** (`http://127.0.0.1:54321`) and **anon/publishable** key into `.env` and `admin/.env.local`.
@@ -78,7 +83,7 @@ URL: `https://cccusktgxrizfwpixddu.supabase.co`
 
 ```bash
 supabase link --project-ref cccusktgxrizfwpixddu
-supabase db push         # no-op if init + booking_commission are already applied
+supabase db push         # applies delete_own_account if init + booking_commission + revoke_anon_definer_rpcs are already on Dahr LY
 # seed.sql is optional on cloud (SQL editor); do not rewrite schema
 ```
 
@@ -115,7 +120,7 @@ Arabic is the default locale (RTL). Switch language on the first screen. Android
 
 ## Try the vendor product flow
 
-Guest browse of Discover stays open. Favorites, booking requests, and reviews still require sign-in (router redirects to login and returns afterward).
+Guest browse of Discover stays open (approved listings only; admin/vendor helpers are not anon RPCs). Favorites, booking requests, and reviews still require sign-in (router redirects to login and returns afterward).
 
 1. **Onboarding** — Sign in, choose **I'm a vendor** (or **Become a vendor** on Profile). Fill business name, category, city, WhatsApp, description, and price range (LYD). Submit. The listing waits for admin approval (`is_approved`).
 2. **Photos** — Profile → Vendor tools → **Manage photos**, or Dashboard → **Manage photos**. Upload to the `vendor-photos` bucket, drag to reorder (first photo is the cover), delete.
