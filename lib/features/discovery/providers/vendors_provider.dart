@@ -18,6 +18,9 @@ class VendorFilters {
   final double? priceMin;
   final double? priceMax;
 
+  bool get hasActiveFilters =>
+      city != null || priceMin != null || priceMax != null;
+
   VendorFilters copyWith({
     VendorCategory? category,
     CityCode? city,
@@ -111,19 +114,59 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
       query = query.lte('price_min', filters.priceMax!);
     }
     if (filters.search != null && filters.search!.isNotEmpty) {
-      query = query.ilike('business_name', '%${filters.search}%');
+      // Sanitize for PostgREST .or() filter syntax.
+      final q = filters.search!.replaceAll(RegExp(r'[%_,]'), ' ').trim();
+      if (q.isNotEmpty) {
+        query = query.or(
+          'business_name.ilike.%$q%,description.ilike.%$q%',
+        );
+      }
     }
 
     final rows = await query.order('created_at', ascending: false);
-    return (rows as List)
+    final vendors = (rows as List)
         .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
+    return _withRatings(vendors);
   }
 
   Future<void> refresh() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(_fetch);
   }
+}
+
+/// Attaches avg rating / review count from the reviews table
+/// (columns are not stored on vendor_profiles).
+Future<List<VendorProfile>> _withRatings(List<VendorProfile> vendors) async {
+  if (vendors.isEmpty) return vendors;
+  final ids = vendors.map((v) => v.id).toList();
+  final rows = await DahrSupabase.client
+      .from('reviews')
+      .select('vendor_id, rating')
+      .eq('is_hidden', false)
+      .inFilter('vendor_id', ids);
+
+  final sums = <String, double>{};
+  final counts = <String, int>{};
+  for (final raw in rows as List) {
+    final row = Map<String, dynamic>.from(raw as Map);
+    final id = row['vendor_id'] as String;
+    final rating = (row['rating'] as num).toDouble();
+    sums[id] = (sums[id] ?? 0) + rating;
+    counts[id] = (counts[id] ?? 0) + 1;
+  }
+
+  return vendors
+      .map((v) {
+        final count = counts[v.id] ?? 0;
+        if (count == 0) return v;
+        return v.copyWith(
+          avgRating: sums[v.id]! / count,
+          reviewCount: count,
+        );
+      })
+      .toList();
 }
 
 final vendorDetailProvider =
@@ -136,11 +179,14 @@ final vendorDetailProvider =
   if (row == null) throw StateError('Vendor not found');
 
   // Fire-and-forget view increment
+  // ignore: unawaited_futures
   DahrSupabase.client.rpc('increment_vendor_views', params: {
     'p_vendor_id': id,
   });
 
-  return VendorProfile.fromJson(Map<String, dynamic>.from(row));
+  final vendor = VendorProfile.fromJson(Map<String, dynamic>.from(row));
+  final withRatings = await _withRatings([vendor]);
+  return withRatings.first;
 });
 
 final vendorReviewsProvider =

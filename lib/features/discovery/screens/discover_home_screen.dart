@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -18,9 +20,11 @@ class DiscoverHomeScreen extends ConsumerStatefulWidget {
 
 class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
   final _searchCtrl = TextEditingController();
+  Timer? _searchDebounce;
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchCtrl.dispose();
     super.dispose();
   }
@@ -46,6 +50,10 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
       case VendorCategory.other:
         return l10n.categoryOther;
     }
+  }
+
+  String _cityLabel(AppLocalizations l10n, CityCode city) {
+    return city == CityCode.tripoli ? l10n.cityTripoli : l10n.cityBenghazi;
   }
 
   void _showFilters() {
@@ -130,6 +138,8 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
                   TextButton(
                     onPressed: () {
                       ref.read(vendorFiltersProvider.notifier).clear();
+                      _searchCtrl.clear();
+                      setState(() {});
                       Navigator.pop(ctx);
                     },
                     child: Text(l10n.clearFilters),
@@ -140,7 +150,10 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      minCtrl.dispose();
+      maxCtrl.dispose();
+    });
   }
 
   @override
@@ -148,14 +161,19 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
     final l10n = AppLocalizations.of(context);
     final filters = ref.watch(vendorFiltersProvider);
     final vendorsAsync = ref.watch(vendorsProvider);
-    final favIds = ref.watch(favoriteVendorIdsProvider);
+    final favIds = ref.watch(favoritesProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.appName),
         actions: [
           IconButton(
-            icon: const Icon(Icons.tune),
+            icon: Badge(
+              isLabelVisible: filters.hasActiveFilters,
+              smallSize: 8,
+              backgroundColor: AppColors.burgundy,
+              child: const Icon(Icons.tune),
+            ),
             onPressed: _showFilters,
             tooltip: l10n.filters,
           ),
@@ -174,6 +192,7 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
                     ? IconButton(
                         icon: const Icon(Icons.clear),
                         onPressed: () {
+                          _searchDebounce?.cancel();
                           _searchCtrl.clear();
                           ref
                               .read(vendorFiltersProvider.notifier)
@@ -185,6 +204,14 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
               ),
               onChanged: (v) {
                 setState(() {});
+                _searchDebounce?.cancel();
+                _searchDebounce = Timer(const Duration(milliseconds: 350), () {
+                  ref.read(vendorFiltersProvider.notifier).setSearch(v);
+                });
+              },
+              textInputAction: TextInputAction.search,
+              onSubmitted: (v) {
+                _searchDebounce?.cancel();
                 ref.read(vendorFiltersProvider.notifier).setSearch(v);
               },
             ),
@@ -220,6 +247,45 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
               ],
             ),
           ),
+          if (filters.hasActiveFilters) ...[
+            const SizedBox(height: 4),
+            SizedBox(
+              height: 36,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  if (filters.city != null)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: InputChip(
+                        label: Text(_cityLabel(l10n, filters.city!)),
+                        onDeleted: () => ref
+                            .read(vendorFiltersProvider.notifier)
+                            .setCity(null),
+                      ),
+                    ),
+                  if (filters.priceMin != null || filters.priceMax != null)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8),
+                      child: InputChip(
+                        label: Text(
+                          [
+                            if (filters.priceMin != null)
+                              '${l10n.priceMin}: ${filters.priceMin!.toStringAsFixed(0)}',
+                            if (filters.priceMax != null)
+                              '${l10n.priceMax}: ${filters.priceMax!.toStringAsFixed(0)}',
+                          ].join(' · '),
+                        ),
+                        onDeleted: () => ref
+                            .read(vendorFiltersProvider.notifier)
+                            .setPriceRange(null, null),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           Expanded(
             child: AsyncBody<List<VendorProfile>>(
@@ -251,7 +317,11 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
                         onTap: () => context.push('/vendor/${v.id}'),
                         onFavoriteToggle: () => ref
                             .read(favoritesProvider.notifier)
-                            .toggle(v.id, context: context),
+                            .toggle(
+                              v.id,
+                              context: context,
+                              returnPath: '/discover',
+                            ),
                       );
                     },
                   ),

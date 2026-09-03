@@ -1,13 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/supabase/supabase_client.dart';
 
-final favoriteVendorIdsProvider =
-    FutureProvider<Set<String>>((ref) async {
+final favoriteVendorIdsProvider = FutureProvider<Set<String>>((ref) async {
   final auth = ref.watch(authProvider);
   if (!auth.isLoggedIn) return {};
   final uid = auth.session!.user.id;
@@ -27,7 +26,8 @@ final favoriteVendorsProvider =
   final rows = await DahrSupabase.client
       .from('vendor_profiles')
       .select('*, vendor_photos(*)')
-      .inFilter('id', ids.toList());
+      .inFilter('id', ids.toList())
+      .eq('is_approved', true);
   return (rows as List)
       .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
       .toList();
@@ -44,32 +44,63 @@ class FavoritesNotifier extends AsyncNotifier<Set<String>> {
     return ref.watch(favoriteVendorIdsProvider.future);
   }
 
-  Future<void> toggle(String vendorId, {BuildContext? context}) async {
+  /// Toggles favorite. Guests are sent to login with [returnPath] (or current route).
+  Future<void> toggle(
+    String vendorId, {
+    BuildContext? context,
+    String? returnPath,
+  }) async {
     final auth = ref.read(authProvider);
     if (!auth.isLoggedIn) {
       if (context != null && context.mounted) {
-        final from = Uri.encodeComponent('/favorites');
+        final path = returnPath ??
+            GoRouterState.of(context).uri.toString();
+        final from = Uri.encodeComponent(path);
         context.push('/auth/login?from=$from');
       }
       return;
     }
+
     final uid = auth.session!.user.id;
-    final current = state.valueOrNull ?? {};
-    if (current.contains(vendorId)) {
-      await DahrSupabase.client
-          .from('favorites')
-          .delete()
-          .eq('consumer_id', uid)
-          .eq('vendor_id', vendorId);
-      state = AsyncData({...current}..remove(vendorId));
+    final current = {...(state.valueOrNull ?? {})};
+    final removing = current.contains(vendorId);
+
+    // Optimistic update
+    if (removing) {
+      current.remove(vendorId);
     } else {
-      await DahrSupabase.client.from('favorites').insert({
-        'consumer_id': uid,
-        'vendor_id': vendorId,
-      });
-      state = AsyncData({...current, vendorId});
+      current.add(vendorId);
     }
-    ref.invalidate(favoriteVendorIdsProvider);
-    ref.invalidate(favoriteVendorsProvider);
+    state = AsyncData(current);
+
+    try {
+      if (removing) {
+        await DahrSupabase.client
+            .from('favorites')
+            .delete()
+            .eq('consumer_id', uid)
+            .eq('vendor_id', vendorId);
+      } else {
+        await DahrSupabase.client.from('favorites').insert({
+          'consumer_id': uid,
+          'vendor_id': vendorId,
+        });
+      }
+      ref.invalidate(favoriteVendorIdsProvider);
+      ref.invalidate(favoriteVendorsProvider);
+    } catch (e) {
+      // Revert optimistic update
+      if (removing) {
+        current.add(vendorId);
+      } else {
+        current.remove(vendorId);
+      }
+      state = AsyncData(current);
+      if (context != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
   }
 }
