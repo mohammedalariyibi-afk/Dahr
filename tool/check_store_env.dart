@@ -9,7 +9,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dahr/core/config/dahr_env.dart';
+import 'package:dahr/core/config/dahr_env_rules.dart';
 
 void main(List<String> args) {
   final envPath = args.isEmpty ? '.env' : args.first;
@@ -17,16 +17,16 @@ void main(List<String> args) {
   if (!file.existsSync()) {
     stderr.writeln(
       'Store preflight: $envPath is missing. Copy .env.example to .env, '
-      'set SUPABASE_URL=${DahrEnv.dahrLyUrl} and the Dahr LY anon / '
+      'set SUPABASE_URL=${DahrEnvRules.dahrLyUrl} and the Dahr LY anon / '
       'publishable key, then rebuild with --dart-define-from-file=.env.',
     );
     exit(1);
   }
 
   final env = parseDotEnv(file.readAsStringSync());
-  final url = DahrEnv.resolveUrl(env: env);
-  final anonKey = DahrEnv.resolveAnonKey(env: env);
-  final blocker = DahrEnv.storeReleaseBlocker(url: url, anonKey: anonKey);
+  final url = DahrEnvRules.resolveUrl(env: env);
+  final anonKey = DahrEnvRules.resolveAnonKey(env: env);
+  final blocker = DahrEnvRules.storeReleaseBlocker(url: url, anonKey: anonKey);
   if (blocker != null) {
     stderr.writeln('Store preflight: $blocker');
     stderr.writeln('File: $envPath');
@@ -35,7 +35,7 @@ void main(List<String> args) {
 
   stdout.writeln(
     'Store preflight OK: $envPath targets Dahr LY '
-    '(${DahrEnv.dahrLyProjectRef}).',
+    '(${DahrEnvRules.dahrLyProjectRef}).',
   );
 }
 

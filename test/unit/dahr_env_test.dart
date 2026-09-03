@@ -233,7 +233,12 @@ void main() {
         'dart',
         ['run', 'tool/check_store_env.dart', file.path],
       );
-      expect(result.exitCode, 0, reason: '${result.stdout}${result.stderr}');
+      expect(
+        result.exitCode,
+        0,
+        reason: 'stdout=${result.stdout} stderr=${result.stderr}'
+            .replaceAll(RegExp(r'\s+'), ' '),
+      );
       expect(result.stdout.toString(), contains(DahrEnv.dahrLyProjectRef));
     });
   });
