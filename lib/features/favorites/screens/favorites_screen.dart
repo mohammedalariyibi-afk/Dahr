@@ -32,6 +32,7 @@ class FavoritesScreen extends ConsumerWidget {
     }
 
     final async = ref.watch(favoriteVendorsProvider);
+    final favIds = ref.watch(favoritesProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.favoritesTitle)),
@@ -44,20 +45,42 @@ class FavoritesScreen extends ConsumerWidget {
           icon: Icons.favorite_border,
         ),
         builder: (context, vendors) {
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: vendors.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 12),
-            itemBuilder: (context, i) {
-              final v = vendors[i];
-              return VendorCard(
-                vendor: v,
-                isFavorite: true,
-                onTap: () => context.push('/vendor/${v.id}'),
-                onFavoriteToggle: () =>
-                    ref.read(favoritesProvider.notifier).toggle(v.id),
-              );
+          final ids = favIds.valueOrNull;
+          final visible = ids == null
+              ? vendors
+              : vendors.where((v) => ids.contains(v.id)).toList();
+          if (visible.isEmpty) {
+            return EmptyState(
+              message: l10n.noFavorites,
+              icon: Icons.favorite_border,
+            );
+          }
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(favoriteVendorIdsProvider);
+              ref.invalidate(favoriteVendorsProvider);
+              await ref.read(favoriteVendorsProvider.future);
             },
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: visible.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, i) {
+                final v = visible[i];
+                return VendorCard(
+                  vendor: v,
+                  isFavorite: true,
+                  onTap: () => context.push('/vendor/${v.id}'),
+                  onFavoriteToggle: () => ref
+                      .read(favoritesProvider.notifier)
+                      .toggle(
+                        v.id,
+                        context: context,
+                        returnPath: '/favorites',
+                      ),
+                );
+              },
+            ),
           );
         },
       ),
