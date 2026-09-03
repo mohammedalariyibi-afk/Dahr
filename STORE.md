@@ -78,6 +78,9 @@ Couples pay vendors **off-platform** (often WhatsApp). Currency shown in-app is 
 
 ## Packaged screenshots
 
+Play phones: `docs/store-shots/play-1080x1920/`. App Store 6.9″: `docs/store-shots/ios-1320x2868/`.
+
+
 Ready-to-upload phone frames live in `docs/store-shots/` (full-color Ice Blue UI + vivid venue photos):
 
 1. `01-email-otp.png`
