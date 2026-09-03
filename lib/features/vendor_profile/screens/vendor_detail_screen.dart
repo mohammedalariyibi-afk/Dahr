@@ -212,7 +212,7 @@ class _VendorDetailScreenState extends ConsumerState<VendorDetailScreen> {
                                   shape: BoxShape.circle,
                                   color: i == _galleryIndex
                                       ? AppColors.surface
-                                      : AppColors.surface.withOpacity(0.45),
+                                      : AppColors.surface.withValues(alpha: 0.45),
                                 ),
                               ),
                             ),
