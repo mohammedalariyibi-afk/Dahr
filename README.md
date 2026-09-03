@@ -13,7 +13,7 @@ Dahr is a wedding-vendor marketplace for Libya. Couples browse venues, photograp
 
 ## How sign-in works
 
-Both the Flutter app and the admin console use **Email OTP only**. Supabase Auth sends a one-time code to the user's email. There is no phone OTP, no Twilio, and no WhatsApp sign-in.
+Both the Flutter app and the admin console use **Email OTP only**. Supabase Auth sends a one-time code to the user's email. There is no phone OTP and no WhatsApp sign-in.
 
 WhatsApp is **vendor contact after booking**, not a login method. The Flutter app opens `https://wa.me/<libya-digits>` only for validated Libya numbers.
 
