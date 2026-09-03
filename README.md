@@ -54,7 +54,7 @@ Migrations (applied in filename order):
 
 - `supabase/migrations/20260328000001_init_schema.sql` — core schema, RLS, `vendor-photos` bucket
 - `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% vendor commission, `accept_booking_request` RPC
-- `supabase/migrations/20260903120000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
+- `supabase/migrations/20260903140000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
 
 ### Local (`supabase start`)
 

@@ -2,7 +2,7 @@
 ///
 /// The SQL takes **no user-id argument**. PostgREST therefore cannot be asked
 /// to delete someone else; the function reads `auth.uid()` only.
-/// Keep in sync with `supabase/migrations/20260903120000_delete_own_account.sql`.
+/// Keep in sync with `supabase/migrations/20260903140000_delete_own_account.sql`.
 abstract final class DeleteAccountRpcSpec {
   static const String rpcName = 'delete_own_account';
 
