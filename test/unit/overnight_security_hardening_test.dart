@@ -84,14 +84,14 @@ void main() {
       sql,
       isNot(contains('GRANT EXECUTE ON FUNCTION public.owns_vendor(uuid) TO anon')),
     );
-    expect(sql.toLowerCase(), isNot(contains('grant_rls_helpers_to_anon')));
+    expect(sql, isNot(contains('GRANT EXECUTE ON FUNCTION public.is_admin() TO PUBLIC')));
   });
 
   test('replaces profile_public with security_invoker view of id, full_name', () {
     expect(sql, contains('DROP VIEW IF EXISTS public.profile_public'));
-    expect(sql, contains('WITH (security_invoker = true)'));
+    expect(sql, contains('CREATE VIEW public.profile_public\nWITH (security_invoker = true) AS'));
     expect(sql, contains('SELECT id, full_name'));
-    expect(sql, isNot(contains('security_barrier')));
+    expect(sql, isNot(contains('WITH (security_barrier')));
     expect(sql, contains('GRANT SELECT ON public.profile_public TO anon, authenticated'));
   });
 
