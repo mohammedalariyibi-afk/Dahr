@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
+import 'auth_redirect.dart';
 import '../../features/auth/screens/language_selection_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/otp_verify_screen.dart';
@@ -34,59 +35,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/splash',
     refreshListenable: _AuthRefresh(ref),
-    redirect: (context, state) {
-      final loc = state.matchedLocation;
-      final status = auth.status;
-
-      if (status == AuthFlowStatus.unknown && loc != '/splash') {
-        return '/splash';
-      }
-
-      final onSplash = loc == '/splash';
-      final onLanguage = loc == '/auth/language';
-      final onLogin = loc == '/auth/login';
-      final onRole = loc == '/auth/role';
-      final onProfileSetup = loc == '/auth/profile-setup';
-
-      // Incomplete onboarding must finish before browsing.
-      if (status == AuthFlowStatus.needsRole && !onRole) {
-        return '/auth/role';
-      }
-      if (status == AuthFlowStatus.needsProfile && !onProfileSetup) {
-        return '/auth/profile-setup';
-      }
-
-      // Role/profile setup require a session.
-      if (status == AuthFlowStatus.unauthenticated &&
-          (onRole || onProfileSetup)) {
-        return '/auth/login';
-      }
-
-      if (status == AuthFlowStatus.authenticated) {
-        // Leave /auth/otp alone so the screen can honor returnTo after verify.
-        if (onSplash || onLanguage || onLogin) {
-          return _safeReturnTo(state.uri.queryParameters['from']) ??
-              '/discover';
-        }
-      }
-
-      // Guest may browse discover, vendor detail, profile, language/login/otp.
-      const protectedPrefixes = [
-        '/favorites',
-        '/bookings',
-        '/booking',
-        '/review',
-        '/inbox',
-        '/vendor-tools',
-      ];
-      final needsAuth = protectedPrefixes.any((p) => loc.startsWith(p));
-      if (needsAuth && status == AuthFlowStatus.unauthenticated) {
-        final from = Uri.encodeComponent(state.uri.toString());
-        return '/auth/login?from=$from';
-      }
-
-      return null;
-    },
+    redirect: (context, state) => resolveAuthRedirect(
+      location: state.matchedLocation,
+      status: auth.status,
+      uri: state.uri,
+    ),
     routes: [
       GoRoute(
         path: '/splash',
@@ -215,19 +168,9 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-/// Only allow in-app relative paths (blocks open redirects).
-String? _safeReturnTo(String? raw) {
-  if (raw == null || raw.isEmpty) return null;
-  final decoded = Uri.decodeComponent(raw);
-  if (!decoded.startsWith('/') || decoded.startsWith('//')) return null;
-  return decoded;
-}
-
 /// Bridges Riverpod auth changes into GoRouter refresh.
 class _AuthRefresh extends ChangeNotifier {
-  _AuthRefresh(this._ref) {
-    _ref.listen<AppAuthState>(authProvider, (_, __) => notifyListeners());
+  _AuthRefresh(Ref ref) {
+    ref.listen<AppAuthState>(authProvider, (_, __) => notifyListeners());
   }
-
-  final Ref _ref;
 }

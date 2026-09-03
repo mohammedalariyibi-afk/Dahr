@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/routing/auth_redirect.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../providers/auth_form_validators.dart';
@@ -60,17 +61,12 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
       }
       await auth.refreshProfile();
       if (!mounted) return;
-      final status = ref.read(authProvider).status;
-      final returnTo = _safeReturnPath(widget.returnTo);
-      if (returnTo != null && status == AuthFlowStatus.authenticated) {
-        context.go(returnTo);
-      } else if (status == AuthFlowStatus.needsRole) {
-        context.go('/auth/role');
-      } else if (status == AuthFlowStatus.needsProfile) {
-        context.go('/auth/profile-setup');
-      } else {
-        context.go('/discover');
-      }
+      context.go(
+        resolvePostOtpLocation(
+          status: ref.read(authProvider).status,
+          returnTo: widget.returnTo,
+        ),
+      );
     } catch (e) {
       setState(() => _error = e.toString());
     } finally {
@@ -135,11 +131,4 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
       ),
     );
   }
-}
-
-String? _safeReturnPath(String? raw) {
-  if (raw == null || raw.isEmpty) return null;
-  final decoded = Uri.decodeComponent(raw);
-  if (!decoded.startsWith('/') || decoded.startsWith('//')) return null;
-  return decoded;
 }
