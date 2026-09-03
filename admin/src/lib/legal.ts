@@ -34,7 +34,7 @@ const privacyEn: LegalDocument = {
     },
     {
       heading: "Accounts and sign-in",
-      body: "You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to a Libyan phone number or an email address. We store the account id, phone and/or email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), and whether you use Dahr as a couple or a vendor. We do not use passwords in the consumer app.",
+      body: "You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to your email address. We store the account id and email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), and whether you use Dahr as a couple or a vendor. We do not use passwords in the consumer app. Vendors may also store a WhatsApp number on their listing.",
     },
     {
       heading: "Vendor listings and photos",
@@ -66,7 +66,7 @@ const privacyEn: LegalDocument = {
     },
     {
       heading: "Delete your account",
-      body: `Signed-in users can delete their account in the app: Profile → Delete account, then confirm. You do not need to contact support. Deletion removes the auth user; the profile cascades, so a vendor listing, photos metadata, availability, related bookings, reviews, and favorites are removed as the database foreign keys allow. Storage photo files for that account are removed as part of deletion. If in-app deletion fails, email ${LEGAL_FACTS.contactEmail} from the same phone or email as the account and ask us to delete it. We will only delete the account that matches that identity — we will not delete someone else’s account on request without being able to verify it.`,
+      body: `Signed-in users can delete their account in the app: Profile → Delete account, then confirm. You do not need to contact support. Deletion removes the auth user; the profile cascades, so a vendor listing, photos metadata, availability, related bookings, reviews, and favorites are removed as the database foreign keys allow. Storage photo files for that account are removed as part of deletion. If in-app deletion fails, email ${LEGAL_FACTS.contactEmail} from the same email as the account and ask us to delete it. We will only delete the account that matches that identity — we will not delete someone else’s account on request without being able to verify it.`,
     },
     {
       heading: "Your choices",
@@ -98,7 +98,7 @@ const termsEn: LegalDocument = {
     },
     {
       heading: "Accounts",
-      body: "You are responsible for the phone number or email you use to sign in. Keep OTP codes private. One person per account. Do not impersonate another vendor or couple. We may suspend accounts that abuse the service or submit false listings.",
+      body: "You are responsible for the email you use to sign in. Keep OTP codes private. One person per account. Do not impersonate another vendor or couple. We may suspend accounts that abuse the service or submit false listings.",
     },
     {
       heading: "Couples",
@@ -158,7 +158,7 @@ const privacyAr: LegalDocument = {
     },
     {
       heading: "الحسابات وتسجيل الدخول",
-      body: "يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى رقم هاتف ليبي أو بريد إلكتروني. نخزّن معرّف الحساب، والهاتف و/أو البريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين.",
+      body: "يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى بريدك الإلكتروني. نخزّن معرّف الحساب والبريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين. قد يخزّن المورّد أيضاً رقم واتساب في عرضه.",
     },
     {
       heading: "عروض المورّدين والصور",
@@ -190,7 +190,7 @@ const privacyAr: LegalDocument = {
     },
     {
       heading: "حذف حسابك",
-      body: `يمكن للمستخدم المسجّل حذف حسابه من التطبيق: حسابي ← حذف الحساب، ثم التأكيد. لا تحتاج إلى التواصل مع الدعم. الحذف يزيل مستخدم المصادقة؛ ويتبعه الملف الشخصي، فيُحذف عرض المورّد وبيانات الصور والتوفر والحجوزات المرتبطة والتقييمات والمفضلة حسب مفاتيح قاعدة البيانات. تُحذف ملفات الصور في التخزين ضمن عملية الحذف. إذا فشل الحذف من التطبيق راسل ${LEGAL_FACTS.contactEmail} من نفس الهاتف أو البريد المرتبط بالحساب واطلب الحذف. لن نحذف حساب شخص آخر دون التمكّن من التحقق من الهوية.`,
+      body: `يمكن للمستخدم المسجّل حذف حسابه من التطبيق: حسابي ← حذف الحساب، ثم التأكيد. لا تحتاج إلى التواصل مع الدعم. الحذف يزيل مستخدم المصادقة؛ ويتبعه الملف الشخصي، فيُحذف عرض المورّد وبيانات الصور والتوفر والحجوزات المرتبطة والتقييمات والمفضلة حسب مفاتيح قاعدة البيانات. تُحذف ملفات الصور في التخزين ضمن عملية الحذف. إذا فشل الحذف من التطبيق راسل ${LEGAL_FACTS.contactEmail} من نفس البريد المرتبط بالحساب واطلب الحذف. لن نحذف حساب شخص آخر دون التمكّن من التحقق من الهوية.`,
     },
     {
       heading: "خياراتك",
@@ -222,7 +222,7 @@ const termsAr: LegalDocument = {
     },
     {
       heading: "الحسابات",
-      body: "أنت مسؤول عن رقم الهاتف أو البريد الذي تستخدمه لتسجيل الدخول. احتفظ برموز OTP لنفسك. حساب واحد لكل شخص. لا تنتحل صفة مورّد أو زوجين آخرين. قد نعلّق الحسابات التي تسيء استخدام الخدمة أو تقدّم عروضاً غير صحيحة.",
+      body: "أنت مسؤول عن البريد الإلكتروني الذي تستخدمه لتسجيل الدخول. احتفظ برموز OTP لنفسك. حساب واحد لكل شخص. لا تنتحل صفة مورّد أو زوجين آخرين. قد نعلّق الحسابات التي تسيء استخدام الخدمة أو تقدّم عروضاً غير صحيحة.",
     },
     {
       heading: "الأزواج",

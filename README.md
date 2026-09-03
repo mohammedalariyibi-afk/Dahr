@@ -73,7 +73,7 @@ supabase db reset        # applies all migrations + seed.sql
 
 Copy the printed **API URL** (`http://127.0.0.1:54321`) and **anon/publishable** key into `.env` and `admin/.env.local`.
 
-Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Phone OTP (+218) needs an SMS provider; the Flutter login screen is phone-first with **Continue with email** as fallback.
+Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Flutter and admin sign-in are **Email OTP only** (no SMS / phone-first path).
 
 Seeded local admin: `admin@dahr.ly` (password `password123` only if you enable password auth). Prefer Email OTP via Inbucket. Couple demo: `couple@dahr.ly`.
 
@@ -117,7 +117,7 @@ flutter pub get
 flutter run --dart-define-from-file=.env
 ```
 
-Arabic is the default locale (RTL). Switch language on the first screen. Android cleartext is enabled so local `http://127.0.0.1:54321` works on device/emulator.
+Arabic is the default locale (RTL). Switch language on the first screen. Android cleartext is enabled so local `http://127.0.0.1:54321` works on device/emulator. Sign-in is Email OTP (same as admin).
 
 ## Try the vendor product flow
 
@@ -198,7 +198,7 @@ Use the **deployed admin origin** for the public URLs reviewers ask for:
 
 In the Flutter app the same documents are under Profile → Privacy policy / Terms of use (`/legal/privacy`, `/legal/terms`), Arabic default and English.
 
-**Account deletion (guideline 5.1.1(v)):** signed-in users delete from **Profile → Delete account** (confirm dialog). No support email is required. The app calls the `delete_own_account` RPC, which deletes `auth.users` for `auth.uid()` only (cascade `profiles`, vendor listing/photos as FKs allow). Fallback if the in-app flow fails: email `mohammedalariyibi@gmail.com` from the same phone or email as the account.
+**Account deletion (guideline 5.1.1(v)):** signed-in users delete from **Profile → Delete account** (confirm dialog). No support email is required. The app calls the `delete_own_account` RPC, which deletes `auth.users` for `auth.uid()` only (cascade `profiles`, vendor listing/photos as FKs allow). Fallback if the in-app flow fails: email `mohammedalariyibi@gmail.com` from the same email as the account.
 
 Copy is a **starting policy**, not law-firm work. Operator: Mohammed Alariyibi. Backend: Dahr LY, `eu-west-1`. No card data is stored.
 

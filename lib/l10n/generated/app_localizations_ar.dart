@@ -33,7 +33,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginTitle => 'تسجيل الدخول';
 
   @override
-  String get loginSubtitle => 'أدخل رقم هاتفك الليبي لاستلام رمز التحقق';
+  String get loginSubtitle => 'أدخل بريدك الإلكتروني لاستلام رمز الدخول لمرة واحدة';
 
   @override
   String get phoneLabel => 'رقم الهاتف';
@@ -63,7 +63,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get otpTitle => 'تحقق من الرمز';
 
   @override
-  String get otpSubtitle => 'أدخل الرمز الذي أرسلناه إليك';
+  String get otpSubtitle => 'أدخل الرمز الذي أرسلناه إلى بريدك الإلكتروني';
 
   @override
   String get otpLabel => 'رمز التحقق';
