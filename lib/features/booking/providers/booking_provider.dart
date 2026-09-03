@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/booking_write.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/supabase/write_guard.dart';
 import '../../vendor_profile/providers/vendor_provider.dart';
@@ -42,7 +43,7 @@ class ConsumerBookingsNotifier extends AsyncNotifier<List<BookingRequest>> {
     if (error != null) throw StateError(error);
     final row = await DahrSupabase.client
         .from('booking_requests')
-        .insert(payload.toJson())
+        .insert(BookingStatusWrite.consumerInsert(payload.toJson()))
         .select(BookingSelect.consumerInsert)
         .single();
     ref.invalidateSelf();
@@ -87,10 +88,10 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
 
   /// Decline or complete only. Accepting requires a quote — use [acceptBooking].
   Future<void> updateStatus(String bookingId, BookingStatus status) async {
-    AcceptBookingPayload.assertNotBareAccept(status);
+    final patch = BookingStatusWrite.vendorDirectPatch(status);
     final rows = await DahrSupabase.client
         .from('booking_requests')
-        .update({'status': status.name})
+        .update(patch)
         .eq('id', bookingId)
         .select('id');
     requireMutatedRows(rows);
@@ -104,7 +105,7 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
     final error = payload.validate();
     if (error != null) throw StateError(error);
     await DahrSupabase.client.rpc(
-      'accept_booking_request',
+      BookingStatusWrite.acceptRpcName,
       params: payload.toRpcParams(),
     );
     final vendorId = booking?.vendorId;

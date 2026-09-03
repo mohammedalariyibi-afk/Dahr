@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/security/review_write.dart';
 import '../../../core/security/safe_user_error.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/theme/app_colors.dart';
@@ -68,7 +69,7 @@ class _LeaveReviewScreenState extends ConsumerState<LeaveReviewScreen> {
     try {
       await DahrSupabase.client
           .from('reviews')
-          .insert(payload.toJson())
+          .insert(ReviewWrite.consumerInsert(payload.toJson()))
           .select('id')
           .single();
       ref.invalidate(consumerBookingsProvider);
