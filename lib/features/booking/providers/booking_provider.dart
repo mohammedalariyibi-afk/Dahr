@@ -69,7 +69,7 @@ class ConsumerBookingsNotifier extends AsyncNotifier<List<BookingRequest>> {
     final row = await DahrSupabase.client
         .from(CommissionTransferWrite.notesTable)
         .insert(payload)
-        .select()
+        .select(CommissionTransferNote.select)
         .single();
     ref.invalidate(transferNotesByBookingProvider(bookingId));
     return CommissionTransferNote.fromJson(Map<String, dynamic>.from(row));
@@ -198,7 +198,7 @@ final transferNotesByBookingProvider = FutureProvider.family<
   try {
     final rows = await DahrSupabase.client
         .from(CommissionTransferWrite.notesTable)
-        .select()
+        .select(CommissionTransferNote.select)
         .eq('booking_id', bookingId)
         .eq('consumer_id', uid)
         .order('created_at', ascending: false);

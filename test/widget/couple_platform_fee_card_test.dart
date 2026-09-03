@@ -19,13 +19,15 @@ void main() {
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
-        body: CouplePlatformFeeCard(
-          amountLyd: 250,
-          status: status,
-          bankDetails: bank,
-          submittedNote: note,
-          noteController: controller,
-          onSubmitTransfer: () {},
+        body: SingleChildScrollView(
+          child: CouplePlatformFeeCard(
+            amountLyd: 250,
+            status: status,
+            bankDetails: bank,
+            submittedNote: note,
+            noteController: controller,
+            onSubmitTransfer: () {},
+          ),
         ),
       ),
     );
@@ -90,7 +92,7 @@ void main() {
       host(bank: PlatformBankDetails.unset, locale: const Locale('ar')),
     );
     expect(find.text('رسوم منصة دهر (10%)'), findsOneWidget);
-    expect(find.textContaining('250 LYD'), findsOneWidget);
+    expect(find.text('250 LYD'), findsOneWidget);
     expect(find.text('بيانات البنك ستأتي من التشغيل.'), findsOneWidget);
     expect(find.text('حوّلت المبلغ'), findsOneWidget);
     expect(find.text('ادفع الآن'), findsNothing);

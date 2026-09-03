@@ -13,6 +13,9 @@ class CommissionTransferNote {
   final String referenceNote;
   final DateTime? createdAt;
 
+  static const String select =
+      'id, booking_id, consumer_id, reference_note, created_at';
+
   factory CommissionTransferNote.fromJson(Map<String, dynamic> json) {
     return CommissionTransferNote(
       id: json['id'] as String,
