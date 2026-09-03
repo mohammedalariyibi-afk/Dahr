@@ -74,6 +74,19 @@ Couples pay vendors **off-platform** (often WhatsApp). Currency shown in-app is 
 - iOS orientations: iPhone **portrait**; iPad all orientations (Flutter default is universal `TARGETED_DEVICE_FAMILY = 1,2`)
 - For Saturday: either capture **iPad 13″** screenshots too, or set the Xcode target to **iPhone only** (`TARGETED_DEVICE_FAMILY = 1`) before archive so iPad screenshots are not required
 
+## Packaged screenshots
+
+Ready-to-upload phone frames live in `docs/store-shots/` (full-color Ice Blue UI + vivid venue photos):
+
+1. `01-email-otp.png`
+2. `02-otp-verify.png`
+3. `03-discover.png`
+4. `04-vendor-detail.png`
+5. `05-booking-request.png`
+6. `06-vendor-inbox.png`
+
+See `docs/store-shots/README.md` for MD5s. Capture more sizes (iPad / Play feature graphic) from these if Connect requires them.
+
 ## Screenshots to capture (both stores)
 
 Use a real device or simulator with Arabic default, then repeat key screens in English if you localize the listing.
