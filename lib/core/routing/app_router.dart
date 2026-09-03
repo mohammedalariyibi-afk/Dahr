@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/auth_provider.dart';
 import 'auth_redirect.dart';
+import '../../features/auth/providers/auth_form_validators.dart';
 import '../../features/auth/screens/language_selection_screen.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/otp_verify_screen.dart';
@@ -63,7 +64,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final extra = state.extra as Map<String, String>? ?? {};
           return OtpVerifyScreen(
-            channel: extra['channel'] ?? 'phone',
+            channel: AuthLoginSpec.otpChannel(requested: extra['channel']),
             destination: extra['destination'] ?? '',
             returnTo: extra['returnTo'],
           );

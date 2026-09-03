@@ -1,5 +1,30 @@
 import '../../../core/constants/app_constants.dart';
 
+/// Consumer/vendor app sign-in is Email OTP only (no SMS path).
+abstract final class AuthLoginSpec {
+  static const primaryChannel = 'email';
+  static const supportsPhoneOtp = false;
+
+  static String otpChannel({String? requested}) {
+    if (supportsPhoneOtp && requested == 'phone') return 'phone';
+    return primaryChannel;
+  }
+
+  static bool usesPhoneOtp(String? channel) =>
+      supportsPhoneOtp && channel == 'phone';
+
+  static Map<String, String> otpExtra({
+    required String email,
+    String? returnTo,
+  }) {
+    return {
+      'channel': primaryChannel,
+      'destination': email,
+      if (returnTo != null && returnTo.isNotEmpty) 'returnTo': returnTo,
+    };
+  }
+}
+
 /// Pure helpers for auth form validation (unit/widget tested).
 abstract final class AuthFormValidators {
   static String? validatePhone(String? value) {

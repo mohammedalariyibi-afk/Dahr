@@ -48,14 +48,15 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
     });
     try {
       final auth = ref.read(authProvider.notifier);
-      if (widget.channel == 'email') {
-        await auth.verifyEmailOtp(
-          email: widget.destination,
+      final channel = AuthLoginSpec.otpChannel(requested: widget.channel);
+      if (AuthLoginSpec.usesPhoneOtp(channel)) {
+        await auth.verifyPhoneOtp(
+          e164Phone: widget.destination,
           token: _otpCtrl.text.trim(),
         );
       } else {
-        await auth.verifyPhoneOtp(
-          e164Phone: widget.destination,
+        await auth.verifyEmailOtp(
+          email: widget.destination,
           token: _otpCtrl.text.trim(),
         );
       }
@@ -76,10 +77,11 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
 
   Future<void> _resend() async {
     final auth = ref.read(authProvider.notifier);
-    if (widget.channel == 'email') {
-      await auth.signInWithEmail(widget.destination);
-    } else {
+    final channel = AuthLoginSpec.otpChannel(requested: widget.channel);
+    if (AuthLoginSpec.usesPhoneOtp(channel)) {
       await auth.signInWithPhone(widget.destination);
+    } else {
+      await auth.signInWithEmail(widget.destination);
     }
   }
 

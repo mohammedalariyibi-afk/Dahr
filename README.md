@@ -60,8 +60,10 @@ Migrations (applied in filename order):
 - `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% vendor commission, `accept_booking_request` RPC
 - `supabase/migrations/20260903120000_revoke_anon_definer_rpcs.sql` — split public-read RLS; revoke anon EXECUTE on admin/vendor helpers (already applied on live Dahr LY)
 - `supabase/migrations/20260903140000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
+- `supabase/migrations/20260903184000_overnight_security_hardening.sql` — revoke `reject_booking_if_date_booked` (trigger only); replace `profile_public` with `security_invoker=true` view of `id,full_name`; `profiles_select_public_names` for review/vendor/booking display names (already applied on live Dahr LY)
+- `supabase/migrations/20260903190000_freeze_admin_role_and_private_profile_rows.sql` — freeze `profiles.role` (non-admins cannot self-promote); drop `profiles_select_public_names`; display names via `private.public_profile_rows()` + `profile_public` invoker/barrier view. **Already on live** (Syber’s two migrations); this repo file is combined so local `db reset` matches. Do **not** re-apply on Dahr LY. Does not touch `vendor-photos`.
 
-**Security note:** Guest browse still works (approved vendors, photos, availability, and `increment_vendor_views`). Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions) are not anon RPCs — `authenticated` only, or no client EXECUTE.
+**Security note:** Guest browse still works (approved vendors, photos, availability, and `increment_vendor_views`). Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions including `reject_booking_if_date_booked`) are not anon RPCs — `authenticated` only, or no client EXECUTE. Do **not** re-grant `is_admin` / `owns_vendor` to anon (live once had `grant_rls_helpers_to_anon`; that must stay revoked).
 
 ### Local (`supabase start`)
 
@@ -74,7 +76,7 @@ supabase db reset        # applies all migrations + seed.sql
 
 Copy the printed **API URL** (`http://127.0.0.1:54321`) and **anon/publishable** key into `.env` and `admin/.env.local`.
 
-Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). **Product auth is Email OTP only** (store listings and Saturday ship). That login UI lands with [PR #11](https://github.com/mohammedalariyibi-afk/Dahr/pull/11). Until #11 merges, `main` still shows phone-first + **Continue with email**. Do not enable Twilio/SMS for store submit.
+Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Flutter and admin sign-in are **Email OTP only** (no SMS / phone-first path). Do not enable Twilio/SMS for store submit.
 
 Seeded local admin: `admin@dahr.ly` (password `password123` only if you enable password auth). Prefer Email OTP via Inbucket. Couple demo: `couple@dahr.ly`.
 
@@ -85,7 +87,7 @@ URL: `https://cccusktgxrizfwpixddu.supabase.co`
 
 ```bash
 supabase link --project-ref cccusktgxrizfwpixddu
-supabase db push         # applies delete_own_account if init + booking_commission + revoke_anon_definer_rpcs are already on Dahr LY
+supabase db push         # do not re-push overnight_security_hardening or freeze_admin_role_and_private_profile_rows — already on Dahr LY
 # seed.sql is optional on cloud (SQL editor); do not rewrite schema
 ```
 
@@ -114,7 +116,7 @@ flutter pub get
 flutter run --dart-define-from-file=.env
 ```
 
-Arabic is the default locale (RTL). Switch language on the first screen. Android allows HTTP **only** to `10.0.2.2` / `127.0.0.1` / `localhost` (local `supabase start`); production Dahr LY is HTTPS.
+Arabic is the default locale (RTL). Switch language on the first screen. Sign-in is Email OTP (same as admin). Android allows HTTP **only** to `10.0.2.2` / `127.0.0.1` / `localhost` (local `supabase start`); production Dahr LY is HTTPS.
 
 Identifiers: Android `applicationId` and iOS bundle id are **`com.dahr.dahr`** (org `com.dahr` + project name `dahr`). See **Store packaging** below.
 
@@ -200,15 +202,15 @@ Ship target: Saturday 5 September 2026. Mohammed signs and uploads; this repo do
 | Privacy | `{ADMIN_ORIGIN}/privacy` |
 | Terms | `{ADMIN_ORIGIN}/terms` |
 | Account deletion | Profile → Delete account |
-| Auth to declare | Email OTP only (see PR #11) |
+| Auth to declare | Email OTP only |
 | IAP / payments | None |
 | Contact | WhatsApp + `mohammedalariyibi@gmail.com` |
 | Languages | Arabic + English |
 | Currency | LYD |
 
-In the Flutter app the legal documents are also under Profile → Privacy policy / Terms of use (`/legal/privacy`, `/legal/terms`). Those **web routes are on `main`** (they do not depend on PR #11). Email OTP-only login **does** live in PR #11 — merge it before the store binary if the listing says Email OTP only.
+In the Flutter app the legal documents are also under Profile → Privacy policy / Terms of use (`/legal/privacy`, `/legal/terms`).
 
-**Account deletion (guideline 5.1.1(v)):** signed-in users delete from **Profile → Delete account** (confirm dialog). The app calls `delete_own_account` (`auth.uid()` only). Fallback: email `mohammedalariyibi@gmail.com` from the same address as the account.
+**Account deletion (guideline 5.1.1(v)):** signed-in users delete from **Profile → Delete account** (confirm dialog). The app calls `delete_own_account` (`auth.uid()` only; cascade `profiles`, vendor listing/photos as FKs allow). Fallback: email `mohammedalariyibi@gmail.com` from the same address as the account.
 
 Copy on the legal pages is a **starting policy**, not law-firm work. Operator: Mohammed Alariyibi. Backend: Dahr LY, `eu-west-1`. No card data is stored.
 

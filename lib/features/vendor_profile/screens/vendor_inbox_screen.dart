@@ -7,6 +7,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../booking/providers/booking_provider.dart';
+import '../providers/vendor_provider.dart';
+import '../widgets/accept_booking_dialog.dart';
 
 class VendorInboxScreen extends ConsumerWidget {
   const VendorInboxScreen({super.key});
@@ -37,6 +39,21 @@ class VendorInboxScreen extends ConsumerWidget {
     }
   }
 
+  String _emptyMessage(AppLocalizations l10n, BookingStatus? filter) {
+    switch (filter) {
+      case BookingStatus.pending:
+        return l10n.inboxEmptyPending;
+      case BookingStatus.accepted:
+        return l10n.inboxEmptyAccepted;
+      case BookingStatus.declined:
+        return l10n.inboxEmptyDeclined;
+      case BookingStatus.completed:
+        return l10n.inboxEmptyCompleted;
+      case null:
+        return l10n.inboxEmptyAll;
+    }
+  }
+
   Future<void> _accept(
     BuildContext context,
     WidgetRef ref,
@@ -44,7 +61,7 @@ class VendorInboxScreen extends ConsumerWidget {
   ) async {
     final quoted = await showDialog<double>(
       context: context,
-      builder: (context) => const _AcceptBookingDialog(),
+      builder: (context) => AcceptBookingDialog(eventDate: booking.eventDate),
     );
     if (quoted == null || !context.mounted) return;
     try {
@@ -55,10 +72,16 @@ class VendorInboxScreen extends ConsumerWidget {
             ),
             booking: booking,
           );
-    } catch (e) {
       if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(l10n.acceptQuoteSuccess)),
+      );
+    } catch (_) {
+      if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.errorGeneric)),
       );
     }
   }
@@ -73,10 +96,11 @@ class VendorInboxScreen extends ConsumerWidget {
       await ref
           .read(vendorInboxProvider.notifier)
           .updateStatus(bookingId, status);
-    } catch (e) {
+    } catch (_) {
       if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
+        SnackBar(content: Text(l10n.errorGeneric)),
       );
     }
   }
@@ -86,11 +110,14 @@ class VendorInboxScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(vendorInboxProvider);
     final filter = ref.watch(vendorInboxFilterProvider);
+    final stats = ref.watch(vendorDashboardStatsProvider).valueOrNull;
+    final unpaid = stats?.unpaidCommissionLyd ?? 0;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vendorInbox)),
       body: Column(
         children: [
+          VendorCommissionBanner(unpaidTotalLyd: unpaid),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -141,8 +168,15 @@ class VendorInboxScreen extends ConsumerWidget {
               emptyWhen: (list) =>
                   list.where((b) => filter == null || b.status == filter).isEmpty,
               empty: EmptyState(
-                message: l10n.noInboxItems,
+                title: l10n.inboxEmptyTitle,
+                message: _emptyMessage(l10n, filter),
                 icon: Icons.inbox_outlined,
+                actionLabel: filter == null ? null : l10n.inboxFilterAll,
+                onAction: filter == null
+                    ? null
+                    : () => ref
+                        .read(vendorInboxFilterProvider.notifier)
+                        .state = null,
               ),
               builder: (context, bookings) {
                 final visible = filter == null
@@ -263,91 +297,6 @@ class _FilterChip extends StatelessWidget {
         ),
         checkmarkColor: AppColors.onBurgundy,
       ),
-    );
-  }
-}
-
-class _AcceptBookingDialog extends StatefulWidget {
-  const _AcceptBookingDialog();
-
-  @override
-  State<_AcceptBookingDialog> createState() => _AcceptBookingDialogState();
-}
-
-class _AcceptBookingDialogState extends State<_AcceptBookingDialog> {
-  final _controller = TextEditingController();
-  String? _error;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _onChanged(String _) {
-    setState(() => _error = null);
-  }
-
-  void _submit() {
-    final l10n = AppLocalizations.of(context);
-    final payload = AcceptBookingPayload.fromInput(
-      bookingId: 'pending-accept',
-      quotedAmountRaw: _controller.text,
-    );
-    final error = payload.validate();
-    if (error != null) {
-      setState(() => _error = l10n.quotedAmountRequired);
-      return;
-    }
-    Navigator.of(context).pop(payload.quotedAmountLyd);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final parsed = CommissionMath.parseQuotedAmount(_controller.text);
-    final valid = parsed != null && parsed > 0 && parsed.isFinite;
-    final preview = valid
-        ? '${CommissionMath.formatPreview(parsed)} ${l10n.currencyLyd}'
-        : '—';
-
-    return AlertDialog(
-      title: Text(l10n.acceptBookingTitle),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l10n.commissionNoteVendor),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _controller,
-            autofocus: true,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: l10n.quotedAmountLabel,
-              hintText: l10n.quotedAmountHint,
-              errorText: _error,
-            ),
-            onChanged: _onChanged,
-            onSubmitted: (_) => _submit(),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '${l10n.commissionDueLabel}: $preview',
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel),
-        ),
-        FilledButton(
-          onPressed: valid ? _submit : null,
-          child: Text(l10n.confirmAccept),
-        ),
-      ],
     );
   }
 }

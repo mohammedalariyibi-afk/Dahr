@@ -34,7 +34,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginSubtitle =>
-      'Enter your Libyan phone number to receive a code';
+      'Enter your email to receive a one-time sign-in code';
 
   @override
   String get phoneLabel => 'Phone number';
@@ -64,7 +64,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get otpTitle => 'Verify code';
 
   @override
-  String get otpSubtitle => 'Enter the code we sent you';
+  String get otpSubtitle => 'Enter the code we sent to your email';
 
   @override
   String get otpLabel => 'Verification code';
@@ -579,4 +579,72 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteAccountFailed =>
       'Could not delete the account. Try again or email mohammedalariyibi@gmail.com.';
+
+  @override
+  String get discoverEmptyTitle => 'No vendors here';
+
+  @override
+  String get discoverEmptyBody =>
+      'Approved vendors in Tripoli and Benghazi will appear here.';
+
+  @override
+  String get discoverEmptyFiltered =>
+      'No vendors match these filters. Try another city, category, or price.';
+
+  @override
+  String get favoritesEmptyTitle => 'No favorites yet';
+
+  @override
+  String get favoritesEmptyBody =>
+      'Save vendors from Discover to find them later.';
+
+  @override
+  String get browseDiscover => 'Browse Discover';
+
+  @override
+  String get bookingsEmptyTitle => 'No bookings yet';
+
+  @override
+  String get bookingsEmptyBody =>
+      'Request a booking from a vendor on Discover.';
+
+  @override
+  String get inboxEmptyTitle => 'No requests';
+
+  @override
+  String get inboxEmptyAll =>
+      'When couples request a date, they will show up here.';
+
+  @override
+  String get inboxEmptyPending =>
+      'No pending requests. Check the other filters for accepted bookings.';
+
+  @override
+  String get inboxEmptyAccepted => 'No accepted bookings in this filter.';
+
+  @override
+  String get inboxEmptyDeclined => 'No declined requests in this filter.';
+
+  @override
+  String get inboxEmptyCompleted => 'No completed bookings in this filter.';
+
+  @override
+  String get commissionBannerTitle => 'Commission owed to Dahr';
+
+  @override
+  String commissionBannerBody(String amount) {
+    return 'Unpaid total: $amount';
+  }
+
+  @override
+  String get commissionBannerHint =>
+      'Dahr records this as unpaid. An admin marks it paid after offline collection.';
+
+  @override
+  String get acceptQuoteSuccess =>
+      'Booking accepted. 10% commission is recorded as unpaid.';
+
+  @override
+  String get roleNotAssignable =>
+      'Choose couple or vendor. Admin cannot be self-assigned.';
 }

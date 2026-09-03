@@ -37,12 +37,7 @@ Local check: `http://localhost:3000/privacy` and `http://localhost:3000/terms`.
 
 Product decision: **Email OTP only**. No phone-first login, no SMS/Twilio, no passwords in the consumer app, no Sign in with Apple required (Email OTP is not a third-party social login).
 
-| Branch | What reviewers will see |
-|--------|-------------------------|
-| This PR / current `main` | Legal URLs + in-app account deletion are present. Flutter login on `main` still has phone-first + “Continue with email” until **[PR #11](https://github.com/mohammedalariyibi-afk/Dahr/pull/11)** merges. |
-| After PR #11 | Login is Email OTP only, matching this store copy. |
-
-**Legal routes do not need PR #11.** Merge #11 before the Saturday binary if the listing says Email OTP only.
+Login on `main` is Email OTP only (merged [PR #11](https://github.com/mohammedalariyibi-afk/Dahr/pull/11)). Privacy/terms and Profile account deletion are also on `main`.
 
 Reviewer sign-in: create a Dahr LY user whose inbox you control. In App Review / Play notes, say a one-time code is emailed. Stay reachable during review. Do not add an OTP backdoor.
 
@@ -89,7 +84,7 @@ Minimum scenes (phone, 6.7″ / 6.9″ plus Play phone):
 2. **Vendor detail** — photos, price range in LYD, WhatsApp button
 3. **Booking request** — date + message form
 4. **Vendor inbox / dashboard** — pending requests and/or dashboard stats
-5. **Login** — Email OTP (after PR #11) or current login screen
+5. **Login** — Email OTP
 
 Play also wants a **1024×500** feature graphic. App Store wants the current required iPhone sizes (check Connect — they change). Optional: short preview video of Discover → vendor → WhatsApp.
 
@@ -186,5 +181,5 @@ iOS:
 ## PR / branch notes
 
 - Packaging PR targets **`main`**.
-- Privacy, terms, and Profile account deletion: **`main`** (merged #10). No need to base this work on #11 for legal URLs.
-- Email OTP-only login + legal copy that drops phone OTP: **open PR #11**. Prefer merging #11 before the store binary if the listing claims Email OTP only.
+- Privacy, terms, and Profile account deletion: **`main`** (merged #10).
+- Email OTP-only login: **`main`** (merged #11). Store listing copy matches the app.
