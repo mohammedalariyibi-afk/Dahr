@@ -16,6 +16,13 @@ build/
 admin/.env.local
 *.pem
 
+# Store signing (Mohammed-only; never commit)
+key.properties
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+
 # Tools / local SDK
 .tools/
 
