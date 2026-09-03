@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/security/booking_write.dart';
+import '../../../core/security/commission_write.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/supabase/write_guard.dart';
 import '../../vendor_profile/providers/vendor_provider.dart';
@@ -48,6 +49,30 @@ class ConsumerBookingsNotifier extends AsyncNotifier<List<BookingRequest>> {
         .single();
     ref.invalidateSelf();
     return BookingRequest.fromJson(Map<String, dynamic>.from(row));
+  }
+
+  /// Couple records a bank-transfer note. Does not set commission_status.
+  Future<CommissionTransferNote> reportTransfer({
+    required String bookingId,
+    required String referenceNote,
+  }) async {
+    final uid = ref.read(authProvider).session?.user.id;
+    if (uid == null) throw StateError('write_rejected');
+    final payload = CommissionTransferWrite.consumerInsert(
+      bookingId: bookingId,
+      consumerId: uid,
+      referenceNote: referenceNote,
+    );
+    if (CommissionTransferWrite.insertContainsMoneyStatus(payload)) {
+      throw StateError('write_rejected');
+    }
+    final row = await DahrSupabase.client
+        .from(CommissionTransferWrite.notesTable)
+        .insert(payload)
+        .select()
+        .single();
+    ref.invalidate(transferNotesByBookingProvider(bookingId));
+    return CommissionTransferNote.fromJson(Map<String, dynamic>.from(row));
   }
 }
 
@@ -147,3 +172,44 @@ final bookingByIdProvider =
 /// Null filter = all statuses. Default pending so new requests are front.
 final vendorInboxFilterProvider =
     StateProvider<BookingStatus?>((ref) => BookingStatus.pending);
+
+final platformBankDetailsProvider =
+    FutureProvider<PlatformBankDetails>((ref) async {
+  final uid = ref.watch(authProvider).session?.user.id;
+  if (uid == null) return PlatformBankDetails.unset;
+  try {
+    final row = await DahrSupabase.client
+        .from(PlatformBankDetails.table)
+        .select(PlatformBankDetails.select)
+        .eq('id', PlatformBankDetails.singletonId)
+        .maybeSingle();
+    return PlatformBankDetails.fromJson(
+      row == null ? null : Map<String, dynamic>.from(row),
+    );
+  } catch (_) {
+    return PlatformBankDetails.unset;
+  }
+});
+
+final transferNotesByBookingProvider = FutureProvider.family<
+    List<CommissionTransferNote>, String>((ref, bookingId) async {
+  final uid = ref.watch(authProvider).session?.user.id;
+  if (uid == null) return const [];
+  try {
+    final rows = await DahrSupabase.client
+        .from(CommissionTransferWrite.notesTable)
+        .select()
+        .eq('booking_id', bookingId)
+        .eq('consumer_id', uid)
+        .order('created_at', ascending: false);
+    return (rows as List)
+        .map(
+          (e) => CommissionTransferNote.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          ),
+        )
+        .toList();
+  } catch (_) {
+    return const [];
+  }
+});

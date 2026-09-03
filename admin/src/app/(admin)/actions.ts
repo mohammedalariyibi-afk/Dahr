@@ -111,3 +111,27 @@ export async function setCommissionStatus(
   revalidatePath("/commissions");
   revalidatePath("/");
 }
+
+export async function updatePlatformBankDetails(formData: FormData) {
+  const supabase = await requireAdmin();
+  const bankName = String(formData.get("bank_name") ?? "").trim();
+  const accountHolder = String(formData.get("account_holder") ?? "").trim();
+  const accountNumber = String(formData.get("account_number") ?? "").trim();
+  const bankNote = String(formData.get("bank_note") ?? "").trim();
+
+  const { data, error } = await supabase
+    .from("platform_settings")
+    .update({
+      bank_name: bankName,
+      account_holder: accountHolder,
+      account_number: accountNumber,
+      bank_note: bankNote,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", "default")
+    .select("id");
+
+  if (error || !data?.length) fail("/settings");
+  revalidatePath("/settings");
+  revalidatePath("/commissions");
+}

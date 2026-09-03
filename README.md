@@ -59,7 +59,8 @@ How Flutter loads them (first non-empty wins):
 Migrations (applied in filename order):
 
 - `supabase/migrations/20260328000001_init_schema.sql` — core schema, RLS, `vendor-photos` bucket
-- `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% vendor commission, `accept_booking_request` RPC
+- `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% platform fee, `accept_booking_request` RPC
+- `supabase/migrations/20260904010000_customer_pays_dahr_fee.sql` — couple pays Dahr 10% by bank transfer; `platform_settings` + `commission_transfer_notes`. **Git-only — Syber applies live. Do not `db push` from the app PR.**
 - `supabase/migrations/20260903120000_revoke_anon_definer_rpcs.sql` — split public-read RLS; revoke anon EXECUTE on admin/vendor helpers (already applied on live Dahr LY)
 - `supabase/migrations/20260903140000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
 - `supabase/migrations/20260903184000_overnight_security_hardening.sql` — revoke `reject_booking_if_date_booked` (trigger only); replace `profile_public` with `security_invoker=true` view of `id,full_name`; `profiles_select_public_names` for review/vendor/booking display names (already applied on live Dahr LY)
@@ -131,10 +132,10 @@ Guest browse of Discover stays open (approved listings only; admin/vendor helper
 1. **Onboarding** — Sign in, choose **I'm a vendor** (or **Become a vendor** on Profile). Fill business name, category, city, WhatsApp, description, and price range (LYD). Submit. The listing waits for admin approval (`is_approved`).
 2. **Photos** — Profile → Vendor tools → **Manage photos**, or Dashboard → **Manage photos**. Upload to the `vendor-photos` bucket, drag to reorder (first photo is the cover), delete.
 3. **Calendar** — **Manage availability**. Tap a date to mark it booked or available. Booked dates show on the couple booking screen and cannot be selected.
-4. **Inbox accept with quote** — A couple opens a vendor → **Request booking**, picks a free date. On the vendor Inbox (**Pending**), **Accept** and enter a LYD quote. The existing `accept_booking_request` RPC records 10% unpaid commission. Decline/complete stay on the other filters.
+4. **Inbox accept with quote** — A couple opens a vendor → **Request booking**, picks a free date. On the vendor Inbox (**Pending**), **Accept** and enter a LYD quote. The existing `accept_booking_request` RPC records 10% unpaid platform fee. The **couple** pays that fee to Dahr by bank transfer. Decline/complete stay on the other filters.
 5. **Complete → review** — Vendor marks the request **Complete**. The couple sees **Leave a review** only then. Hidden reviews stay off the public vendor page.
 
-Vendor dashboard overview: pending requests, unpaid commission owed, photo count, next booked dates.
+Vendor dashboard overview: pending requests, Dahr fee status (not an amount the vendor owes), photo count, next booked dates.
 
 ### Tests
 

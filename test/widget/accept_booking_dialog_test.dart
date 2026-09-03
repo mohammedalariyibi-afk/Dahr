@@ -48,7 +48,12 @@ void main() {
 
     expect(find.text('Quote: 2500 LYD'), findsOneWidget);
     expect(find.text('Dahr commission (10%): 250 LYD'), findsOneWidget);
-    expect(find.textContaining('WhatsApp'), findsNothing);
+    expect(find.textContaining('You pay 10%'), findsNothing);
+    expect(
+      find.textContaining('The couple pays that fee to Dahr by bank transfer'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Pay now'), findsNothing);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Confirm accept'));
     await tester.pumpAndSettle();

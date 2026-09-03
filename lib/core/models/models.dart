@@ -6,3 +6,5 @@ export 'booking.dart';
 export 'booking_select.dart';
 export 'review.dart';
 export 'commission.dart';
+export 'bank_details.dart';
+export 'transfer_note.dart';

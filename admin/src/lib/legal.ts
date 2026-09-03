@@ -25,7 +25,7 @@ export const LEGAL_FACTS = {
 
 const privacyEn: LegalDocument = {
   title: "Privacy policy",
-  updated: "Last updated: 3 September 2026",
+  updated: "Last updated: 4 September 2026",
   intro: `${LEGAL_FACTS.startingPolicyEn} Dahr is a wedding vendor marketplace for Libya, operated by ${LEGAL_FACTS.operator}. Contact: ${LEGAL_FACTS.contactEmail}.`,
   sections: [
     {
@@ -50,7 +50,7 @@ const privacyEn: LegalDocument = {
     },
     {
       heading: "Payments and cards",
-      body: "Couples pay vendors off-platform (often via WhatsApp or in person). Dahr does not process card payments and does not store card numbers, CVVs, or payment-provider tokens. There is no Stripe, Apple IAP, or Google Play Billing in this app. We do record a 10% vendor commission on accepted quotes (amount in LYD and paid/unpaid/waived status) so the operator can collect that commission offline.",
+      body: "Couples pay vendors the rest of the quote off-platform (often via WhatsApp or in person). Couples pay Dahr a 10% platform fee by online bank transfer. Dahr does not process card payments and does not store card numbers, CVVs, or payment-provider tokens. There is no Stripe, Apple IAP, or Google Play Billing in this app. We record the 10% fee on accepted quotes (amount in LYD and unpaid/paid/waived status) so the operator can confirm the bank transfer.",
     },
     {
       heading: "Analytics and tracking",
@@ -89,7 +89,7 @@ const privacyEn: LegalDocument = {
 
 const termsEn: LegalDocument = {
   title: "Terms of use",
-  updated: "Last updated: 3 September 2026",
+  updated: "Last updated: 4 September 2026",
   intro: `${LEGAL_FACTS.startingPolicyEn} These terms are a simple description of how Dahr works today. They are not a substitute for a lawyer-drafted contract.`,
   sections: [
     {
@@ -102,7 +102,7 @@ const termsEn: LegalDocument = {
     },
     {
       heading: "Couples",
-      body: "A booking request is a message to the vendor, not a guaranteed reservation until the vendor accepts. You pay the vendor directly off-platform. Dahr is not a party to that payment and does not hold customer funds.",
+      body: "A booking request is a message to the vendor, not a guaranteed reservation until the vendor accepts. You pay the vendor the rest of the quote directly off-platform. You pay Dahr the 10% platform fee by online bank transfer. Dahr is not a party to the vendor payment and does not hold customer funds or process cards.",
     },
     {
       heading: "Vendors",
@@ -110,11 +110,11 @@ const termsEn: LegalDocument = {
     },
     {
       heading: "Commission",
-      body: "When a vendor accepts a request they enter a quote in LYD. Dahr records 10% of that quote as commission the vendor owes the operator. Commission is collected offline (not charged to the couple in the app). Completing a booking does not mark commission paid. Admins record paid or waived after collection.",
+      body: "When a vendor accepts a request they enter a quote in LYD. Dahr records 10% of that quote as the platform fee the couple pays to Dahr by bank transfer. The rest of the quote is settled with the vendor off-platform. Completing a booking does not mark the fee paid. Admins record paid or waived after the transfer is confirmed. Couples can send a transfer reference note; they cannot mark the fee paid themselves.",
     },
     {
       heading: "No in-app payments",
-      body: "Dahr does not take card payments. There is no payment SDK. Any money that changes hands between couple and vendor, or vendor and operator, happens outside the app.",
+      body: "Dahr does not take card payments. There is no payment SDK. Any money that changes hands between couple and vendor, or couple and Dahr, happens outside the app.",
     },
     {
       heading: "WhatsApp",
@@ -149,7 +149,7 @@ const termsEn: LegalDocument = {
 
 const privacyAr: LegalDocument = {
   title: "سياسة الخصوصية",
-  updated: "آخر تحديث: 3 سبتمبر 2026",
+  updated: "آخر تحديث: 4 سبتمبر 2026",
   intro: `${LEGAL_FACTS.startingPolicyAr} دهر سوق لمورّدي الزفاف في ليبيا، يشغّله ${LEGAL_FACTS.operatorAr}. للتواصل: ${LEGAL_FACTS.contactEmail}.`,
   sections: [
     {
@@ -174,7 +174,7 @@ const privacyAr: LegalDocument = {
     },
     {
       heading: "المدفوعات والبطاقات",
-      body: "يدفع الأزواج للمورّد خارج المنصة (غالباً عبر واتساب أو مباشرة). دهر لا يعالج مدفوعات البطاقات ولا يخزّن أرقام بطاقات أو رموز CVV أو رموز مزوّد دفع. لا يوجد Stripe أو مشتريات داخل تطبيق آبل أو فوترة Google Play. نسجّل عمولة المورّد 10٪ على العروض المقبولة (المبلغ بالدينار وحالة مدفوعة/غير مدفوعة/معفاة) حتى يتمكن المشغّل من تحصيلها خارج التطبيق.",
+      body: "يدفع الأزواج بقية عرض السعر للمورّد خارج المنصة (غالباً عبر واتساب أو مباشرة). يدفع الأزواج لدهر رسوم منصة 10٪ بتحويل بنكي عبر الإنترنت. دهر لا يعالج مدفوعات البطاقات ولا يخزّن أرقام بطاقات أو رموز CVV أو رموز مزوّد دفع. لا يوجد Stripe أو مشتريات داخل تطبيق آبل أو فوترة Google Play. نسجّل رسوم 10٪ على العروض المقبولة (المبلغ بالدينار وحالة غير مدفوعة/مدفوعة/معفاة) حتى يؤكّد المشغّل التحويل البنكي.",
     },
     {
       heading: "التحليلات والتتبع",
@@ -213,7 +213,7 @@ const privacyAr: LegalDocument = {
 
 const termsAr: LegalDocument = {
   title: "شروط الاستخدام",
-  updated: "آخر تحديث: 3 سبتمبر 2026",
+  updated: "آخر تحديث: 4 سبتمبر 2026",
   intro: `${LEGAL_FACTS.startingPolicyAr} هذه الشروط وصف مبسّط لكيفية عمل دهر اليوم، وليست بديلاً عن عقد يصوغه محامٍ.`,
   sections: [
     {
@@ -226,7 +226,7 @@ const termsAr: LegalDocument = {
     },
     {
       heading: "الأزواج",
-      body: "طلب الحجز رسالة إلى المورّد وليس حجزاً مضموناً حتى يقبل المورّد. تدفع للمورّد مباشرة خارج المنصة. دهر ليس طرفاً في ذلك الدفع ولا يحتفظ بأموال العملاء.",
+      body: "طلب الحجز رسالة إلى المورّد وليس حجزاً مضموناً حتى يقبل المورّد. تدفع بقية عرض السعر للمورّد مباشرة خارج المنصة. تدفع رسوم منصة دهر 10٪ بتحويل بنكي عبر الإنترنت. دهر ليس طرفاً في دفع المورّد ولا يحتفظ بأموال العملاء ولا يعالج البطاقات.",
     },
     {
       heading: "المورّدون",
@@ -234,11 +234,11 @@ const termsAr: LegalDocument = {
     },
     {
       heading: "العمولة",
-      body: "عند قبول طلب يدخل المورّد عرض سعر بالدينار. يسجّل دهر 10٪ من ذلك المبلغ كعمولة مستحقة للمشغّل. تُحصَّل العمولة خارج التطبيق (لا تُخصم من الزوجين داخل التطبيق). إكمال الحجز لا يعلّم العمولة مدفوعة. تسجّل الإدارة المدفوع أو المعفى بعد التحصيل.",
+      body: "عند قبول طلب يدخل المورّد عرض سعر بالدينار. يسجّل دهر 10٪ من ذلك المبلغ كرسوم منصة يدفعها الزوجان لدهر بتحويل بنكي. بقية المبلغ تُسوّى مع المورّد خارج المنصة. إكمال الحجز لا يعلّم الرسوم مدفوعة. تسجّل الإدارة المدفوع أو المعفى بعد تأكيد التحويل. يمكن للزوجين إرسال ملاحظة مرجع التحويل؛ ولا يمكنهم تعليم الرسوم مدفوعة بأنفسهم.",
     },
     {
       heading: "لا مدفوعات داخل التطبيق",
-      body: "دهر لا يستقبل مدفوعات بطاقات. لا توجد حزمة دفع. أي مال بين الزوجين والمورّد، أو المورّد والمشغّل، يتم خارج التطبيق.",
+      body: "دهر لا يستقبل مدفوعات بطاقات. لا توجد حزمة دفع. أي مال بين الزوجين والمورّد، أو الزوجين ودهر، يتم خارج التطبيق.",
     },
     {
       heading: "واتساب",

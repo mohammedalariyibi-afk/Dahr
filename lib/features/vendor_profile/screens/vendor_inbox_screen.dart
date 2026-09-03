@@ -8,7 +8,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../booking/providers/booking_provider.dart';
-import '../providers/vendor_provider.dart';
 import '../widgets/accept_booking_dialog.dart';
 
 class VendorInboxScreen extends ConsumerWidget {
@@ -111,14 +110,11 @@ class VendorInboxScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(vendorInboxProvider);
     final filter = ref.watch(vendorInboxFilterProvider);
-    final stats = ref.watch(vendorDashboardStatsProvider).valueOrNull;
-    final unpaid = stats?.unpaidCommissionLyd ?? 0;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vendorInbox)),
       body: Column(
         children: [
-          VendorCommissionBanner(unpaidTotalLyd: unpaid),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),

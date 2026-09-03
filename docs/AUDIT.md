@@ -33,7 +33,7 @@ Nothing in this audit found a way for a couple to become `admin`, leak the servi
 | Couple / vendor app | Flutter 3.47, Riverpod, go_router, `supabase_flutter` | Anon key + RLS + client write guards |
 | Admin | Next.js 15 App Router, `@supabase/ssr` | Anon key, `getUser()`, `requireAdmin()`, RLS, RPCs |
 | Backend | Supabase Auth (Email OTP), Postgres, Storage `vendor-photos` | RLS, triggers, `SECURITY INVOKER` accept/commission RPCs |
-| Money | Offline 10% vendor commission in LYD | Quote on accept; admin marks paid/waived |
+| Money | Couple pays Dahr 10% by bank transfer (LYD) | Quote on accept; couple can send a transfer note; admin marks paid/waived |
 
 Out of scope for v1 (intentional): in-app payments, IAP, chat, push, maps, SMS login.
 

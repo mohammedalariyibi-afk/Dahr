@@ -64,48 +64,59 @@ class ConsumerBookingsScreen extends ConsumerWidget {
             itemBuilder: (context, i) {
               final b = bookings[i];
               return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              b.vendor?.businessName ?? b.vendorId,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                child: InkWell(
+                  onTap: () => context.push('/bookings/${b.id}'),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                b.vendor?.businessName ?? b.vendorId,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                          ),
-                          Icon(
-                            Icons.circle,
-                            size: 10,
-                            color: _statusColor(b.status),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(AvailabilityCalendar.dateKey(b.eventDate)),
-                      Text(_statusLabel(l10n, b.status)),
-                      if (b.quotedAmountLyd != null)
-                        Text(
-                          '${l10n.quotedAmountDisplay}: '
-                          '${AppConstants.formatPrice(b.quotedAmountLyd)}',
-                        ),
-                      if (b.canLeaveReview)
-                        Align(
-                          alignment: AlignmentDirectional.centerEnd,
-                          child: TextButton(
-                            onPressed: () => context.push(
-                              '/review/${b.id}',
-                              extra: {'vendorId': b.vendorId},
+                            Icon(
+                              Icons.circle,
+                              size: 10,
+                              color: _statusColor(b.status),
                             ),
-                            child: Text(l10n.leaveReview),
-                          ),
+                          ],
                         ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(AvailabilityCalendar.dateKey(b.eventDate)),
+                        Text(_statusLabel(l10n, b.status)),
+                        if (b.quotedAmountLyd != null)
+                          Text(
+                            '${l10n.quotedAmountDisplay}: '
+                            '${AppConstants.formatPrice(b.quotedAmountLyd)}',
+                          ),
+                        if (b.showsCouplePlatformFee &&
+                            b.commissionAmountLyd != null)
+                          Text(
+                            '${l10n.platformFeeTitle}: '
+                            '${AppConstants.formatPrice(b.commissionAmountLyd)}'
+                            '${b.isCommissionUnpaid ? ' · ${l10n.commissionUnpaid}' : ''}',
+                          ),
+                        if (b.canLeaveReview)
+                          Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: TextButton(
+                              onPressed: () => context.push(
+                                '/review/${b.id}',
+                                extra: {'vendorId': b.vendorId},
+                              ),
+                              child: Text(l10n.leaveReview),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               );

@@ -15,6 +15,7 @@ import '../../features/discovery/screens/discover_home_screen.dart';
 import '../../features/discovery/screens/home_shell.dart';
 import '../../features/favorites/screens/favorites_screen.dart';
 import '../../features/booking/screens/booking_request_screen.dart';
+import '../../features/booking/screens/consumer_booking_detail_screen.dart';
 import '../../features/booking/screens/consumer_bookings_screen.dart';
 import '../../features/reviews/screens/leave_review_screen.dart';
 import '../../features/vendor_profile/screens/vendor_detail_screen.dart';
@@ -129,6 +130,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           return BookingRequestScreen(
             vendorId: state.pathParameters['vendorId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: '/bookings/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          return ConsumerBookingDetailScreen(
+            bookingId: state.pathParameters['id']!,
           );
         },
       ),

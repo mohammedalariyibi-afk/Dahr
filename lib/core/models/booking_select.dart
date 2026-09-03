@@ -1,6 +1,7 @@
 /// PostgREST `select` lists for `booking_requests`.
 ///
-/// Couples must not request commission columns. Vendors may.
+/// Couples may **read** commission columns so they can transfer the 10%
+/// fee. They still must not write those columns. Inserts stay money-free.
 abstract final class BookingSelect {
   static const List<String> consumerColumns = [
     'id',
@@ -21,6 +22,11 @@ abstract final class BookingSelect {
     'commission_paid_at',
   ];
 
+  static const List<String> consumerReadColumns = [
+    ...consumerColumns,
+    ...commissionColumns,
+  ];
+
   static const List<String> vendorColumns = [
     ...consumerColumns,
     ...commissionColumns,
@@ -30,18 +36,18 @@ abstract final class BookingSelect {
       'vendor_profiles(*, vendor_photos(*))';
   static const String reviewsEmbed = 'reviews(*)';
 
-  /// Couple inbox / bookings list. Quote is visible; commission is not.
+  /// Couple inbox / bookings list. Quote + 10% fee status are visible.
   static String get consumerList =>
-      '${consumerColumns.join(', ')}, $vendorListingEmbed, $reviewsEmbed';
+      '${consumerReadColumns.join(', ')}, $vendorListingEmbed, $reviewsEmbed';
 
-  /// Couple review / booking-by-id. No commission columns.
+  /// Couple booking detail / review. Includes fee amount and status.
   static String get consumerById =>
-      '${consumerColumns.join(', ')}, $reviewsEmbed';
+      '${consumerReadColumns.join(', ')}, $reviewsEmbed';
 
-  /// Return shape after a couple insert.
+  /// Return shape after a couple insert. No commission columns on write.
   static String get consumerInsert => consumerColumns.join(', ');
 
-  /// Vendor inbox and dashboard. Includes unpaid 10% columns.
+  /// Vendor inbox and dashboard. Fee status only — vendors do not pay.
   static String get vendor => vendorColumns.join(', ');
 
   static bool includesCommission(String select) {

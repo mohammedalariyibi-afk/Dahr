@@ -64,6 +64,7 @@ void main() {
         covers(doc, [
           'off-platform',
           '10%',
+          'bank transfer',
           'WhatsApp',
           'Delete',
           LegalFacts.contactEmail,

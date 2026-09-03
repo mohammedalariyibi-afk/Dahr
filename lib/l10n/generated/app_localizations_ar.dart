@@ -33,7 +33,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginTitle => 'تسجيل الدخول';
 
   @override
-  String get loginSubtitle => 'أدخل بريدك الإلكتروني لاستلام رمز الدخول لمرة واحدة';
+  String get loginSubtitle =>
+      'أدخل بريدك الإلكتروني لاستلام رمز الدخول لمرة واحدة';
 
   @override
   String get phoneLabel => 'رقم الهاتف';
@@ -459,17 +460,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commissionWaived => 'معفاة';
 
   @override
-  String get unpaidCommissionOwed => 'العمولة المستحقة لدهر';
+  String get unpaidCommissionOwed => 'رسوم دهر (غير مدفوعة)';
 
   @override
-  String get noUnpaidCommission => 'لا توجد عمولة مستحقة';
+  String get noUnpaidCommission => 'لا توجد رسوم دهر غير مدفوعة';
 
   @override
   String get quotedAmountDisplay => 'عرض السعر';
 
   @override
   String get commissionNoteVendor =>
-      'تدفع 10٪ من هذا المبلغ لدهر، ويُحصَّل خارج التطبيق.';
+      'يسجّل دهر 10٪ من هذا المبلغ. يدفع الزوجان هذه الرسوم لدهر بتحويل بنكي. تُسوّى بقية المبلغ معهم خارج المنصة.';
 
   @override
   String get invalidQuotedAmount => 'أدخل مبلغاً صالحاً بالدينار الليبي';
@@ -624,22 +625,63 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inboxEmptyCompleted => 'لا توجد حجوزات مكتملة في هذه التصفية.';
 
   @override
-  String get commissionBannerTitle => 'العمولة المستحقة لدهر';
-
-  @override
-  String commissionBannerBody(String amount) {
-    return 'المجموع غير المدفوع: $amount';
-  }
-
-  @override
-  String get commissionBannerHint =>
-      'يسجّل دهر هذا كمبلغ غير مدفوع. يعلّمه المشرف مدفوعاً بعد التحصيل خارج التطبيق.';
-
-  @override
   String get acceptQuoteSuccess =>
-      'تم قبول الحجز. سُجّلت عمولة 10٪ كغير مدفوعة.';
+      'تم قبول الحجز. يدفع الزوجان رسوم دهر 10٪ بتحويل بنكي.';
 
   @override
   String get roleNotAssignable =>
       'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.';
+
+  @override
+  String get bookingDetailTitle => 'الحجز';
+
+  @override
+  String get platformFeeTitle => 'رسوم منصة دهر (10%)';
+
+  @override
+  String platformFeeBody(String amount) {
+    return 'حوّل $amount إلى دهر بتحويل بنكي عبر الإنترنت. هذه رسوم المنصة — وليست دفعاً ببطاقة داخل التطبيق.';
+  }
+
+  @override
+  String get platformFeeVendorRest =>
+      'بقية عرض السعر ما زالت تُسوّى مع المورّد خارج المنصة (غالباً واتساب).';
+
+  @override
+  String get bankDetailsTitle => 'بيانات بنك دهر';
+
+  @override
+  String get bankDetailsPending => 'بيانات البنك ستأتي من التشغيل.';
+
+  @override
+  String get bankNameLabel => 'البنك';
+
+  @override
+  String get accountHolderLabel => 'صاحب الحساب';
+
+  @override
+  String get accountNumberLabel => 'رقم الحساب / IBAN';
+
+  @override
+  String get transferNoteLabel => 'مرجع التحويل';
+
+  @override
+  String get transferNoteHint => 'مرجع البنك أو ملاحظة قصيرة';
+
+  @override
+  String get iTransferred => 'حوّلت المبلغ';
+
+  @override
+  String get transferReported =>
+      'أُرسلت ملاحظة التحويل. سيؤكّد دهر بعد وصول المبلغ.';
+
+  @override
+  String get transferNoteRequired => 'أضف مرجعاً قصيراً للتحويل';
+
+  @override
+  String get vendorDahrFeeStatus => 'حالة رسوم دهر';
+
+  @override
+  String get vendorDahrFeeHint =>
+      'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي.';
 }

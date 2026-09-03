@@ -12,7 +12,7 @@ Ship target: **Saturday 5 Sep 2026** (Africa/Tripoli). Screenshots and listing c
    - `https://mohammedalariyibi-afk.github.io/Dahr/terms`
    - After merge: if those 404, set **Settings → Pages → Source: GitHub Actions**. In-app `/legal/privacy` and `/legal/terms` do **not** satisfy the store fields.
 5. Have WhatsApp business number + email `mohammedalariyibi@gmail.com` for store support / contact fields.
-6. Optional for 10% collection path: bank / WhatsApp details for offline commission (not required for store listing).
+6. Optional for 10% collection path: paste real Dahr bank details in admin Settings after Syber applies `20260904010000_customer_pays_dahr_fee.sql` (not required for store listing).
 
 ## Assets already in repo
 

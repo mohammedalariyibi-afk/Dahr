@@ -1001,13 +1001,13 @@ abstract class AppLocalizations {
   /// No description provided for @unpaidCommissionOwed.
   ///
   /// In ar, this message translates to:
-  /// **'العمولة المستحقة لدهر'**
+  /// **'رسوم دهر (غير مدفوعة)'**
   String get unpaidCommissionOwed;
 
   /// No description provided for @noUnpaidCommission.
   ///
   /// In ar, this message translates to:
-  /// **'لا توجد عمولة مستحقة'**
+  /// **'لا توجد رسوم دهر غير مدفوعة'**
   String get noUnpaidCommission;
 
   /// No description provided for @quotedAmountDisplay.
@@ -1019,7 +1019,7 @@ abstract class AppLocalizations {
   /// No description provided for @commissionNoteVendor.
   ///
   /// In ar, this message translates to:
-  /// **'تدفع 10٪ من هذا المبلغ لدهر، ويُحصَّل خارج التطبيق.'**
+  /// **'يسجّل دهر 10٪ من هذا المبلغ. يدفع الزوجان هذه الرسوم لدهر بتحويل بنكي. تُسوّى بقية المبلغ معهم خارج المنصة.'**
   String get commissionNoteVendor;
 
   /// No description provided for @invalidQuotedAmount.
@@ -1310,28 +1310,10 @@ abstract class AppLocalizations {
   /// **'لا توجد حجوزات مكتملة في هذه التصفية.'**
   String get inboxEmptyCompleted;
 
-  /// No description provided for @commissionBannerTitle.
-  ///
-  /// In ar, this message translates to:
-  /// **'العمولة المستحقة لدهر'**
-  String get commissionBannerTitle;
-
-  /// No description provided for @commissionBannerBody.
-  ///
-  /// In ar, this message translates to:
-  /// **'المجموع غير المدفوع: {amount}'**
-  String commissionBannerBody(String amount);
-
-  /// No description provided for @commissionBannerHint.
-  ///
-  /// In ar, this message translates to:
-  /// **'يسجّل دهر هذا كمبلغ غير مدفوع. يعلّمه المشرف مدفوعاً بعد التحصيل خارج التطبيق.'**
-  String get commissionBannerHint;
-
   /// No description provided for @acceptQuoteSuccess.
   ///
   /// In ar, this message translates to:
-  /// **'تم قبول الحجز. سُجّلت عمولة 10٪ كغير مدفوعة.'**
+  /// **'تم قبول الحجز. يدفع الزوجان رسوم دهر 10٪ بتحويل بنكي.'**
   String get acceptQuoteSuccess;
 
   /// No description provided for @roleNotAssignable.
@@ -1339,6 +1321,102 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.'**
   String get roleNotAssignable;
+
+  /// No description provided for @bookingDetailTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحجز'**
+  String get bookingDetailTitle;
+
+  /// No description provided for @platformFeeTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'رسوم منصة دهر (10%)'**
+  String get platformFeeTitle;
+
+  /// No description provided for @platformFeeBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'حوّل {amount} إلى دهر بتحويل بنكي عبر الإنترنت. هذه رسوم المنصة — وليست دفعاً ببطاقة داخل التطبيق.'**
+  String platformFeeBody(String amount);
+
+  /// No description provided for @platformFeeVendorRest.
+  ///
+  /// In ar, this message translates to:
+  /// **'بقية عرض السعر ما زالت تُسوّى مع المورّد خارج المنصة (غالباً واتساب).'**
+  String get platformFeeVendorRest;
+
+  /// No description provided for @bankDetailsTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيانات بنك دهر'**
+  String get bankDetailsTitle;
+
+  /// No description provided for @bankDetailsPending.
+  ///
+  /// In ar, this message translates to:
+  /// **'بيانات البنك ستأتي من التشغيل.'**
+  String get bankDetailsPending;
+
+  /// No description provided for @bankNameLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'البنك'**
+  String get bankNameLabel;
+
+  /// No description provided for @accountHolderLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'صاحب الحساب'**
+  String get accountHolderLabel;
+
+  /// No description provided for @accountNumberLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم الحساب / IBAN'**
+  String get accountNumberLabel;
+
+  /// No description provided for @transferNoteLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرجع التحويل'**
+  String get transferNoteLabel;
+
+  /// No description provided for @transferNoteHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرجع البنك أو ملاحظة قصيرة'**
+  String get transferNoteHint;
+
+  /// No description provided for @iTransferred.
+  ///
+  /// In ar, this message translates to:
+  /// **'حوّلت المبلغ'**
+  String get iTransferred;
+
+  /// No description provided for @transferReported.
+  ///
+  /// In ar, this message translates to:
+  /// **'أُرسلت ملاحظة التحويل. سيؤكّد دهر بعد وصول المبلغ.'**
+  String get transferReported;
+
+  /// No description provided for @transferNoteRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف مرجعاً قصيراً للتحويل'**
+  String get transferNoteRequired;
+
+  /// No description provided for @vendorDahrFeeStatus.
+  ///
+  /// In ar, this message translates to:
+  /// **'حالة رسوم دهر'**
+  String get vendorDahrFeeStatus;
+
+  /// No description provided for @vendorDahrFeeHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي.'**
+  String get vendorDahrFeeHint;
 }
 
 class _AppLocalizationsDelegate

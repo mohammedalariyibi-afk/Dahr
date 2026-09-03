@@ -55,7 +55,7 @@ What Dahr does not do
 
 • No in-app card payments, Apple IAP, or Google Play Billing
 • You pay the vendor off-platform (often via WhatsApp or in person), in LYD
-• Dahr records a 10% vendor commission on accepted quotes so the operator can collect it offline — that is not charged as an in-app purchase
+• After a vendor accepts a quote, the couple pays Dahr a 10% platform fee by bank transfer — that is not charged as an in-app purchase. The rest of the quote is still settled with the vendor off-platform
 
 Guest browse of Discover works without an account. Booking, favorites, and vendor tools require sign-in.
 
@@ -103,7 +103,7 @@ Operator: Mohammed Alariyibi. Product: Dahr.
 
 • لا مدفوعات بطاقات داخل التطبيق ولا مشتريات آبل ولا فوترة Google Play
 • تدفع للمورّد خارج المنصة (غالباً واتساب أو مباشرة) بالدينار الليبي
-• يسجّل دهر عمولة 10٪ على العروض المقبولة ليُحصّلها المشغّل خارج التطبيق — وليست عملية شراء داخل التطبيق
+• بعد قبول عرض السعر يدفع الزوجان لدهر رسوم منصة 10٪ بتحويل بنكي — وليست عملية شراء داخل التطبيق. بقية المبلغ تُسوّى مع المورّد خارج المنصة
 
 تصفّح الاكتشاف متاح للزائر دون حساب. الحجز والمفضلة وأدوات المورّد تتطلّب تسجيل الدخول.
 

@@ -5,13 +5,14 @@ import 'package:dahr/core/models/booking_select.dart';
 
 void main() {
   group('BookingSelect', () {
-    test('couple selects never include commission columns', () {
-      expect(BookingSelect.includesCommission(BookingSelect.consumerList), isFalse);
-      expect(BookingSelect.includesCommission(BookingSelect.consumerById), isFalse);
+    test('couple reads fee columns; insert stays money-free', () {
+      expect(BookingSelect.includesCommission(BookingSelect.consumerList), isTrue);
+      expect(BookingSelect.includesCommission(BookingSelect.consumerById), isTrue);
       expect(BookingSelect.includesCommission(BookingSelect.consumerInsert), isFalse);
-      expect(BookingSelect.consumerList.contains('commission_'), isFalse);
-      expect(BookingSelect.consumerById.contains('commission_'), isFalse);
+      expect(BookingSelect.consumerList.contains('commission_amount_lyd'), isTrue);
+      expect(BookingSelect.consumerById.contains('commission_status'), isTrue);
       expect(BookingSelect.consumerInsert.contains('quoted_amount_lyd'), isTrue);
+      expect(BookingSelect.consumerInsert.contains('commission_'), isFalse);
     });
 
     test('vendor select includes unpaid commission columns', () {
