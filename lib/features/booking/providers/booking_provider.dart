@@ -20,7 +20,7 @@ class ConsumerBookingsNotifier extends AsyncNotifier<List<BookingRequest>> {
     final uid = auth.session!.user.id;
     final rows = await DahrSupabase.client
         .from('booking_requests')
-        .select('*, vendor_profiles(*, vendor_photos(*)), reviews(*)')
+        .select(BookingSelect.consumerList)
         .eq('consumer_id', uid)
         .order('created_at', ascending: false);
     return (rows as List)
@@ -42,7 +42,7 @@ class ConsumerBookingsNotifier extends AsyncNotifier<List<BookingRequest>> {
     final row = await DahrSupabase.client
         .from('booking_requests')
         .insert(payload.toJson())
-        .select()
+        .select(BookingSelect.consumerInsert)
         .single();
     ref.invalidateSelf();
     return BookingRequest.fromJson(Map<String, dynamic>.from(row));
@@ -71,7 +71,7 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
     final vendorId = vendor['id'] as String;
     final rows = await DahrSupabase.client
         .from('booking_requests')
-        .select()
+        .select(BookingSelect.vendor)
         .eq('vendor_id', vendorId)
         .order('created_at', ascending: false);
     return (rows as List)
@@ -129,7 +129,7 @@ final bookingByIdProvider =
     FutureProvider.family<BookingRequest?, String>((ref, id) async {
   final row = await DahrSupabase.client
       .from('booking_requests')
-      .select('*, reviews(*)')
+      .select(BookingSelect.consumerById)
       .eq('id', id)
       .maybeSingle();
   if (row == null) return null;

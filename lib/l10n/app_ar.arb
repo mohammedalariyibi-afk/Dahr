@@ -187,5 +187,31 @@
   "deleteAccountTitle": "حذف حسابك؟",
   "deleteAccountBody": "سيُحذف حساب دهر نهائياً. إذا كنت مورّداً فسيُزال عرضك وصورك. لا يمكن التراجع عن هذا.",
   "deleteAccountConfirm": "حذف الحساب",
-  "deleteAccountFailed": "تعذر حذف الحساب. حاول مرة أخرى أو راسل mohammedalariyibi@gmail.com."
+  "deleteAccountFailed": "تعذر حذف الحساب. حاول مرة أخرى أو راسل mohammedalariyibi@gmail.com.",
+  "discoverEmptyTitle": "لا يوجد مورّدون هنا",
+  "discoverEmptyBody": "سيظهر هنا المورّدون المعتمدون في طرابلس وبنغازي.",
+  "discoverEmptyFiltered": "لا يوجد مورّدون مطابقون لهذه التصفية. جرّب مدينة أو تصنيفاً أو سعراً آخر.",
+  "favoritesEmptyTitle": "لا توجد مفضلات بعد",
+  "favoritesEmptyBody": "احفظ مورّدين من الاكتشاف لتجدهم لاحقاً.",
+  "browseDiscover": "تصفح الاكتشاف",
+  "bookingsEmptyTitle": "لا توجد حجوزات بعد",
+  "bookingsEmptyBody": "اطلب حجزاً من مورّد في الاكتشاف.",
+  "inboxEmptyTitle": "لا توجد طلبات",
+  "inboxEmptyAll": "عندما يطلب الأزواج تاريخاً سيظهر هنا.",
+  "inboxEmptyPending": "لا توجد طلبات معلّقة. راجع التصفيات الأخرى للحجوزات المقبولة.",
+  "inboxEmptyAccepted": "لا توجد حجوزات مقبولة في هذه التصفية.",
+  "inboxEmptyDeclined": "لا توجد طلبات مرفوضة في هذه التصفية.",
+  "inboxEmptyCompleted": "لا توجد حجوزات مكتملة في هذه التصفية.",
+  "commissionBannerTitle": "العمولة المستحقة لدهر",
+  "commissionBannerBody": "المجموع غير المدفوع: {amount}",
+  "@commissionBannerBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "commissionBannerHint": "يسجّل دهر هذا كمبلغ غير مدفوع. يعلّمه المشرف مدفوعاً بعد التحصيل خارج التطبيق.",
+  "acceptQuoteSuccess": "تم قبول الحجز. سُجّلت عمولة 10٪ كغير مدفوعة.",
+  "roleNotAssignable": "اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً."
 }

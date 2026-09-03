@@ -20,6 +20,7 @@ class FavoritesScreen extends ConsumerWidget {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.favoritesTitle)),
         body: EmptyState(
+          title: l10n.loginRequired,
           message: l10n.loginRequiredBody,
           icon: Icons.favorite_border,
           actionLabel: l10n.loginAction,
@@ -41,8 +42,11 @@ class FavoritesScreen extends ConsumerWidget {
         onRetry: () => ref.invalidate(favoriteVendorsProvider),
         emptyWhen: (list) => list.isEmpty,
         empty: EmptyState(
-          message: l10n.noFavorites,
+          title: l10n.favoritesEmptyTitle,
+          message: l10n.favoritesEmptyBody,
           icon: Icons.favorite_border,
+          actionLabel: l10n.browseDiscover,
+          onAction: () => context.go('/discover'),
         ),
         builder: (context, vendors) {
           final ids = favIds.valueOrNull;
@@ -51,8 +55,11 @@ class FavoritesScreen extends ConsumerWidget {
               : vendors.where((v) => ids.contains(v.id)).toList();
           if (visible.isEmpty) {
             return EmptyState(
-              message: l10n.noFavorites,
+              title: l10n.favoritesEmptyTitle,
+              message: l10n.favoritesEmptyBody,
               icon: Icons.favorite_border,
+              actionLabel: l10n.browseDiscover,
+              onAction: () => context.go('/discover'),
             );
           }
           return RefreshIndicator(

@@ -21,6 +21,12 @@ class VendorFilters {
   bool get hasActiveFilters =>
       city != null || priceMin != null || priceMax != null;
 
+  /// True when Discover is narrowed by chip, search, city, or price.
+  bool get hasNarrowing =>
+      hasActiveFilters ||
+      category != null ||
+      (search != null && search!.isNotEmpty);
+
   VendorFilters copyWith({
     VendorCategory? category,
     CityCode? city,

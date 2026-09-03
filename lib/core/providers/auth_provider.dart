@@ -139,10 +139,9 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<void> setRole(UserRole role) async {
     final uid = DahrSupabase.currentUserId;
     if (uid == null) throw StateError('Not signed in');
-    await DahrSupabase.client.from('profiles').upsert({
-      'id': uid,
-      'role': role.name,
-    });
+    await DahrSupabase.client.from('profiles').upsert(
+          ProfileRoleWrite.upsertPayload(userId: uid, role: role),
+        );
     // Keep a complete profile authenticated (e.g. consumer becoming vendor).
     await refreshProfile();
   }
