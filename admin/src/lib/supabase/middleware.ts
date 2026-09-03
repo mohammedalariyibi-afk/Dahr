@@ -3,10 +3,22 @@ import { NextResponse, type NextRequest } from "next/server";
 import { PUBLIC_ERROR } from "@/lib/public-error";
 import { supabaseCookieOptions } from "@/lib/supabase/cookie-options";
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+export async function updateSession(
+  request: NextRequest,
+  extraRequestHeaders?: Record<string, string>,
+) {
+  // Rebuilt on every call: `request.cookies.set` writes through to the cookie
+  // header, and a refreshed session must reach the server components below.
+  const forwardRequest = () => {
+    if (!extraRequestHeaders) return { request };
+    const headers = new Headers(request.headers);
+    for (const [name, value] of Object.entries(extraRequestHeaders)) {
+      headers.set(name, value);
+    }
+    return { request: { headers } };
+  };
+
+  let supabaseResponse = NextResponse.next(forwardRequest());
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,9 +39,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
+          supabaseResponse = NextResponse.next(forwardRequest());
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );
@@ -45,8 +55,11 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isLogin = path === "/login";
   const isAuthCallback = path.startsWith("/auth/");
+  // Sign-in endpoints: they are the throttled path to a session, so they must
+  // stay reachable without one.
+  const isAuthApi = path.startsWith("/api/auth/");
   const isLegal = path === "/privacy" || path === "/terms";
-  const isPublic = isLogin || isAuthCallback || isLegal;
+  const isPublic = isLogin || isAuthCallback || isAuthApi || isLegal;
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone();
