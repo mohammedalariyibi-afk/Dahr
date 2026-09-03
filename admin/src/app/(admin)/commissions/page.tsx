@@ -1,4 +1,5 @@
 import { setCommissionStatus } from "@/app/(admin)/actions";
+import { ActionError } from "@/components/action-error";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -50,9 +51,9 @@ function statusBadgeClass(status: CommissionRow["commission_status"]): string {
 export default async function CommissionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; error?: string }>;
 }) {
-  const { status: rawStatus } = await searchParams;
+  const { status: rawStatus, error: actionError } = await searchParams;
   const filter: CommissionFilter =
     rawStatus === "unpaid" || rawStatus === "paid" || rawStatus === "waived"
       ? rawStatus
@@ -102,6 +103,8 @@ export default async function CommissionsPage({
           paid after you collect, or waive. Couples are not charged in-app.
         </p>
       </div>
+
+      <ActionError message={actionError} />
 
       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
         <p className="text-sm text-[var(--muted)]">Unpaid on this list</p>
