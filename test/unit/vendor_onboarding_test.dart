@@ -85,11 +85,22 @@ void main() {
         VendorPhoto(id: 'b', vendorId: 'v', storageUrl: 'u2', sortOrder: 1),
         VendorPhoto(id: 'c', vendorId: 'v', storageUrl: 'u3', sortOrder: 2),
       ];
+      // onReorderItem / applyReorder: newIndex is the destination after removal.
       final moved = VendorPhotoStorage.applyReorder(photos, 0, 1);
       expect(moved.map((p) => p.id).toList(), ['b', 'a', 'c']);
       expect(moved.map((p) => p.sortOrder).toList(), [0, 1, 2]);
       final toEnd = VendorPhotoStorage.applyReorder(photos, 0, 2);
       expect(toEnd.map((p) => p.id).toList(), ['b', 'c', 'a']);
+      final lastToFirst = VendorPhotoStorage.applyReorder(photos, 2, 0);
+      expect(lastToFirst.map((p) => p.id).toList(), ['c', 'a', 'b']);
+      final upOne = VendorPhotoStorage.applyReorder(photos, 2, 1);
+      expect(upOne.map((p) => p.id).toList(), ['a', 'c', 'b']);
+      final same = VendorPhotoStorage.applyReorder(photos, 1, 1);
+      expect(same.map((p) => p.id).toList(), ['a', 'b', 'c']);
+      expect(
+        VendorPhotoStorage.applyReorder(photos, -1, 0).map((p) => p.id).toList(),
+        ['a', 'b', 'c'],
+      );
     });
   });
 }
