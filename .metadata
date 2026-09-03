@@ -1,0 +1,5 @@
+# This file tracks properties of this Flutter project.
+# Used by Flutter tool; regenerate with `flutter create . --project-name dahr`.
+
+org: com.dahr
+projectType: app

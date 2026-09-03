@@ -1,0 +1,48 @@
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+.idea/
+*.lock
+
+# Env / secrets
+.env
+.env.local
+admin/.env.local
+*.pem
+
+# Tools / local SDK
+.tools/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+admin/node_modules/
+admin/.next/
+admin/out/
+
+# Coverage / misc
+coverage/
+*.log
+.vscode/
+.cursor/
+
+# Android / iOS generated
+android/local.properties
+android/.gradle/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/ephemeral/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+
+# Root Node
+node_modules/
