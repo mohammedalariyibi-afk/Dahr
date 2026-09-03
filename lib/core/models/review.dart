@@ -1,3 +1,4 @@
+import '../security/review_write.dart';
 import 'enums.dart';
 
 class Review {
@@ -45,13 +46,13 @@ class Review {
     );
   }
 
-  Map<String, dynamic> toInsertJson() => {
+  Map<String, dynamic> toInsertJson() => ReviewWrite.consumerInsert({
         'vendor_id': vendorId,
         'consumer_id': consumerId,
         'booking_request_id': bookingRequestId,
         'rating': rating,
         'comment': comment,
-      };
+      });
 
   bool get isVisibleToPublic => !isHidden;
 }
@@ -93,13 +94,13 @@ class ReviewPayload {
     return null;
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => ReviewWrite.consumerInsert({
         'vendor_id': vendorId,
         'consumer_id': consumerId,
         'booking_request_id': bookingRequestId,
         'rating': rating,
         'comment': comment,
-      };
+      });
 }
 
 /// True when the couple may open the leave-review screen.

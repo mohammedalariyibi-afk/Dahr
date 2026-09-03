@@ -1,3 +1,4 @@
+import '../security/booking_write.dart';
 import 'commission.dart';
 import 'enums.dart';
 import 'review.dart';
@@ -91,14 +92,14 @@ class BookingRequest {
     );
   }
 
-  Map<String, dynamic> toInsertJson() => {
+  Map<String, dynamic> toInsertJson() => BookingStatusWrite.consumerInsert({
         'vendor_id': vendorId,
         'consumer_id': consumerId,
         'event_date': eventDate.toIso8601String().split('T').first,
         'guest_count': guestCount,
         'message': message,
         'status': status.name,
-      };
+      });
 
   BookingRequest copyWith({
     BookingStatus? status,
@@ -144,14 +145,14 @@ class BookingRequestPayload {
   final int? guestCount;
   final String message;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() => BookingStatusWrite.consumerInsert({
         'vendor_id': vendorId,
         'consumer_id': consumerId,
         'event_date': AvailabilityCalendar.dateKey(eventDate),
         'guest_count': guestCount,
         'message': message,
         'status': BookingStatus.pending.name,
-      };
+      });
 
   /// Returns null if valid, otherwise an error key.
   ///
@@ -218,9 +219,7 @@ class AcceptBookingPayload {
 
   /// Direct status updates cannot mark a booking accepted — use this payload.
   static void assertNotBareAccept(BookingStatus status) {
-    if (status == BookingStatus.accepted) {
-      throw StateError('quoted_amount_required');
-    }
+    BookingStatusWrite.vendorDirectPatch(status);
   }
 
   /// Parses vendor input and validates. Null amount → `quoted_amount_required`.

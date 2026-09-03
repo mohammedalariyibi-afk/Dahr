@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { PUBLIC_ERROR } from "@/lib/public-error";
+import { adminHideReviewPatch } from "@/lib/review-write";
 import { createClient } from "@/lib/supabase/server";
 
 async function requireAdmin() {
@@ -79,7 +80,7 @@ export async function hideReview(reviewId: string, reportId?: string) {
   const supabase = await requireAdmin();
   const { data, error } = await supabase
     .from("reviews")
-    .update({ is_hidden: true })
+    .update(adminHideReviewPatch())
     .eq("id", reviewId)
     .select("id");
   if (error || !data?.length) fail("/reports");
