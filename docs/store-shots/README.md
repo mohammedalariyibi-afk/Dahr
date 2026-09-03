@@ -8,3 +8,4 @@ Full-color store set (Ice Blue UI + vivid venue photos). Design-truth Stitch exp
 - `04-vendor-detail.png` — MD5 `bf9234ef5f5a1296b4e70cd366481180`
 - `05-booking-request.png` — MD5 `515b4232b1da63e06416944dfe5e7d56`
 - `06-vendor-inbox.png` — MD5 `222adacd00b4697ddf4d38dc567bc55d`
+- `play-feature-graphic-1024x500.png` — MD5 `48a0b496f69cb5b4834767067f7db7f6` (Google Play feature graphic 1024×500)

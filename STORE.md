@@ -101,7 +101,7 @@ Minimum scenes (phone, 6.7″ / 6.9″ plus Play phone):
 4. **Vendor inbox / dashboard** — pending requests and/or dashboard stats
 5. **Login** — Email OTP
 
-Play also wants a **1024×500** feature graphic. App Store wants the current required iPhone sizes (check Connect — they change). Optional: short preview video of Discover → vendor → WhatsApp.
+Play also wants a **1024×500** feature graphic — packaged as `docs/store-shots/play-feature-graphic-1024x500.png`. App Store wants the current required iPhone sizes (check Connect — they change). Optional: short preview video of Discover → vendor → WhatsApp.
 
 Do not screenshot debug banners, `.env` URLs, or `127.0.0.1`.
 
