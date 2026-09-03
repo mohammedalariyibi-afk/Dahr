@@ -164,7 +164,9 @@ class BookingRequestPayload {
     final today = DateTime.now();
     final startOfToday = DateTime(today.year, today.month, today.day);
     if (eventDate.isBefore(startOfToday)) return 'event_date_past';
-    if (guestCount != null && guestCount! < 1) return 'guest_count_invalid';
+    if (guestCount != null && (guestCount! < 1 || guestCount! > 10000)) {
+      return 'guest_count_invalid';
+    }
     if (message.length > 2000) return 'message_too_long';
     if (bookedDateKeys != null &&
         AvailabilityCalendar.isBookedDate(eventDate, bookedDateKeys)) {
@@ -184,7 +186,8 @@ abstract final class BookingDateConflict {
     final text = error is StateError ? error.message : error.toString();
     return text == clientKey ||
         text.contains(clientKey) ||
-        text.contains(dbException);
+        text.contains(dbException) ||
+        text.contains('date_has_accepted_booking');
   }
 }
 

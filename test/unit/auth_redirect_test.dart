@@ -77,8 +77,62 @@ void main() {
             location: loc,
             status: signedIn,
             uri: Uri.parse(loc),
+            isVendor: loc == '/inbox',
           ),
           isNull,
+        );
+      }
+    });
+
+    test('couple cannot open vendor inbox or vendor tools', () {
+      const signedIn = AuthFlowStatus.authenticated;
+      for (final loc in [
+        '/inbox',
+        '/vendor-tools/dashboard',
+        '/vendor-tools/availability',
+        '/vendor-tools/edit',
+        '/vendor-tools/photos',
+      ]) {
+        expect(
+          resolveAuthRedirect(
+            location: loc,
+            status: signedIn,
+            uri: Uri.parse(loc),
+            isVendor: false,
+          ),
+          '/profile',
+          reason: loc,
+        );
+      }
+    });
+
+    test('couple may still open vendor onboarding', () {
+      expect(
+        resolveAuthRedirect(
+          location: '/vendor-tools/onboarding',
+          status: AuthFlowStatus.authenticated,
+          uri: Uri.parse('/vendor-tools/onboarding'),
+          isVendor: false,
+        ),
+        isNull,
+      );
+    });
+
+    test('vendor stays on inbox and vendor tools', () {
+      for (final loc in [
+        '/inbox',
+        '/vendor-tools/dashboard',
+        '/vendor-tools/availability',
+      ]) {
+        expect(
+          resolveAuthRedirect(
+            location: loc,
+            status: AuthFlowStatus.authenticated,
+            uri: Uri.parse(loc),
+            isVendor: true,
+          ),
+          isNull,
+          reason: loc,
         );
       }
     });

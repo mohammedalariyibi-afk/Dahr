@@ -11,6 +11,19 @@ const kAuthProtectedPrefixes = [
   '/vendor-tools',
 ];
 
+/// Vendor product surfaces. Onboarding stays open so a couple can become a
+/// vendor. Inbox / dashboard / calendar / photos require `profiles.role`.
+const kVendorOnlyPrefixes = [
+  '/inbox',
+  '/vendor-tools/dashboard',
+  '/vendor-tools/availability',
+  '/vendor-tools/edit',
+  '/vendor-tools/photos',
+];
+
+bool isVendorOnlyLocation(String location) =>
+    kVendorOnlyPrefixes.any((prefix) => location.startsWith(prefix));
+
 /// Only allow in-app relative paths (blocks open redirects).
 String? safeReturnTo(String? raw) {
   if (raw == null || raw.isEmpty) return null;
@@ -24,6 +37,7 @@ String? resolveAuthRedirect({
   required String location,
   required AuthFlowStatus status,
   required Uri uri,
+  bool isVendor = false,
 }) {
   if (status == AuthFlowStatus.unknown && location != '/splash') {
     return '/splash';
@@ -62,6 +76,12 @@ String? resolveAuthRedirect({
   if (needsAuth && status == AuthFlowStatus.unauthenticated) {
     final from = Uri.encodeComponent(uri.toString());
     return '/auth/login?from=$from';
+  }
+
+  if (status == AuthFlowStatus.authenticated &&
+      isVendorOnlyLocation(location) &&
+      !isVendor) {
+    return '/profile';
   }
 
   return null;

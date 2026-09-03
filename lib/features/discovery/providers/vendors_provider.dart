@@ -27,6 +27,15 @@ class VendorFilters {
       category != null ||
       (search != null && search!.isNotEmpty);
 
+  /// Allowlist letters (incl. Arabic), digits, spaces, and hyphen so a
+  /// crafted string cannot break PostgREST `.or()` filter syntax.
+  static String sanitizeSearch(String raw) {
+    return raw
+        .replaceAll(RegExp(r'[^\p{L}\p{N}\s-]', unicode: true), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
   VendorFilters copyWith({
     VendorCategory? category,
     CityCode? city,
@@ -120,8 +129,7 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
       query = query.lte('price_min', filters.priceMax!);
     }
     if (filters.search != null && filters.search!.isNotEmpty) {
-      // Sanitize for PostgREST .or() filter syntax.
-      final q = filters.search!.replaceAll(RegExp(r'[%_,]'), ' ').trim();
+      final q = VendorFilters.sanitizeSearch(filters.search!);
       if (q.isNotEmpty) {
         query = query.or(
           'business_name.ilike.%$q%,description.ilike.%$q%',

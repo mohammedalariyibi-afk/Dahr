@@ -15,6 +15,10 @@ abstract final class SafeUserError {
     'review_not_completed',
     'already_reviewed',
     'quoted_amount_required',
+    'date_has_accepted_booking',
+    'vendor_not_approved',
+    'booking_must_be_pending',
+    'guest_count_invalid',
     'profile_required',
     'business_name_required',
     'description_required',
@@ -37,6 +41,7 @@ abstract final class SafeUserError {
   static String fromKey(AppLocalizations l10n, String? key) {
     switch (key) {
       case 'event_date_booked':
+      case 'date_has_accepted_booking':
         return l10n.bookingDateBookedError;
       case 'event_date_past':
       case 'vendor_required':

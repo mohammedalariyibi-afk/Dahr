@@ -65,10 +65,17 @@ class VendorAvailabilityScreen extends ConsumerWidget {
                     currentDate: first,
                     firstDate: first,
                     lastDate: last,
-                    onDateChanged: (date) {
-                      ref
-                          .read(vendorAvailabilityProvider.notifier)
-                          .toggleDate(date);
+                    onDateChanged: (date) async {
+                      try {
+                        await ref
+                            .read(vendorAvailabilityProvider.notifier)
+                            .toggleDate(date);
+                      } catch (e) {
+                        if (!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(SafeUserError.of(l10n, e))),
+                        );
+                      }
                     },
                   ),
                 ),

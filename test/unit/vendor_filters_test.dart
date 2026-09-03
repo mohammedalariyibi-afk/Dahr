@@ -15,4 +15,12 @@ void main() {
       isTrue,
     );
   });
+
+  test('sanitizeSearch strips PostgREST filter metacharacters', () {
+    expect(VendorFilters.sanitizeSearch('قاعة, hall'), 'قاعة hall');
+    expect(VendorFilters.sanitizeSearch('hall%_'), 'hall');
+    expect(VendorFilters.sanitizeSearch('a).or(id.eq.1'), 'a or id eq 1');
+    expect(VendorFilters.sanitizeSearch('  photo-studio  '), 'photo-studio');
+    expect(VendorFilters.sanitizeSearch(''), '');
+  });
 }

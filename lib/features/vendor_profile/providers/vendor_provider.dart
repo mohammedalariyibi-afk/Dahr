@@ -139,6 +139,20 @@ class VendorAvailabilityNotifier
   Future<void> upsertDate(DateTime date, AvailabilityStatus status) async {
     final vendor = await ref.read(myVendorProfileProvider.future);
     if (vendor == null) throw StateError('not_vendor');
+    if (status == AvailabilityStatus.available) {
+      final held = await DahrSupabase.client
+          .from('booking_requests')
+          .select('id')
+          .eq('vendor_id', vendor.id)
+          .eq('event_date', AvailabilityCalendar.dateKey(date))
+          .inFilter('status', [
+        BookingStatus.accepted.name,
+        BookingStatus.completed.name,
+      ]);
+      if ((held as List).isNotEmpty) {
+        throw StateError('date_has_accepted_booking');
+      }
+    }
     final rows = await DahrSupabase.client
         .from('availability')
         .upsert(

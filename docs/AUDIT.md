@@ -1,0 +1,166 @@
+# Dahr application audit
+
+**Date:** 3 September 2026  
+**Scope:** Flutter app (`lib/`), Next.js admin (`admin/`), Supabase schema (`supabase/`), store packaging, tests/CI  
+**Auditor:** Cursor Cloud Agent  
+**Live backend:** Dahr LY (`cccusktgxrizfwpixddu`, `eu-west-1`)
+
+This is a full-app audit, not only a diff review. Findings assume an attacker who has the published **anon / publishable** key (it ships in the Flutter and admin clients) and can call PostgREST / Auth directly, bypassing UI guards.
+
+---
+
+## Executive summary
+
+Dahr is in good shape for a marketplace MVP: RLS on every public table, layered admin checks, fail-closed Flutter write guards, no `service_role` in clients, Email OTP only, privacy/terms and in-app account deletion on `main`. Previous hardening PRs (#11, #16, #18, overnight / admin-role freeze) closed the obvious privilege-escalation paths.
+
+The remaining **ship-blocking** gap was **booking integrity at the database**. Flutter rejected fake completed bookings and skipped-quote completes, but anyone with the anon key could still:
+
+1. Insert a `completed` booking as themselves and leave a review (skip vendor accept + 10% commission).
+2. As a vendor, `UPDATE` `pending → completed` and skip the quote/commission path.
+3. Accept two couples for the same date (date guard only checked the vendor calendar, and only on INSERT).
+4. Reassign `consumer_id` / `vendor_id` / `event_date` after insert.
+
+Those four are **fixed in this change** (`20260903230000_booking_integrity_guards.sql` plus matching Flutter guards). **Apply that migration to Dahr LY** (`supabase db push`) before Saturday store submit. Do **not** re-push the already-live overnight / freeze-admin files.
+
+Nothing in this audit found a way for a couple to become `admin`, leak the service role, or bypass admin RLS from the dashboard.
+
+---
+
+## Architecture (what we audited)
+
+| Layer | Stack | Authz model |
+|-------|--------|-------------|
+| Couple / vendor app | Flutter 3.47, Riverpod, go_router, `supabase_flutter` | Anon key + RLS + client write guards |
+| Admin | Next.js 15 App Router, `@supabase/ssr` | Anon key, `getUser()`, `requireAdmin()`, RLS, RPCs |
+| Backend | Supabase Auth (Email OTP), Postgres, Storage `vendor-photos` | RLS, triggers, `SECURITY INVOKER` accept/commission RPCs |
+| Money | Offline 10% vendor commission in LYD | Quote on accept; admin marks paid/waived |
+
+Out of scope for v1 (intentional): in-app payments, IAP, chat, push, maps, SMS login.
+
+---
+
+## What is already solid
+
+1. **RLS on all eight public tables**; anon has no write policies.
+2. **No `service_role` in Flutter or admin.** Startup rejects `sb_secret_*` and `service_role` JWTs (`dahr_env.dart`).
+3. **Admin role freeze** — trigger downgrades unauthorized `admin` writes; UI never offers the role.
+4. **Vendor `is_approved` / `is_verified`** cannot be self-granted (trigger).
+5. **Consumers cannot UPDATE bookings** (policy + `BookingStatusWrite.consumerMayUpdate = false`).
+6. **Reviews are insert-only for authors**; hide is admin-only (policy + trigger).
+7. **Commission math** is constrained (`ROUND(quote * 0.10, 2)`); vendors cannot mark paid/waived.
+8. **Accept RPC** is `SECURITY INVOKER`, pending-only, vendor-owned.
+9. **`profile_public`** is `security_invoker` + barrier; public names are not full profile rows.
+10. **Anon cannot EXECUTE** `is_admin`, `owns_vendor`, or trigger helpers.
+11. **Admin dashboard** uses `getUser()` (not `getSession()`), `shouldCreateUser: false`, `safe-next` open-redirect hardening, whitelisted error codes, security headers.
+12. **Account deletion** RPC takes no user-id argument; storage prefix cleanup + `auth.users` delete.
+13. **WhatsApp** URLs are validated (Libya digits, `wa.me` host only).
+14. **Guest browse** of approved listings is intentional and still works.
+15. **CI** runs `flutter analyze` + `flutter test` on PRs/`main` with no secrets.
+
+---
+
+## Findings
+
+Severity is for a published marketplace whose API key is in the client.
+
+### Critical — remediating in this change
+
+| ID | Finding | Why it matters | Fix |
+|----|---------|----------------|-----|
+| C1 | Consumer INSERT only blocked `status = accepted`. A direct insert with `status = completed` passed the commission trigger, then passed `enforce_review_on_completed_booking`. | Fake reviews + skipped commission. Flutter `BookingStatusWrite` does not protect PostgREST. | Trigger now raises `booking_must_be_pending` for non-pending consumer inserts. |
+| C2 | Vendor UPDATE allowed `pending → completed` (quote path only ran for `pending → accepted`). | Vendor skips quote and 10% unpaid commission; couple can still review. | Status machine: `pending→accepted` (quote), `pending→declined`, `accepted→completed` only. |
+| C3 | `consumer_id`, `vendor_id`, `event_date` were mutable after insert. | Vendor could reassign a booking or move the date; commission/review attribution breaks. | Non-admin UPDATE locks those three columns. |
+
+### High — remediating in this change
+
+| ID | Finding | Why it matters | Fix |
+|----|---------|----------------|-----|
+| H1 | Date guard ran **INSERT-only** and only looked at `availability`, not held bookings. Two pending requests could both be accepted. | Double-booked wedding date. | Unique index on `(vendor_id, event_date)` where status is accepted/completed; trigger also checks held rows on INSERT/UPDATE; accept RPC upserts `availability` in the same transaction. |
+| H2 | Vendor could mark an accepted date `available` again. | Re-opens the date while a booking is held. | DB trigger `protect_availability_held_dates` + Flutter check before upsert. |
+| H3 | Booking INSERT did not require `vendor_profiles.is_approved`. | Spam against pending listings. | Trigger raises `vendor_not_approved`. |
+| H4 | Review INSERT did not force `is_hidden = false`. | Author could hide their own review from the public page while the vendor still saw it. | `enforce_review_on_completed_booking` forces `is_hidden = false` for non-admins. |
+| H5 | Vendors could `UPDATE` their own `view_count`. | Popularity inflation. | `view_count` frozen unless `increment_vendor_views` sets `dahr.allow_view_increment`. |
+
+### Medium — remediating in this change (client)
+
+| ID | Finding | Fix |
+|----|---------|-----|
+| M1 | `/inbox` and `/vendor-tools/*` (except onboarding) were auth-gated but not role-gated. | `resolveAuthRedirect` sends non-vendors to `/profile`. |
+| M2 | Discover search only stripped `% _ ,`. | `VendorFilters.sanitizeSearch` allowlists letters/digits/spaces/hyphen. |
+| M3 | `bookingByIdProvider` did not filter `consumer_id`. | Query now requires the signed-in consumer. |
+| M4 | Calendar `onDateChanged` swallowed toggle errors. | Await + `SafeUserError` snackbar. |
+| M5 | Guest count had no upper bound. | Reject `guestCount > 10000`. |
+
+### Medium — still open (not blocking Saturday if ops are careful)
+
+| ID | Finding | Recommendation |
+|----|---------|----------------|
+| M6 | Admin Email OTP / callback has no app-level rate limit. | Rely on Supabase Auth limits for Saturday; add IP/email throttle before a public admin URL. |
+| M7 | Successful OTP then “not an admin” confirms the email exists. | Generic failure copy; optionally refuse OTP unless `profiles.role = admin`. |
+| M8 | No Content-Security-Policy on the admin Next.js app. | Add a strict CSP when the admin origin is public. |
+| M9 | `hideReview` then close-report is two updates (partial state if the second fails). | Single `hide_review_and_close_report` RPC later. |
+| M10 | `increment_vendor_views` is an anon SECURITY DEFINER RPC with no rate limit. | Acceptable for v1 analytics; inflate-resistant ranking should not trust this number. |
+
+### Low / info — still open
+
+| ID | Finding | Notes |
+|----|---------|-------|
+| L1 | Admin dashboard can render raw PostgREST `error.message` on stats failure. | Whitelist like other actions. |
+| L2 | No append-only `admin_audit_log`. | Useful after launch for approve / commission / hide. |
+| L3 | Admin CI is not in `.github/workflows` (Flutter only). | Add `npm run lint` / `next build` when time allows. |
+| L4 | `seed.sql` creates `admin@dahr.ly` / `password123`. | Local/Inbucket only. Comment added; never run seed on Dahr LY. |
+| L5 | Onboarding `needsRole` fires when `full_name` is empty, not when role is unset (role defaults to `consumer`). | UX loop if someone picks a role and drops off before a name. Not an authz bug. |
+| L6 | Users can set `role = vendor` themselves. | Intentional “become a vendor” path; vendor **writes** still need a `vendor_profiles` row and approval for public listing. |
+| L7 | Legal copy names “Dahr LY” and `eu-west-1`. | Appropriate for a privacy notice. |
+| I1 | `config.toml` `enable_confirmations = false` is local-only. | Keep Email confirmations **on** in the Dahr LY dashboard. |
+| I2 | Account deletion CASCADE wipes bookings/reviews. | Correct for store 5.1.1(v); archive commissions before delete if disputes matter later. |
+
+---
+
+## Store-submit readiness (Saturday 5 September 2026)
+
+| Item | Status |
+|------|--------|
+| Bundle / application id `com.dahr.dahr` | On `main` |
+| Email OTP only (no SMS / IAP / ads SDKs) | On `main` |
+| Privacy / terms in-app + admin routes | On `main` — **hosted `{ADMIN_ORIGIN}` still needs a deploy** |
+| Account deletion in Profile | On `main` |
+| Listing copy + phone screenshots | `docs/store-listing.md`, `docs/store-shots/` |
+| iPad 13″ shots **or** iPhone-only target | Operator choice (`STORE.md`) |
+| Play feature graphic 1024×500 | Called out as optional/Designer |
+| Flutter CI | Analyze + test, no secrets |
+| **This integrity migration on Dahr LY** | **Required before submit** |
+| Signing keystore / `.p12` | Local to Mohammed — correctly not in git |
+
+Operator runbook: [`docs/store-submit-checklist.md`](store-submit-checklist.md).
+
+---
+
+## Apply on Dahr LY
+
+```bash
+supabase link --project-ref cccusktgxrizfwpixddu
+supabase db push   # applies 20260903230000_booking_integrity_guards only if not present
+```
+
+If `CREATE UNIQUE INDEX booking_requests_one_held_date` fails, two accepted/completed rows already share a vendor date — inspect and decline/move one, then retry.
+
+Do **not** re-apply `20260903184000_overnight_security_hardening` or `20260903190000_freeze_admin_role_and_private_profile_rows`.
+
+---
+
+## Suggested next work (after submit)
+
+1. Admin OTP rate limit + generic forbidden copy (M6, M7).
+2. CSP + hide-review RPC (M8, M9).
+3. Admin lint/build CI (L3).
+4. Audit log for approve / commission / hide (L2).
+5. Split `needsRole` vs missing name (L5).
+
+---
+
+## Verification in this repo
+
+- New SQL assertions: `test/unit/booking_integrity_guards_test.dart`
+- Redirect / search / guest-count / write-guard tests updated
+- `flutter analyze lib test` and `flutter test` should stay green
