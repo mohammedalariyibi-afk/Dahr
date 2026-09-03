@@ -43,6 +43,14 @@ void main() {
         guestCount: 0,
       );
       expect(badGuests.validate(), 'guest_count_invalid');
+
+      final hugeGuests = BookingRequestPayload(
+        vendorId: 'v1',
+        consumerId: 'c1',
+        eventDate: DateTime.now().add(const Duration(days: 10)),
+        guestCount: 10001,
+      );
+      expect(hugeGuests.validate(), 'guest_count_invalid');
     });
 
     test('validate rejects a date the vendor marked booked', () {
@@ -113,6 +121,10 @@ void main() {
         BookingDateConflict.matches(
           Exception('PostgrestException(message: date_unavailable, code: P0001)'),
         ),
+        isTrue,
+      );
+      expect(
+        BookingDateConflict.matches(StateError('date_has_accepted_booking')),
         isTrue,
       );
       expect(BookingDateConflict.matches(StateError('event_date_past')), isFalse);

@@ -132,10 +132,13 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
 
 final bookingByIdProvider =
     FutureProvider.family<BookingRequest?, String>((ref, id) async {
+  final uid = ref.watch(authProvider).session?.user.id;
+  if (uid == null) return null;
   final row = await DahrSupabase.client
       .from('booking_requests')
       .select(BookingSelect.consumerById)
       .eq('id', id)
+      .eq('consumer_id', uid)
       .maybeSingle();
   if (row == null) return null;
   return BookingRequest.fromJson(Map<String, dynamic>.from(row));

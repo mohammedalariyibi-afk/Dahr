@@ -46,7 +46,7 @@ Upload order suggestion: email OTP → OTP verify → Discover → vendor detail
 ## Do not
 
 - Commit `.env` / service role keys
-- `db push` migrations already live on Dahr LY (e.g. booking/review scope from #16)
+- `db push` migrations already live on Dahr LY (e.g. booking/review scope from #16). **Do** push `20260903230000_booking_integrity_guards.sql` once if it is not on Dahr LY yet.
 - Use Sidra LY or the paused older `dahr` Supabase project
 
 ## Room signal

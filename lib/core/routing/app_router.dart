@@ -42,6 +42,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       location: state.matchedLocation,
       status: auth.status,
       uri: state.uri,
+      isVendor: auth.isVendor,
     ),
     routes: [
       GoRoute(

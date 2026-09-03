@@ -1,4 +1,6 @@
--- Seed data for Dahr local / demo environments.
+-- Seed data for Dahr local / demo environments ONLY.
+-- Do not run against live Dahr LY / production. Known emails
+-- (admin@dahr.ly, couple@dahr.ly) and password123 are for Inbucket.
 -- Creates demo auth users, approved vendors across Tripoli & Benghazi,
 -- one pending vendor for the admin approve flow, photos, availability,
 -- completed bookings + reviews, sample reports, and one admin.

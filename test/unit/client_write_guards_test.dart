@@ -18,6 +18,7 @@ void main() {
   late String consumerBookingsScreen;
   late String bookingRequestScreen;
   late String vendorInbox;
+  late String vendorProvider;
   late String adminActions;
   late String adminBookingWrite;
   late String adminReviewWrite;
@@ -37,6 +38,9 @@ void main() {
             .readAsStringSync();
     vendorInbox =
         File('lib/features/vendor_profile/screens/vendor_inbox_screen.dart')
+            .readAsStringSync();
+    vendorProvider =
+        File('lib/features/vendor_profile/providers/vendor_provider.dart')
             .readAsStringSync();
     adminActions =
         File('admin/src/app/(admin)/actions.ts').readAsStringSync();
@@ -75,6 +79,22 @@ void main() {
       expect(vendorInbox.contains('acceptBooking'), isTrue);
       expect(vendorInbox.contains('updateStatus'), isTrue);
     });
+
+    test('vendor calendar refuses to free a date with an accepted booking', () {
+      expect(vendorProvider.contains('date_has_accepted_booking'), isTrue);
+      expect(vendorProvider.contains("inFilter('status'"), isTrue);
+      expect(vendorProvider.contains('BookingStatus.accepted.name'), isTrue);
+      expect(vendorProvider.contains('BookingStatus.completed.name'), isTrue);
+    });
+
+    test('booking-by-id is scoped to the signed-in consumer', () {
+      expect(bookingProvider.contains('.eq(\'consumer_id\', uid)'), isTrue);
+    });
+  });
+
+  test('router passes vendor role into auth redirect', () {
+    final router = File('lib/core/routing/app_router.dart').readAsStringSync();
+    expect(router.contains('isVendor: auth.isVendor'), isTrue);
   });
 
   group('consumers never call review update or is_hidden', () {

@@ -30,7 +30,7 @@ dahr/
 - [Supabase CLI](https://supabase.com/docs/guides/cli) (local backend)
 - Docker (for local Supabase)
 
-CI runs `flutter analyze lib test` and `flutter test` on pull requests and pushes to `main` (no secrets, no live Dahr LY).
+CI runs `flutter analyze lib test` and `flutter test` on pull requests and pushes to `main` (no secrets, no live Dahr LY). Latest security/integrity notes: [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ## Environment files
 
@@ -62,6 +62,8 @@ Migrations (applied in filename order):
 - `supabase/migrations/20260903140000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
 - `supabase/migrations/20260903184000_overnight_security_hardening.sql` — revoke `reject_booking_if_date_booked` (trigger only); replace `profile_public` with `security_invoker=true` view of `id,full_name`; `profiles_select_public_names` for review/vendor/booking display names (already applied on live Dahr LY)
 - `supabase/migrations/20260903190000_freeze_admin_role_and_private_profile_rows.sql` — freeze `profiles.role` (non-admins cannot self-promote); drop `profiles_select_public_names`; display names via `private.public_profile_rows()` + `profile_public` invoker/barrier view. **Already on live** (Syber’s two migrations); this repo file is combined so local `db reset` matches. Do **not** re-apply on Dahr LY. Does not touch `vendor-photos`.
+- `supabase/migrations/20260903210000_scope_booking_updates_and_insert_only_reviews.sql` — consumers cannot UPDATE bookings; reviews are insert-only for authors (admin hide only)
+- `supabase/migrations/20260903230000_booking_integrity_guards.sql` — booking status machine, one held date per vendor, accept marks availability, approved-vendor insert, `is_hidden`/`view_count` locks. **Not yet on live** — apply with `supabase db push` (do not re-push the already-live files above).
 
 **Security note:** Guest browse still works (approved vendors, photos, availability, and `increment_vendor_views`). Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions including `reject_booking_if_date_booked`) are not anon RPCs — `authenticated` only, or no client EXECUTE. Do **not** re-grant `is_admin` / `owns_vendor` to anon (live once had `grant_rls_helpers_to_anon`; that must stay revoked).
 
