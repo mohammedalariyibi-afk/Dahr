@@ -1,5 +1,6 @@
 import 'commission.dart';
 import 'enums.dart';
+import 'review.dart';
 import 'vendor.dart';
 
 class BookingRequest {
@@ -18,6 +19,7 @@ class BookingRequest {
     this.commissionPaidAt,
     this.createdAt,
     this.vendor,
+    this.review,
   });
 
   final String id;
@@ -34,16 +36,32 @@ class BookingRequest {
   final DateTime? commissionPaidAt;
   final DateTime? createdAt;
   final VendorProfile? vendor;
+  final Review? review;
 
   bool get hasQuote => quotedAmountLyd != null;
   bool get isCommissionUnpaid =>
       commissionStatus == CommissionStatus.unpaid;
+  bool get canLeaveReview =>
+      status == BookingStatus.completed && review == null;
 
   factory BookingRequest.fromJson(Map<String, dynamic> json) {
     VendorProfile? vendor;
     final vendorRaw = json['vendor_profiles'] ?? json['vendor'];
     if (vendorRaw is Map<String, dynamic>) {
       vendor = VendorProfile.fromJson(vendorRaw);
+    }
+
+    Review? review;
+    final reviewRaw = json['reviews'] ?? json['review'];
+    if (reviewRaw is Map<String, dynamic>) {
+      review = Review.fromJson(reviewRaw);
+    } else if (reviewRaw is List && reviewRaw.isNotEmpty) {
+      final first = reviewRaw.first;
+      if (first is Map<String, dynamic>) {
+        review = Review.fromJson(first);
+      } else if (first is Map) {
+        review = Review.fromJson(Map<String, dynamic>.from(first));
+      }
     }
 
     return BookingRequest(
@@ -69,6 +87,7 @@ class BookingRequest {
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
       vendor: vendor,
+      review: review,
     );
   }
 
@@ -87,6 +106,7 @@ class BookingRequest {
     double? commissionAmountLyd,
     CommissionStatus? commissionStatus,
     VendorProfile? vendor,
+    Review? review,
   }) {
     return BookingRequest(
       id: id,
@@ -103,6 +123,7 @@ class BookingRequest {
       commissionPaidAt: commissionPaidAt,
       createdAt: createdAt,
       vendor: vendor ?? this.vendor,
+      review: review ?? this.review,
     );
   }
 }
@@ -126,14 +147,17 @@ class BookingRequestPayload {
   Map<String, dynamic> toJson() => {
         'vendor_id': vendorId,
         'consumer_id': consumerId,
-        'event_date': eventDate.toIso8601String().split('T').first,
+        'event_date': AvailabilityCalendar.dateKey(eventDate),
         'guest_count': guestCount,
         'message': message,
         'status': BookingStatus.pending.name,
       };
 
   /// Returns null if valid, otherwise an error key.
-  String? validate() {
+  ///
+  /// Pass [bookedDateKeys] (`yyyy-MM-dd`) so a couple cannot request a date
+  /// the vendor already marked booked.
+  String? validate({Iterable<String>? bookedDateKeys}) {
     if (vendorId.isEmpty) return 'vendor_required';
     if (consumerId.isEmpty) return 'consumer_required';
     final today = DateTime.now();
@@ -141,6 +165,10 @@ class BookingRequestPayload {
     if (eventDate.isBefore(startOfToday)) return 'event_date_past';
     if (guestCount != null && guestCount! < 1) return 'guest_count_invalid';
     if (message.length > 2000) return 'message_too_long';
+    if (bookedDateKeys != null &&
+        AvailabilityCalendar.isBookedDate(eventDate, bookedDateKeys)) {
+      return 'event_date_booked';
+    }
     return null;
   }
 }

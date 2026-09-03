@@ -45,6 +45,22 @@ void main() {
       expect(badGuests.validate(), 'guest_count_invalid');
     });
 
+    test('validate rejects a date the vendor marked booked', () {
+      final payload = BookingRequestPayload(
+        vendorId: 'v1',
+        consumerId: 'c1',
+        eventDate: DateTime(2030, 6, 15),
+      );
+      expect(
+        payload.validate(bookedDateKeys: {'2030-06-15'}),
+        'event_date_booked',
+      );
+      expect(
+        payload.validate(bookedDateKeys: {'2030-06-16'}),
+        isNull,
+      );
+    });
+
     test('validate accepts future booking', () {
       final ok = BookingRequestPayload(
         vendorId: 'v1',
@@ -177,6 +193,41 @@ void main() {
       expect(booking.quotedAmountLyd, isNull);
       expect(booking.commissionStatus, isNull);
       expect(booking.isCommissionUnpaid, isFalse);
+      expect(booking.canLeaveReview, isFalse);
+    });
+
+    test('completed booking without a review can be reviewed', () {
+      final booking = BookingRequest.fromJson({
+        'id': 'b1',
+        'vendor_id': 'v1',
+        'consumer_id': 'c1',
+        'event_date': '2030-06-15',
+        'status': 'completed',
+        'quoted_amount_lyd': '1000.00',
+        'commission_rate': '0.1000',
+        'commission_amount_lyd': '100.00',
+        'commission_status': 'unpaid',
+      });
+      expect(booking.canLeaveReview, isTrue);
+    });
+
+    test('completed booking with a review cannot be reviewed again', () {
+      final booking = BookingRequest.fromJson({
+        'id': 'b1',
+        'vendor_id': 'v1',
+        'consumer_id': 'c1',
+        'event_date': '2030-06-15',
+        'status': 'completed',
+        'reviews': {
+          'id': 'r1',
+          'vendor_id': 'v1',
+          'consumer_id': 'c1',
+          'booking_request_id': 'b1',
+          'rating': 5,
+        },
+      });
+      expect(booking.review, isNotNull);
+      expect(booking.canLeaveReview, isFalse);
     });
   });
 }

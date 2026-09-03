@@ -131,7 +131,7 @@ class _RoleCard extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         color: selected
-                            ? AppColors.onBurgundy.withOpacity(0.85)
+                            ? AppColors.onBurgundy.withValues(alpha: 0.85)
                             : AppColors.inkMuted,
                       ),
                     ),

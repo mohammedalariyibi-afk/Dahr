@@ -69,9 +69,17 @@ flutter run
 
 Arabic is the default locale (RTL). Switch language on the first screen.
 
-### Guest browse
+## Try the vendor product flow
 
-Anyone can open Discover and vendor details. Favorites, booking requests, and reviews require sign-in (router redirects to login and returns afterward).
+Guest browse of Discover stays open. Favorites, booking requests, and reviews still require sign-in.
+
+1. **Onboarding** — Sign in, choose **I'm a vendor** (or **Become a vendor** on Profile). Fill business name, category, city, WhatsApp, description, and price range (LYD). Submit. The listing waits for admin approval (`is_approved`).
+2. **Photos** — Profile → Vendor tools → **Manage photos**, or Dashboard → **Manage photos**. Upload to the `vendor-photos` bucket, drag to reorder (first photo is the cover), delete.
+3. **Calendar** — **Manage availability**. Tap a date to mark it booked or available. Booked dates show on the couple booking screen and cannot be selected.
+4. **Inbox accept with quote** — A couple opens a vendor → **Request booking**, picks a free date. On the vendor Inbox (**Pending**), **Accept** and enter a LYD quote. The existing `accept_booking_request` RPC records 10% unpaid commission. Decline/complete stay on the other filters.
+5. **Complete → review** — Vendor marks the request **Complete**. The couple sees **Leave a review** only then. Hidden reviews stay off the public vendor page.
+
+Vendor dashboard overview: pending requests, unpaid commission owed, photo count, next booked dates.
 
 ### Tests
 

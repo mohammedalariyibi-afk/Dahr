@@ -14,61 +14,91 @@ class VendorAvailabilityScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final async = ref.watch(vendorAvailabilityProvider);
+    final now = DateTime.now();
+    final first = DateTime(now.year, now.month, now.day);
+    final last = first.add(const Duration(days: 365 * 2));
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.availabilityTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          final now = DateTime.now();
           final picked = await showDatePicker(
             context: context,
-            initialDate: now,
-            firstDate: now,
-            lastDate: now.add(const Duration(days: 365 * 2)),
+            initialDate: first,
+            firstDate: first,
+            lastDate: last,
           );
           if (picked == null) return;
           await ref
               .read(vendorAvailabilityProvider.notifier)
-              .upsertDate(picked, AvailabilityStatus.booked);
+              .toggleDate(picked);
         },
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.event),
         label: Text(l10n.markBooked),
       ),
-      body: AsyncBody<List<AvailabilitySlot>>(
-        value: async,
-        onRetry: () =>
-            ref.read(vendorAvailabilityProvider.notifier).refresh(),
-        emptyWhen: (list) => list.isEmpty,
-        empty: EmptyState(message: l10n.emptyDefault),
-        builder: (context, slots) {
-          return ListView.separated(
+      body: async.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => ErrorState(
+          message: e.toString(),
+          onRetry: () => ref.read(vendorAvailabilityProvider.notifier).refresh(),
+        ),
+        data: (slots) {
+          final booked = AvailabilityCalendar.upcomingBookedDates(slots);
+          return ListView(
             padding: const EdgeInsets.all(16),
-            itemCount: slots.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, i) {
-              final s = slots[i];
-              final booked = s.status == AvailabilityStatus.booked.name;
-              return Card(
-                child: ListTile(
-                  title: Text(s.date.toIso8601String().split('T').first),
-                  subtitle: Text(
-                    booked ? l10n.markBooked : l10n.markAvailable,
-                  ),
-                  trailing: Switch(
-                    value: booked,
-                    activeColor: AppColors.burgundy,
-                    onChanged: (v) {
-                      ref.read(vendorAvailabilityProvider.notifier).upsertDate(
-                            s.date,
-                            v
-                                ? AvailabilityStatus.booked
-                                : AvailabilityStatus.available,
-                          );
+            children: [
+              Text(l10n.toggleAvailabilityHint),
+              const SizedBox(height: 12),
+              Card(
+                child: SizedBox(
+                  height: 360,
+                  child: CalendarDatePicker(
+                    initialDate: first,
+                    currentDate: first,
+                    firstDate: first,
+                    lastDate: last,
+                    onDateChanged: (date) {
+                      ref
+                          .read(vendorAvailabilityProvider.notifier)
+                          .toggleDate(date);
                     },
                   ),
                 ),
-              );
-            },
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.bookedDatesTitle,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              if (booked.isEmpty)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(l10n.noBookedDates),
+                  ),
+                )
+              else
+                ...booked.map((d) {
+                  return Card(
+                    child: ListTile(
+                      title: Text(AvailabilityCalendar.dateKey(d)),
+                      subtitle: Text(l10n.markBooked),
+                      trailing: Switch(
+                        value: true,
+                        activeThumbColor: AppColors.burgundy,
+                        onChanged: (_) {
+                          ref
+                              .read(vendorAvailabilityProvider.notifier)
+                              .upsertDate(d, AvailabilityStatus.available);
+                        },
+                      ),
+                    ),
+                  );
+                }),
+            ],
           );
         },
       ),

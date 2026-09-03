@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../vendor_profile/providers/vendor_provider.dart';
 import '../providers/booking_provider.dart';
 
 class BookingRequestScreen extends ConsumerStatefulWidget {
@@ -30,18 +31,41 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
     super.dispose();
   }
 
-  Future<void> _pickDate() async {
+  String _errorLabel(AppLocalizations l10n, Object error) {
+    final key = error is StateError ? error.message : error.toString();
+    switch (key) {
+      case 'event_date_booked':
+        return l10n.bookingDateBookedError;
+      case 'event_date_past':
+      case 'vendor_required':
+      case 'consumer_required':
+        return l10n.requiredField;
+      default:
+        return error.toString();
+    }
+  }
+
+  Future<void> _pickDate(Set<String> bookedKeys) async {
     final now = DateTime.now();
+    final first = DateTime(now.year, now.month, now.day);
+    var initial = _eventDate ?? now.add(const Duration(days: 30));
+    if (initial.isBefore(first)) initial = first;
+    while (AvailabilityCalendar.isBookedDate(initial, bookedKeys) &&
+        initial.isBefore(first.add(const Duration(days: 365 * 3)))) {
+      initial = initial.add(const Duration(days: 1));
+    }
     final picked = await showDatePicker(
       context: context,
-      initialDate: now.add(const Duration(days: 30)),
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365 * 3)),
+      initialDate: initial,
+      firstDate: first,
+      lastDate: first.add(const Duration(days: 365 * 3)),
+      selectableDayPredicate: (day) =>
+          !AvailabilityCalendar.isBookedDate(day, bookedKeys),
     );
     if (picked != null) setState(() => _eventDate = picked);
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(Set<String> bookedKeys) async {
     final l10n = AppLocalizations.of(context);
     final auth = ref.read(authProvider);
     if (!auth.isLoggedIn) {
@@ -64,7 +88,10 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
         guestCount: int.tryParse(_guestsCtrl.text),
         message: _messageCtrl.text.trim(),
       );
-      await ref.read(consumerBookingsProvider.notifier).submit(payload);
+      await ref.read(consumerBookingsProvider.notifier).submit(
+            payload,
+            bookedDateKeys: bookedKeys,
+          );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.bookingSuccess)),
@@ -73,7 +100,7 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text(_errorLabel(l10n, e))),
         );
       }
     } finally {
@@ -84,6 +111,8 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final bookedAsync = ref.watch(vendorBookedDatesProvider(widget.vendorId));
+    final bookedKeys = bookedAsync.valueOrNull ?? <String>{};
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bookingTitle)),
@@ -98,12 +127,40 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
               subtitle: Text(
                 _eventDate == null
                     ? l10n.pickDate
-                    : _eventDate!.toIso8601String().split('T').first,
+                    : AvailabilityCalendar.dateKey(_eventDate!),
               ),
               trailing: const Icon(Icons.calendar_today),
-              onTap: _pickDate,
+              onTap: () => _pickDate(bookedKeys),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            Text(
+              l10n.bookedDatesTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            bookedAsync.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (e, _) => Text(e.toString()),
+              data: (keys) {
+                if (keys.isEmpty) {
+                  return Text(l10n.noBookedDates);
+                }
+                final sorted = keys.toList()..sort();
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: sorted
+                      .map(
+                        (d) => Chip(
+                          label: Text(d),
+                          avatar: const Icon(Icons.event_busy, size: 16),
+                        ),
+                      )
+                      .toList(),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
             TextFormField(
               controller: _guestsCtrl,
               keyboardType: TextInputType.number,
@@ -120,7 +177,7 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
             ),
             const SizedBox(height: 28),
             FilledButton(
-              onPressed: _loading ? null : _submit,
+              onPressed: _loading ? null : () => _submit(bookedKeys),
               child: Text(l10n.submitBooking),
             ),
           ],

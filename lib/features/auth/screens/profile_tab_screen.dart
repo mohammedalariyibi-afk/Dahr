@@ -88,6 +88,11 @@ class ProfileTabScreen extends ConsumerWidget {
               onTap: () => context.push('/vendor-tools/edit'),
             ),
             ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: Text(l10n.managePhotos),
+              onTap: () => context.push('/vendor-tools/photos'),
+            ),
+            ListTile(
               leading: const Icon(Icons.calendar_month_outlined),
               title: Text(l10n.manageAvailability),
               onTap: () => context.push('/vendor-tools/availability'),

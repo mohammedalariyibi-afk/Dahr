@@ -84,14 +84,14 @@ class ConsumerBookingsScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(b.eventDate.toIso8601String().split('T').first),
+                      Text(AvailabilityCalendar.dateKey(b.eventDate)),
                       Text(_statusLabel(l10n, b.status)),
                       if (b.quotedAmountLyd != null)
                         Text(
                           '${l10n.quotedAmountDisplay}: '
                           '${AppConstants.formatPrice(b.quotedAmountLyd)}',
                         ),
-                      if (b.status == BookingStatus.completed)
+                      if (b.canLeaveReview)
                         Align(
                           alignment: AlignmentDirectional.centerEnd,
                           child: TextButton(

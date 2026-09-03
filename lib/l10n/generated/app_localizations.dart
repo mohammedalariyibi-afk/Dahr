@@ -1033,6 +1033,150 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'حالة العمولة'**
   String get commissionStatusLabel;
+
+  /// No description provided for @bookedDatesTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'التواريخ المحجوزة'**
+  String get bookedDatesTitle;
+
+  /// No description provided for @dateUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا التاريخ محجوز'**
+  String get dateUnavailable;
+
+  /// No description provided for @noBookedDates.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد تواريخ محجوزة'**
+  String get noBookedDates;
+
+  /// No description provided for @managePhotos.
+  ///
+  /// In ar, this message translates to:
+  /// **'إدارة الصور'**
+  String get managePhotos;
+
+  /// No description provided for @nextBookedDates.
+  ///
+  /// In ar, this message translates to:
+  /// **'أقرب التواريخ المحجوزة'**
+  String get nextBookedDates;
+
+  /// No description provided for @noUpcomingBooked.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد تواريخ محجوزة قادمة'**
+  String get noUpcomingBooked;
+
+  /// No description provided for @inboxFilterAll.
+  ///
+  /// In ar, this message translates to:
+  /// **'الكل'**
+  String get inboxFilterAll;
+
+  /// No description provided for @reviewNotCompleted.
+  ///
+  /// In ar, this message translates to:
+  /// **'يمكنك التقييم بعد اكتمال الحجز'**
+  String get reviewNotCompleted;
+
+  /// No description provided for @alreadyReviewed.
+  ///
+  /// In ar, this message translates to:
+  /// **'لقد قيّمت هذا الحجز مسبقاً'**
+  String get alreadyReviewed;
+
+  /// No description provided for @priceRangeRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل نطاق السعر بالدينار الليبي'**
+  String get priceRangeRequired;
+
+  /// No description provided for @priceRangeInvalid.
+  ///
+  /// In ar, this message translates to:
+  /// **'يجب أن يكون السعر الأعلى أكبر من أو يساوي السعر الأدنى'**
+  String get priceRangeInvalid;
+
+  /// No description provided for @whatsappRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'رقم واتساب مطلوب'**
+  String get whatsappRequired;
+
+  /// No description provided for @invalidWhatsapp.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل رقم واتساب ليبي صالح'**
+  String get invalidWhatsapp;
+
+  /// No description provided for @descriptionRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'الوصف مطلوب'**
+  String get descriptionRequired;
+
+  /// No description provided for @businessNameRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'اسم النشاط مطلوب'**
+  String get businessNameRequired;
+
+  /// No description provided for @reorderPhotosHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط مع السحب لإعادة الترتيب. الصورة الأولى هي الغلاف.'**
+  String get reorderPhotosHint;
+
+  /// No description provided for @deletePhoto.
+  ///
+  /// In ar, this message translates to:
+  /// **'حذف الصورة'**
+  String get deletePhoto;
+
+  /// No description provided for @photosEmpty.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف صوراً لأعمالك'**
+  String get photosEmpty;
+
+  /// No description provided for @coverPhoto.
+  ///
+  /// In ar, this message translates to:
+  /// **'الغلاف'**
+  String get coverPhoto;
+
+  /// No description provided for @vendorPhotosTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'المعرض'**
+  String get vendorPhotosTitle;
+
+  /// No description provided for @toggleAvailabilityHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط على تاريخ لتعيينه محجوزاً أو متاحاً'**
+  String get toggleAvailabilityHint;
+
+  /// No description provided for @setupVendorListing.
+  ///
+  /// In ar, this message translates to:
+  /// **'أكمل إعداد عرضك'**
+  String get setupVendorListing;
+
+  /// No description provided for @bookingDateBookedError.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر تاريخاً غير محجوز'**
+  String get bookingDateBookedError;
+
+  /// No description provided for @photoCountStat.
+  ///
+  /// In ar, this message translates to:
+  /// **'الصور'**
+  String get photoCountStat;
 }
 
 class _AppLocalizationsDelegate

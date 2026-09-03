@@ -151,7 +151,9 @@ final vendorReviewsProvider =
       .eq('vendor_id', vendorId)
       .eq('is_hidden', false)
       .order('created_at', ascending: false);
-  return (rows as List)
-      .map((e) => Review.fromJson(Map<String, dynamic>.from(e as Map)))
-      .toList();
+      return (rows as List)
+          .map((e) => Review.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList()
+          .where((r) => r.isVisibleToPublic)
+          .toList();
 });

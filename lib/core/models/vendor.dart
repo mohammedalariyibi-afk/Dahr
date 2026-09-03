@@ -1,3 +1,4 @@
+import '../constants/app_constants.dart';
 import 'enums.dart';
 
 class VendorPhoto {
@@ -21,6 +22,142 @@ class VendorPhoto {
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
     );
   }
+
+  VendorPhoto copyWith({int? sortOrder, String? storageUrl}) {
+    return VendorPhoto(
+      id: id,
+      vendorId: vendorId,
+      storageUrl: storageUrl ?? this.storageUrl,
+      sortOrder: sortOrder ?? this.sortOrder,
+    );
+  }
+}
+
+/// Storage helpers for the public `vendor-photos` bucket.
+/// Object path is `{auth.uid}/{uuid}.jpg` so existing RLS matches.
+abstract final class VendorPhotoStorage {
+  static const String bucket = 'vendor-photos';
+  static const String _publicMarker = '/object/public/vendor-photos/';
+
+  static String objectPath(String userId, String fileId) =>
+      '$userId/$fileId.jpg';
+
+  /// Extracts `{userId}/{file}` from a public Storage URL.
+  static String? objectPathFromPublicUrl(String url) {
+    final i = url.indexOf(_publicMarker);
+    if (i < 0) return null;
+    final rest = url.substring(i + _publicMarker.length).split('?').first;
+    if (rest.isEmpty) return null;
+    return Uri.decodeFull(rest);
+  }
+
+  /// Reorders [photos] and rewrites `sort_order` to 0..n-1.
+  ///
+  /// [newIndex] is the destination after the item is removed (Flutter
+  /// `onReorderItem` semantics).
+  static List<VendorPhoto> applyReorder(
+    List<VendorPhoto> photos,
+    int oldIndex,
+    int newIndex,
+  ) {
+    if (oldIndex < 0 || oldIndex >= photos.length) {
+      return List<VendorPhoto>.of(photos);
+    }
+    var target = newIndex;
+    if (target < 0) target = 0;
+    if (target > photos.length - 1) target = photos.length - 1;
+    final list = List<VendorPhoto>.of(photos);
+    final item = list.removeAt(oldIndex);
+    if (target > list.length) target = list.length;
+    list.insert(target, item);
+    return [
+      for (var i = 0; i < list.length; i++) list[i].copyWith(sortOrder: i),
+    ];
+  }
+}
+
+/// Validated payload for creating or updating a vendor listing.
+class VendorOnboardingPayload {
+  const VendorOnboardingPayload({
+    required this.profileId,
+    required this.businessName,
+    required this.category,
+    required this.city,
+    required this.description,
+    required this.whatsappNumber,
+    this.priceMin,
+    this.priceMax,
+    this.services = const [],
+  });
+
+  final String profileId;
+  final String businessName;
+  final VendorCategory category;
+  final CityCode city;
+  final String description;
+  final String whatsappNumber;
+  final double? priceMin;
+  final double? priceMax;
+  final List<String> services;
+
+  factory VendorOnboardingPayload.fromInput({
+    required String profileId,
+    required String businessName,
+    required VendorCategory category,
+    required CityCode city,
+    required String description,
+    required String whatsappNumber,
+    required String priceMinRaw,
+    required String priceMaxRaw,
+    String servicesRaw = '',
+  }) {
+    final services = servicesRaw
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+    return VendorOnboardingPayload(
+      profileId: profileId,
+      businessName: businessName.trim(),
+      category: category,
+      city: city,
+      description: description.trim(),
+      whatsappNumber: whatsappNumber.trim(),
+      priceMin: double.tryParse(priceMinRaw.trim()),
+      priceMax: double.tryParse(priceMaxRaw.trim()),
+      services: services,
+    );
+  }
+
+  /// Returns null if valid, otherwise an error key.
+  String? validate() {
+    if (profileId.isEmpty) return 'profile_required';
+    if (businessName.trim().isEmpty) return 'business_name_required';
+    if (description.trim().isEmpty) return 'description_required';
+    if (whatsappNumber.trim().isEmpty) return 'whatsapp_required';
+    if (!AppConstants.isValidLibyaPhone(whatsappNumber)) {
+      return 'whatsapp_invalid';
+    }
+    if (priceMin == null || priceMax == null) return 'price_range_required';
+    if (!priceMin!.isFinite || !priceMax!.isFinite) {
+      return 'price_range_required';
+    }
+    if (priceMin! <= 0 || priceMax! <= 0) return 'price_range_invalid';
+    if (priceMin! > priceMax!) return 'price_range_invalid';
+    return null;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'profile_id': profileId,
+        'business_name': businessName,
+        'category': category.name,
+        'city': city.name,
+        'description': description,
+        'price_min': priceMin,
+        'price_max': priceMax,
+        'whatsapp_number': AppConstants.toE164Libya(whatsappNumber),
+        'services': services,
+      };
 }
 
 class VendorProfile {
