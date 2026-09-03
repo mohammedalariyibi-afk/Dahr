@@ -23,10 +23,12 @@ dahr/
 
 ## Prerequisites
 
-- Flutter SDK 3.24+ ([install](https://docs.flutter.dev/get-started/install))
+- Flutter SDK 3.47+ ([install](https://docs.flutter.dev/get-started/install)) — Dart `>=3.5.0 <4.0.0`; photo reorder uses `onReorderItem` (3.44+)
 - Node.js 20+ (admin)
 - [Supabase CLI](https://supabase.com/docs/guides/cli) (local backend)
 - Docker (for local Supabase)
+
+CI runs `flutter analyze lib test` and `flutter test` on pull requests and pushes to `main` (no secrets, no live Dahr LY).
 
 ## Environment files
 
