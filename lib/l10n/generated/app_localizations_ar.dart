@@ -33,7 +33,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loginTitle => 'تسجيل الدخول';
 
   @override
-  String get loginSubtitle => 'أدخل بريدك الإلكتروني لاستلام رمز الدخول لمرة واحدة';
+  String get loginSubtitle =>
+      'أدخل بريدك الإلكتروني لاستلام رمز الدخول لمرة واحدة';
 
   @override
   String get phoneLabel => 'رقم الهاتف';
@@ -642,4 +643,16 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get roleNotAssignable =>
       'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.';
+
+  @override
+  String get guestCountInvalid => 'عدد الضيوف يجب أن يكون 1 على الأقل';
+
+  @override
+  String get messageTooLong => 'الرسالة طويلة جداً';
+
+  @override
+  String get ratingRequired => 'اختر تقييماً من 1 إلى 5';
+
+  @override
+  String get commentTooLong => 'التعليق طويل جداً';
 }
