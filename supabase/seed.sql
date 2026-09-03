@@ -39,7 +39,13 @@ BEGIN
       raw_app_meta_data,
       raw_user_meta_data,
       created_at,
-      updated_at
+      updated_at,
+      -- GoTrue scans these token columns as non-null strings; seeding them as
+      -- '' (not NULL) keeps Email OTP login working for demo users.
+      confirmation_token,
+      recovery_token,
+      email_change,
+      email_change_token_new
     ) VALUES (
       p_id,
       '00000000-0000-0000-0000-000000000000',
@@ -53,7 +59,11 @@ BEGIN
       '{"provider":"email","providers":["email"]}'::jsonb,
       jsonb_build_object('full_name', p_name, 'locale', 'ar'),
       now(),
-      now()
+      now(),
+      '',
+      '',
+      '',
+      ''
     );
   END IF;
 END;
