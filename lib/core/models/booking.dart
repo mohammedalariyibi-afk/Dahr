@@ -42,8 +42,8 @@ class BookingRequest {
   factory BookingRequest.fromJson(Map<String, dynamic> json) {
     VendorProfile? vendor;
     final vendorRaw = json['vendor_profiles'] ?? json['vendor'];
-    if (vendorRaw is Map<String, dynamic>) {
-      vendor = VendorProfile.fromJson(vendorRaw);
+    if (vendorRaw is Map) {
+      vendor = VendorProfile.fromJson(Map<String, dynamic>.from(vendorRaw));
     }
 
     return BookingRequest(

@@ -61,9 +61,10 @@ class RatingStars extends StatelessWidget {
 }
 
 class VerifiedBadge extends StatelessWidget {
-  const VerifiedBadge({super.key, this.compact = false});
+  const VerifiedBadge({super.key, this.compact = false, this.label});
 
   final bool compact;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +88,9 @@ class VerifiedBadge extends StatelessWidget {
           ),
           if (!compact) ...[
             const SizedBox(width: 4),
-            const Text(
-              'Verified',
-              style: TextStyle(
+            Text(
+              label ?? 'Verified',
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: AppColors.goldDark,
