@@ -2,7 +2,7 @@
 
 Cross-platform Flutter marketplace connecting couples with wedding vendors in Libya, plus a Next.js admin dashboard. Backend is **Supabase** (Auth, Postgres, Storage, RLS).
 
-> **Important:** Do **not** reuse the existing Zeen Supabase project. Create a **new** Supabase project for Dahr (or use local `supabase start`).
+> **Important:** Do **not** reuse the existing Zeen Supabase project. Use local `supabase start`, or the dedicated **Dahr LY** cloud project (never Zeen).
 
 ## Repo layout
 
@@ -10,13 +10,14 @@ Cross-platform Flutter marketplace connecting couples with wedding vendors in Li
 dahr/
   lib/                 # Flutter app (feature-first)
   test/
-  android/ ios/        # Minimal platform stubs — refresh with flutter create
+  android/ ios/        # Platform stubs (Android applicationId com.dahr.app)
   admin/               # Next.js admin (App Router + Tailwind)
   supabase/
-    migrations/        # Schema + RLS + storage
+    migrations/        # Schema + RLS + storage + commission
     seed.sql           # Demo vendors (Tripoli & Benghazi)
     config.toml
-  .env.example
+  .env.example         # Flutter env names (copy to gitignored .env)
+  admin/.env.example   # Admin NEXT_PUBLIC_* names (copy to .env.local)
   README.md
 ```
 
@@ -27,24 +28,65 @@ dahr/
 - [Supabase CLI](https://supabase.com/docs/guides/cli) (local backend)
 - Docker (for local Supabase)
 
-## 1. Supabase (local recommended)
+## Environment files
+
+`.env` and `admin/.env.local` are gitignored. Copy the examples and fill placeholders — never commit the Dahr LY anon key or any `service_role` key.
+
+| App | File to copy | Names the code reads |
+|-----|----------------|----------------------|
+| Flutter | `.env.example` → `.env` | `SUPABASE_URL`, `SUPABASE_ANON_KEY` (alias `SUPABASE_PUBLISHABLE_KEY`) |
+| Admin | `admin/.env.example` → `admin/.env.local` | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+
+Flutter does **not** read `NEXT_PUBLIC_*`. The admin browser client **only** reads `NEXT_PUBLIC_*`. Same URL and anon/publishable key, different names.
+
+How Flutter loads them (first non-empty wins):
+
+1. `--dart-define` or `--dart-define-from-file=.env` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, optional `SUPABASE_PUBLISHABLE_KEY`)
+2. `flutter_dotenv` from the bundled `.env.example` asset
+
+`.env` is not a Flutter asset (it is gitignored, so bundling it would break `flutter test` on a fresh clone). Pass real keys with `--dart-define-from-file=.env`.
+
+`supabase_flutter` `initialize()` uses `url` + `publishableKey` (the anon/publishable key, not `service_role`).
+
+## 1. Supabase
+
+Migrations (applied in filename order):
+
+- `supabase/migrations/20260328000001_init_schema.sql` — core schema, RLS, `vendor-photos` bucket
+- `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% vendor commission, `accept_booking_request` RPC
+
+### Local (`supabase start`)
 
 ```bash
 # From repo root
 supabase start
-# Copy API URL + anon key printed by the CLI into .env and admin/.env.local
-supabase db reset   # applies migrations + seed.sql
+supabase status          # API URL + anon (publishable) key
+supabase db reset        # applies both migrations + seed.sql
 ```
 
-Or create a **new** cloud project, then:
+Copy the printed **API URL** (`http://127.0.0.1:54321`) and **anon/publishable** key into `.env` and `admin/.env.local`.
+
+Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Phone OTP (+218) needs an SMS provider; the Flutter login screen is phone-first with **Continue with email** as fallback.
+
+Seeded local admin: `admin@dahr.ly` (password `password123` only if you enable password auth). Prefer Email OTP via Inbucket. Couple demo: `couple@dahr.ly`.
+
+### Cloud: Dahr LY
+
+Live project: **Dahr LY**, ref `cccusktgxrizfwpixddu`, region `eu-west-1`.  
+URL: `https://cccusktgxrizfwpixddu.supabase.co`
 
 ```bash
-supabase link --project-ref <your-new-project-ref>
-supabase db push
-# Run seed.sql in the SQL editor (optional for cloud)
+supabase link --project-ref cccusktgxrizfwpixddu
+supabase db push         # no-op if init + booking_commission are already applied
+# seed.sql is optional on cloud (SQL editor); do not rewrite schema
 ```
 
-Enable **Email OTP** in Auth settings for day-one login. Phone OTP (+218) needs an SMS provider (Twilio, etc.) — the Flutter app exposes phone first and **Continue with email** as fallback.
+Put that URL and the **anon / publishable** key (Project Settings → API) in `.env` / `admin/.env.local`. Do not put real keys in git.
+
+Enable **Email OTP** (Authentication → Providers → Email) for day-one login. Add redirect URLs:
+
+- `http://localhost:3000/auth/callback`
+- production admin origin `/auth/callback` if you deploy the dashboard
 
 ### Promote an admin
 
@@ -52,26 +94,27 @@ Enable **Email OTP** in Auth settings for day-one login. Phone OTP (+218) needs 
 UPDATE public.profiles SET role = 'admin' WHERE id = '<auth-user-uuid>';
 ```
 
-Seeded local admin email: `admin@dahr.ly` (password `password123` only if you enable password auth; prefer email OTP in local Inbucket at http://127.0.0.1:54324).
+Admin login uses Email OTP and `shouldCreateUser: false` — the user must already exist (seed or this SQL).
 
 ## 2. Flutter app
 
 ```bash
 cp .env.example .env
-# Set SUPABASE_URL and SUPABASE_ANON_KEY
+# Set SUPABASE_URL and SUPABASE_ANON_KEY (local status output, or Dahr LY anon key)
 
-# Refresh full Android/iOS tooling if needed:
-flutter create . --project-name dahr --org com.dahr
+# Platform folders already exist (Android applicationId com.dahr.app).
+# Refresh tooling only if android/ or ios/ are missing:
+# flutter create . --project-name dahr --org com.dahr --platforms=android,ios
 
 flutter pub get
-flutter run
+flutter run --dart-define-from-file=.env
 ```
 
-Arabic is the default locale (RTL). Switch language on the first screen.
+Arabic is the default locale (RTL). Switch language on the first screen. Android cleartext is enabled so local `http://127.0.0.1:54321` works on device/emulator.
 
 ## Try the vendor product flow
 
-Guest browse of Discover stays open. Favorites, booking requests, and reviews still require sign-in.
+Guest browse of Discover stays open. Favorites, booking requests, and reviews still require sign-in (router redirects to login and returns afterward).
 
 1. **Onboarding** — Sign in, choose **I'm a vendor** (or **Become a vendor** on Profile). Fill business name, category, city, WhatsApp, description, and price range (LYD). Submit. The listing waits for admin approval (`is_approved`).
 2. **Photos** — Profile → Vendor tools → **Manage photos**, or Dashboard → **Manage photos**. Upload to the `vendor-photos` bucket, drag to reorder (first photo is the cover), delete.
@@ -85,7 +128,7 @@ Vendor dashboard overview: pending requests, unpaid commission owed, photo count
 
 ```bash
 flutter test
-flutter analyze
+flutter analyze lib test
 ```
 
 ## 3. Admin (Next.js)
@@ -93,7 +136,7 @@ flutter analyze
 ```bash
 cd admin
 cp .env.example .env.local
-# Same SUPABASE URL + anon key as Flutter (NEXT_PUBLIC_*)
+# Same Supabase URL + anon key as Flutter, with NEXT_PUBLIC_ prefix
 
 npm install
 npm run dev

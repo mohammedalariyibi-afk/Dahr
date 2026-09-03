@@ -1,17 +1,19 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../config/dahr_env.dart';
 
 abstract final class DahrSupabase {
   static Future<void> initialize() async {
-    final url = dotenv.env['SUPABASE_URL']?.trim() ?? '';
-    final anonKey = dotenv.env['SUPABASE_ANON_KEY']?.trim() ?? '';
-    if (url.isEmpty ||
-        anonKey.isEmpty ||
-        anonKey == 'your-local-anon-key') {
+    await DahrEnv.load();
+    final url = DahrEnv.supabaseUrl;
+    final anonKey = DahrEnv.supabaseAnonKey;
+    if (DahrEnv.isMissingOrPlaceholder(url: url, anonKey: anonKey)) {
       throw StateError(
-        'Missing or placeholder SUPABASE_URL / SUPABASE_ANON_KEY. '
-        'Copy .env.example to .env and set local/new-project values '
-        '(do not use the Zeen project).',
+        'Missing or placeholder SUPABASE_URL / SUPABASE_ANON_KEY '
+        '(alias SUPABASE_PUBLISHABLE_KEY). '
+        'Copy .env.example to .env and run with '
+        '--dart-define-from-file=.env, or pass the same names as dart-define. '
+        'Use local `supabase start` or the Dahr LY project — do not use Zeen.',
       );
     }
     await Supabase.initialize(url: url, publishableKey: anonKey);

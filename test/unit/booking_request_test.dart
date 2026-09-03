@@ -61,6 +61,38 @@ void main() {
       );
     });
 
+    test('validate rejects empty consumer and overly long messages', () {
+      final missingConsumer = BookingRequestPayload(
+        vendorId: 'v1',
+        consumerId: '',
+        eventDate: DateTime.now().add(const Duration(days: 10)),
+      );
+      expect(missingConsumer.validate(), 'consumer_required');
+
+      final longMessage = BookingRequestPayload(
+        vendorId: 'v1',
+        consumerId: 'c1',
+        eventDate: DateTime.now().add(const Duration(days: 10)),
+        message: 'x' * 2001,
+      );
+      expect(longMessage.validate(), 'message_too_long');
+    });
+
+    test('validate allows today and requires create payload to stay pending',
+        () {
+      final now = DateTime.now();
+      final today = BookingRequestPayload(
+        vendorId: 'v1',
+        consumerId: 'c1',
+        eventDate: DateTime(now.year, now.month, now.day),
+        guestCount: 80,
+        message: 'Please hold this date',
+      );
+      expect(today.validate(), isNull);
+      expect(today.toJson()['status'], 'pending');
+      expect(today.toJson().containsKey('quoted_amount_lyd'), isFalse);
+    });
+
     test('validate accepts future booking', () {
       final ok = BookingRequestPayload(
         vendorId: 'v1',
