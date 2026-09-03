@@ -17,11 +17,16 @@ abstract final class DahrEnv {
   static const compileTimePublishableKey =
       String.fromEnvironment('SUPABASE_PUBLISHABLE_KEY');
 
+  static const dahrLyProjectRef = 'cccusktgxrizfwpixddu';
+  static const dahrLyHost = 'cccusktgxrizfwpixddu.supabase.co';
+  static const dahrLyUrl = 'https://cccusktgxrizfwpixddu.supabase.co';
+
   static const placeholderKeys = {
     '',
     'your-local-anon-key',
     'your-anon-key',
     'your-publishable-key',
+    '<Project Settings → API → anon / publishable key>',
   };
 
   static const envExampleAsset = '.env.example';
@@ -117,5 +122,42 @@ abstract final class DahrEnv {
     } catch (_) {
       return false;
     }
+  }
+
+  /// Store / Play AAB builds must target live Dahr LY over HTTPS.
+  static bool isDahrLyStoreUrl(String url) {
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null || uri.scheme != 'https') return false;
+    if (uri.host.toLowerCase() != dahrLyHost) return false;
+    final path = uri.path.replaceAll(RegExp(r'/+$'), '');
+    if (path.isNotEmpty) return false;
+    if (uri.hasQuery || uri.fragment.isNotEmpty) return false;
+    return true;
+  }
+
+  /// Non-null reason a `.env` / dart-define file must not be used for a
+  /// store build. Runtime [isAllowedSupabaseUrl] still allows loopback for
+  /// local `flutter run --release`.
+  static String? storeReleaseBlocker({
+    required String url,
+    required String anonKey,
+  }) {
+    final trimmedUrl = url.trim();
+    final trimmedKey = anonKey.trim();
+    if (isMissingOrPlaceholder(url: trimmedUrl, anonKey: trimmedKey)) {
+      return 'Missing or placeholder SUPABASE_URL / SUPABASE_ANON_KEY '
+          '(alias SUPABASE_PUBLISHABLE_KEY). Copy .env.example to .env and '
+          'set the Dahr LY anon / publishable key.';
+    }
+    if (looksLikeSecretKey(trimmedKey)) {
+      return 'SUPABASE_ANON_KEY looks like a secret/service_role key. '
+          'Use the anon / publishable key only.';
+    }
+    if (!isDahrLyStoreUrl(trimmedUrl)) {
+      return 'Store builds must use $dahrLyUrl '
+          '(project $dahrLyProjectRef). Do not use Zeen, local supabase, '
+          'or another project.';
+    }
+    return null;
   }
 }

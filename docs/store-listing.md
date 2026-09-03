@@ -2,9 +2,9 @@
 
 Paste into App Store Connect and Google Play Console. Arabic is the primary listing language; English is the localization.
 
-Replace `{ADMIN_ORIGIN}` with the deployed admin origin when filling privacy/terms URL fields (not part of the description text). Support contact is **WhatsApp** (Mohammed’s business number) plus `mohammedalariyibi@gmail.com`.
+Privacy / terms URL fields (not part of the description text): `https://mohammedalariyibi-afk.github.io/Dahr/privacy` and `https://mohammedalariyibi-afk.github.io/Dahr/terms`. Support contact is **WhatsApp** (Mohammed’s business number) plus `mohammedalariyibi@gmail.com`.
 
-This is marketing copy, not a legal document. Privacy/terms stay on `{ADMIN_ORIGIN}/privacy` and `{ADMIN_ORIGIN}/terms`.
+This is marketing copy, not a legal document.
 
 Character limits to respect when pasting:
 
@@ -59,8 +59,8 @@ What Dahr does not do
 
 Guest browse of Discover works without an account. Booking, favorites, and vendor tools require sign-in.
 
-Privacy: {ADMIN_ORIGIN}/privacy
-Terms: {ADMIN_ORIGIN}/terms
+Privacy: https://mohammedalariyibi-afk.github.io/Dahr/privacy
+Terms: https://mohammedalariyibi-afk.github.io/Dahr/terms
 Support: WhatsApp (listing / store contact number) or mohammedalariyibi@gmail.com
 
 Operator: Mohammed Alariyibi. Product: Dahr.
@@ -107,8 +107,8 @@ Operator: Mohammed Alariyibi. Product: Dahr.
 
 تصفّح الاكتشاف متاح للزائر دون حساب. الحجز والمفضلة وأدوات المورّد تتطلّب تسجيل الدخول.
 
-الخصوصية: {ADMIN_ORIGIN}/privacy
-الشروط: {ADMIN_ORIGIN}/terms
+الخصوصية: https://mohammedalariyibi-afk.github.io/Dahr/privacy
+الشروط: https://mohammedalariyibi-afk.github.io/Dahr/terms
 الدعم: واتساب (رقم التواصل في المتجر) أو mohammedalariyibi@gmail.com
 
 المشغّل: محمد العريبي. المنتج: دهر.

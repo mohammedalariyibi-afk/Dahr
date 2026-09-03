@@ -139,4 +139,102 @@ void main() {
       expect(DahrEnv.looksLikeSecretKey('anon-not-a-jwt'), isFalse);
     });
   });
+
+  group('DahrEnv store release preflight', () {
+    const anonJwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.'
+        'eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIn0.sig';
+
+    test('accepts Dahr LY https URL with a non-placeholder anon key', () {
+      expect(
+        DahrEnv.isDahrLyStoreUrl(DahrEnv.dahrLyUrl),
+        isTrue,
+      );
+      expect(
+        DahrEnv.storeReleaseBlocker(
+          url: DahrEnv.dahrLyUrl,
+          anonKey: anonJwt,
+        ),
+        isNull,
+      );
+    });
+
+    test('rejects placeholders, loopback, other projects, and service_role', () {
+      expect(
+        DahrEnv.storeReleaseBlocker(
+          url: DahrEnv.dahrLyUrl,
+          anonKey: 'your-local-anon-key',
+        ),
+        contains('placeholder'),
+      );
+      expect(
+        DahrEnv.storeReleaseBlocker(
+          url: 'http://127.0.0.1:54321',
+          anonKey: anonJwt,
+        ),
+        contains(DahrEnv.dahrLyUrl),
+      );
+      expect(
+        DahrEnv.storeReleaseBlocker(
+          url: 'https://zeen.supabase.co',
+          anonKey: anonJwt,
+        ),
+        contains(DahrEnv.dahrLyProjectRef),
+      );
+      expect(
+        DahrEnv.storeReleaseBlocker(
+          url: 'http://cccusktgxrizfwpixddu.supabase.co',
+          anonKey: anonJwt,
+        ),
+        isNotNull,
+      );
+      const header = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+      final payload = base64Url.encode(
+        utf8.encode('{"role":"service_role","iss":"supabase"}'),
+      );
+      expect(
+        DahrEnv.storeReleaseBlocker(
+          url: DahrEnv.dahrLyUrl,
+          anonKey: '$header.$payload.sig',
+        ),
+        contains('service_role'),
+      );
+    });
+
+    test('store script rejects .env.example and a missing file', () async {
+      final example = await Process.run(
+        'dart',
+        ['run', 'tool/check_store_env.dart', '.env.example'],
+      );
+      expect(example.exitCode, isNot(0), reason: example.stderr.toString());
+      expect(example.stderr.toString(), contains('placeholder'));
+
+      final missing = await Process.run(
+        'dart',
+        [
+          'run',
+          'tool/check_store_env.dart',
+          'tool/.missing-store-env-for-test',
+        ],
+      );
+      expect(missing.exitCode, isNot(0));
+      expect(missing.stderr.toString(), contains('missing'));
+    });
+
+    test('store script accepts a Dahr LY dart-define file', () async {
+      final file = File('tool/.tmp-store-env-ok');
+      addTearDown(() {
+        if (file.existsSync()) file.deleteSync();
+      });
+      file.writeAsStringSync(
+        'SUPABASE_URL=${DahrEnv.dahrLyUrl}\n'
+        'SUPABASE_ANON_KEY=$anonJwt\n',
+      );
+      final result = await Process.run(
+        'dart',
+        ['run', 'tool/check_store_env.dart', file.path],
+      );
+      expect(result.exitCode, 0, reason: '${result.stdout}${result.stderr}');
+      expect(result.stdout.toString(), contains(DahrEnv.dahrLyProjectRef));
+    });
+  });
 }
