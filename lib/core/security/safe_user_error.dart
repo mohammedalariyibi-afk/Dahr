@@ -23,7 +23,6 @@ abstract final class SafeUserError {
     'date_has_accepted_booking',
     'vendor_not_approved',
     'booking_must_be_pending',
-    'guest_count_invalid',
     'profile_required',
     'business_name_required',
     'description_required',
