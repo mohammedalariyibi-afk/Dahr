@@ -10,12 +10,14 @@ Cross-platform Flutter marketplace connecting couples with wedding vendors in Li
 dahr/
   lib/                 # Flutter app (feature-first)
   test/
-  android/ ios/        # Platform stubs (Android applicationId com.dahr.app)
+  android/ ios/        # Platform stubs (applicationId / bundle id com.dahr.dahr)
   admin/               # Next.js admin (App Router + Tailwind)
   supabase/
     migrations/        # Schema + RLS + storage + commission
     seed.sql           # Demo vendors (Tripoli & Benghazi)
     config.toml
+  docs/store-listing.md
+  STORE.md             # App Store + Google Play submit checklist
   .env.example         # Flutter env names (copy to gitignored .env)
   admin/.env.example   # Admin NEXT_PUBLIC_* names (copy to .env.local)
   README.md
@@ -74,7 +76,7 @@ supabase db reset        # applies all migrations + seed.sql
 
 Copy the printed **API URL** (`http://127.0.0.1:54321`) and **anon/publishable** key into `.env` and `admin/.env.local`.
 
-Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Flutter and admin sign-in are **Email OTP only** (no SMS / phone-first path).
+Local Email OTP: Inbucket at http://127.0.0.1:54324 (`enable_confirmations = false` in `supabase/config.toml`). Flutter and admin sign-in are **Email OTP only** (no SMS / phone-first path). Do not enable Twilio/SMS for store submit.
 
 Seeded local admin: `admin@dahr.ly` (password `password123` only if you enable password auth). Prefer Email OTP via Inbucket. Couple demo: `couple@dahr.ly`.
 
@@ -110,15 +112,13 @@ Admin login uses Email OTP and `shouldCreateUser: false` — the user must alrea
 cp .env.example .env
 # Set SUPABASE_URL and SUPABASE_ANON_KEY (local status output, or Dahr LY anon key)
 
-# Platform folders already exist (Android applicationId com.dahr.app).
-# Refresh tooling only if android/ or ios/ are missing:
-# flutter create . --project-name dahr --org com.dahr --platforms=android,ios
-
 flutter pub get
 flutter run --dart-define-from-file=.env
 ```
 
-Arabic is the default locale (RTL). Switch language on the first screen. Android cleartext is enabled so local `http://127.0.0.1:54321` works on device/emulator. Sign-in is Email OTP (same as admin).
+Arabic is the default locale (RTL). Switch language on the first screen. Sign-in is Email OTP (same as admin). Android allows HTTP **only** to `10.0.2.2` / `127.0.0.1` / `localhost` (local `supabase start`); production Dahr LY is HTTPS.
+
+Identifiers: Android `applicationId` and iOS bundle id are **`com.dahr.dahr`** (org `com.dahr` + project name `dahr`). See **Store packaging** below.
 
 ## Try the vendor product flow
 
@@ -188,20 +188,91 @@ Couples still settle with the vendor off-platform (WhatsApp). When a vendor **ac
 
 Admins record offline collection on **Commissions**: **Mark paid** or **Waive**. That is the only way a vendor’s 10% is marked paid in v1.
 
-## Store listing (Apple / Google Play)
+## Store packaging (Apple / Google Play)
 
-Use the **deployed admin origin** for the public URLs reviewers ask for:
+Full checklist: **[STORE.md](STORE.md)**. Placeholder AR+EN listing copy: **[docs/store-listing.md](docs/store-listing.md)**.
 
-| Field | URL / path |
-|-------|-------------|
-| Privacy policy | `{ADMIN_ORIGIN}/privacy` |
-| Terms of use | `{ADMIN_ORIGIN}/terms` |
+Ship target: Saturday 5 September 2026. Mohammed signs and uploads; this repo does not contain keystores, `.p12`, or `key.properties`.
 
-In the Flutter app the same documents are under Profile → Privacy policy / Terms of use (`/legal/privacy`, `/legal/terms`), Arabic default and English.
+| Field | Value |
+|-------|--------|
+| Org / bundle root | `com.dahr` |
+| Android `applicationId` | `com.dahr.dahr` |
+| iOS bundle identifier | `com.dahr.dahr` |
+| Privacy | `{ADMIN_ORIGIN}/privacy` |
+| Terms | `{ADMIN_ORIGIN}/terms` |
+| Account deletion | Profile → Delete account |
+| Auth to declare | Email OTP only |
+| IAP / payments | None |
+| Contact | WhatsApp + `mohammedalariyibi@gmail.com` |
+| Languages | Arabic + English |
+| Currency | LYD |
 
-**Account deletion (guideline 5.1.1(v)):** signed-in users delete from **Profile → Delete account** (confirm dialog). No support email is required. The app calls the `delete_own_account` RPC, which deletes `auth.users` for `auth.uid()` only (cascade `profiles`, vendor listing/photos as FKs allow). Fallback if the in-app flow fails: email `mohammedalariyibi@gmail.com` from the same email as the account.
+In the Flutter app the legal documents are also under Profile → Privacy policy / Terms of use (`/legal/privacy`, `/legal/terms`).
 
-Copy is a **starting policy**, not law-firm work. Operator: Mohammed Alariyibi. Backend: Dahr LY, `eu-west-1`. No card data is stored.
+**Account deletion (guideline 5.1.1(v)):** signed-in users delete from **Profile → Delete account** (confirm dialog). The app calls `delete_own_account` (`auth.uid()` only; cascade `profiles`, vendor listing/photos as FKs allow). Fallback: email `mohammedalariyibi@gmail.com` from the same address as the account.
+
+Copy on the legal pages is a **starting policy**, not law-firm work. Operator: Mohammed Alariyibi. Backend: Dahr LY, `eu-west-1`. No card data is stored.
+
+Screenshots to capture: Discover, vendor detail, booking request, vendor inbox/dashboard, login.
+
+### Refresh `android/` and `ios/` without wiping Dart
+
+Platform folders are complete Flutter 3.47 stubs (Kotlin DSL, Xcode project, default icons). **Never delete `lib/` or `test/`.** Do not pass `--overwrite` unless you have just backed up the Dahr customizations listed in step 3.
+
+```bash
+# From repo root. Flutter 3.47+ (CI pins 3.47.2).
+
+# 1. Back up files this repo customizes (safe even if create skips them):
+mkdir -p /tmp/dahr-platform-custom
+cp android/app/src/main/AndroidManifest.xml /tmp/dahr-platform-custom/
+cp android/app/src/main/res/xml/network_security_config.xml /tmp/dahr-platform-custom/
+cp android/app/build.gradle.kts /tmp/dahr-platform-custom/
+cp ios/Runner/Info.plist /tmp/dahr-platform-custom/
+
+# 2. Fill in any missing template files. Leaves lib/, test/ (except a dummy
+#    test/widget_test.dart), and pubspec.yaml alone:
+flutter create . --project-name dahr --org com.dahr --platforms=android,ios
+
+#    If create added test/widget_test.dart (counter smoke test), delete it.
+#    This repo's tests are test/unit/ and test/widget/. Do not pass --overwrite.
+
+# 3. If a template reset your customizations, restore them. Required Dahr bits:
+#    - applicationId / namespace / PRODUCT_BUNDLE_IDENTIFIER = com.dahr.dahr
+#    - Android label "Dahr"; INTERNET on the main manifest
+#    - res/xml/network_security_config.xml (cleartext only for local Supabase)
+#    - queries: https, http, com.whatsapp
+#    - Info.plist: CFBundleDevelopmentRegion=ar, iPhone portrait, dahr URL scheme,
+#      LSApplicationQueriesSchemes (whatsapp, https, http), camera/photo usage strings
+#    - release signing stays debug in git; Mohammed adds a local key.properties to upload
+
+# 4. Confirm identifiers:
+grep applicationId android/app/build.gradle.kts
+grep PRODUCT_BUNDLE_IDENTIFIER ios/Runner.xcodeproj/project.pbxproj
+```
+
+If `flutter create .` errors with “unable to detect the type of project”, `.metadata` is broken (`project_type: app` is required). Recover by creating a sibling project and copying platforms only:
+
+```bash
+flutter create /tmp/dahr-platform --project-name dahr --org com.dahr --platforms=android,ios
+# Copy /tmp/dahr-platform/android and .../ios into the repo (not lib/ or pubspec.yaml).
+# Copy /tmp/dahr-platform/.metadata over the repo .metadata.
+# Re-apply the customizations in step 3.
+```
+
+Do **not** run `flutter create` without `--platforms=android,ios` if you want to avoid extra desktop/web folders.
+
+### Build artifacts (Mohammed uploads)
+
+```bash
+# Play (AAB) — requires local signing for a store upload
+flutter build appbundle --dart-define-from-file=.env
+
+# App Store (IPA) — Xcode Team on Mohammed’s Mac
+flutter build ipa --dart-define-from-file=.env
+```
+
+Use Dahr LY keys in `.env`. Never Zeen. Never `service_role`.
 
 ## Demo seed
 
