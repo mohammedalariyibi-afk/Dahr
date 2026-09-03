@@ -316,9 +316,10 @@ INSERT INTO public.availability (vendor_id, date, status) VALUES
 ('c0000000-0000-4000-8000-000000000005', CURRENT_DATE + 35, 'booked')
 ON CONFLICT DO NOTHING;
 
--- Completed booking + review for demo
+-- Completed + accepted bookings for demo (10% commission tracked, unpaid until admin marks paid)
 INSERT INTO public.booking_requests (
-  id, vendor_id, consumer_id, event_date, guest_count, message, status
+  id, vendor_id, consumer_id, event_date, guest_count, message, status,
+  quoted_amount_lyd
 ) VALUES (
   'd0000000-0000-4000-8000-000000000001',
   'c0000000-0000-4000-8000-000000000003',
@@ -326,7 +327,8 @@ INSERT INTO public.booking_requests (
   CURRENT_DATE - 14,
   180,
   'نحتاج تصوير كامل ليوم الزفاف.',
-  'completed'
+  'completed',
+  3500
 ),
 (
   'd0000000-0000-4000-8000-000000000002',
@@ -335,7 +337,18 @@ INSERT INTO public.booking_requests (
   CURRENT_DATE + 60,
   250,
   'حجز القاعة مع التزيين الأساسي.',
-  'pending'
+  'pending',
+  NULL
+),
+(
+  'd0000000-0000-4000-8000-000000000003',
+  'c0000000-0000-4000-8000-000000000005',
+  'a0000000-0000-4000-8000-000000000002',
+  CURRENT_DATE + 40,
+  200,
+  'ضيافة ليوم الزفاف.',
+  'accepted',
+  4500
 )
 ON CONFLICT (id) DO NOTHING;
 

@@ -1,3 +1,4 @@
+import 'commission.dart';
 import 'enums.dart';
 import 'vendor.dart';
 
@@ -10,6 +11,11 @@ class BookingRequest {
     this.guestCount,
     this.message = '',
     this.status = BookingStatus.pending,
+    this.quotedAmountLyd,
+    this.commissionRate = CommissionMath.defaultRate,
+    this.commissionAmountLyd,
+    this.commissionStatus,
+    this.commissionPaidAt,
     this.createdAt,
     this.vendor,
   });
@@ -21,8 +27,17 @@ class BookingRequest {
   final int? guestCount;
   final String message;
   final BookingStatus status;
+  final double? quotedAmountLyd;
+  final double commissionRate;
+  final double? commissionAmountLyd;
+  final CommissionStatus? commissionStatus;
+  final DateTime? commissionPaidAt;
   final DateTime? createdAt;
   final VendorProfile? vendor;
+
+  bool get hasQuote => quotedAmountLyd != null;
+  bool get isCommissionUnpaid =>
+      commissionStatus == CommissionStatus.unpaid;
 
   factory BookingRequest.fromJson(Map<String, dynamic> json) {
     VendorProfile? vendor;
@@ -39,6 +54,17 @@ class BookingRequest {
       guestCount: (json['guest_count'] as num?)?.toInt(),
       message: (json['message'] as String?) ?? '',
       status: BookingStatus.fromString(json['status'] as String?),
+      quotedAmountLyd: CommissionMath.parseLyd(json['quoted_amount_lyd']),
+      commissionRate:
+          CommissionMath.parseLyd(json['commission_rate']) ??
+              CommissionMath.defaultRate,
+      commissionAmountLyd:
+          CommissionMath.parseLyd(json['commission_amount_lyd']),
+      commissionStatus:
+          CommissionStatus.tryParse(json['commission_status'] as String?),
+      commissionPaidAt: json['commission_paid_at'] != null
+          ? DateTime.tryParse(json['commission_paid_at'] as String)
+          : null,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
@@ -57,6 +83,9 @@ class BookingRequest {
 
   BookingRequest copyWith({
     BookingStatus? status,
+    double? quotedAmountLyd,
+    double? commissionAmountLyd,
+    CommissionStatus? commissionStatus,
     VendorProfile? vendor,
   }) {
     return BookingRequest(
@@ -67,6 +96,11 @@ class BookingRequest {
       guestCount: guestCount,
       message: message,
       status: status ?? this.status,
+      quotedAmountLyd: quotedAmountLyd ?? this.quotedAmountLyd,
+      commissionRate: commissionRate,
+      commissionAmountLyd: commissionAmountLyd ?? this.commissionAmountLyd,
+      commissionStatus: commissionStatus ?? this.commissionStatus,
+      commissionPaidAt: commissionPaidAt,
       createdAt: createdAt,
       vendor: vendor ?? this.vendor,
     );
@@ -108,5 +142,54 @@ class BookingRequestPayload {
     if (guestCount != null && guestCount! < 1) return 'guest_count_invalid';
     if (message.length > 2000) return 'message_too_long';
     return null;
+  }
+}
+
+/// Vendor accept payload: a quote in LYD is required; commission is 10%.
+class AcceptBookingPayload {
+  const AcceptBookingPayload({
+    required this.bookingId,
+    required this.quotedAmountLyd,
+  });
+
+  final String bookingId;
+  final double quotedAmountLyd;
+
+  static const double commissionRate = CommissionMath.defaultRate;
+
+  double get commissionAmountLyd =>
+      CommissionMath.amountDue(quotedAmountLyd, rate: commissionRate);
+
+  Map<String, dynamic> toRpcParams() => {
+        'p_booking_id': bookingId,
+        'p_quoted_amount_lyd': quotedAmountLyd,
+      };
+
+  /// Returns null if valid, otherwise an error key.
+  String? validate() {
+    if (bookingId.isEmpty) return 'booking_required';
+    if (!quotedAmountLyd.isFinite || quotedAmountLyd <= 0) {
+      return 'quoted_amount_required';
+    }
+    return null;
+  }
+
+  /// Direct status updates cannot mark a booking accepted — use this payload.
+  static void assertNotBareAccept(BookingStatus status) {
+    if (status == BookingStatus.accepted) {
+      throw StateError('quoted_amount_required');
+    }
+  }
+
+  /// Parses vendor input and validates. Null amount → `quoted_amount_required`.
+  factory AcceptBookingPayload.fromInput({
+    required String bookingId,
+    required String quotedAmountRaw,
+  }) {
+    final parsed = CommissionMath.parseQuotedAmount(quotedAmountRaw);
+    return AcceptBookingPayload(
+      bookingId: bookingId,
+      quotedAmountLyd: parsed ?? 0,
+    );
   }
 }

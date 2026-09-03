@@ -140,5 +140,20 @@
   "requiredField": "هذا الحقل مطلوب",
   "photosLabel": "الصور",
   "addPhoto": "إضافة صورة",
-  "photoUploadFailed": "تعذر رفع الصورة"
+  "photoUploadFailed": "تعذر رفع الصورة",
+  "quotedAmountLabel": "المبلغ المتفق عليه (د.ل)",
+  "quotedAmountHint": "المبلغ المتفق عليه مع الزوجين",
+  "commissionDueLabel": "عمولة دهر (10%)",
+  "acceptBookingTitle": "قبول الحجز",
+  "confirmAccept": "تأكيد القبول",
+  "quotedAmountRequired": "أدخل مبلغاً أكبر من صفر",
+  "commissionUnpaid": "غير مدفوعة",
+  "commissionPaid": "مدفوعة",
+  "commissionWaived": "معفاة",
+  "unpaidCommissionOwed": "العمولة المستحقة لدهر",
+  "noUnpaidCommission": "لا توجد عمولة مستحقة",
+  "quotedAmountDisplay": "عرض السعر",
+  "commissionNoteVendor": "تدفع 10٪ من هذا المبلغ لدهر، ويُحصَّل خارج التطبيق.",
+  "invalidQuotedAmount": "أدخل مبلغاً صالحاً بالدينار الليبي",
+  "commissionStatusLabel": "حالة العمولة"
 }

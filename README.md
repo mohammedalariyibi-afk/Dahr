@@ -91,7 +91,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 — only users with `profiles.role = 'admin'` can access Dashboard / Vendors / Reports.
+Open http://localhost:3000 — only users with `profiles.role = 'admin'` can access Dashboard / Vendors / Commissions / Reports.
 
 Add Auth redirect URL: `http://localhost:3000/auth/callback`.
 
@@ -108,12 +108,14 @@ Add Auth redirect URL: `http://localhost:3000/auth/callback`.
 
 ## MVP scope
 
-**In:** discovery, filters, favorites, booking requests, vendor dashboard/inbox/availability/photos, reviews after completed bookings, admin approve/verify/moderate.
+**In:** discovery, filters, favorites, booking requests, vendor dashboard/inbox/availability/photos, reviews after completed bookings, admin approve/verify/moderate, **10% booking commission tracking** (vendor-paid, recorded in LYD).
 
-**Out:** in-app payments, chat, push notifications, maps, package bundling.
+**Out:** in-app card payments, Stripe, Apple IAP, Google Play Billing, chat, push notifications, maps, package bundling.
 
-Payments can attach later to `booking_requests` without restructuring the app.
+Couples still settle with the vendor off-platform (WhatsApp). When a vendor **accepts** a request they must enter a quoted amount in LYD. The database stores `quoted_amount_lyd`, computes `commission_amount_lyd` at 10%, and sets `commission_status = unpaid`. Completing a booking does **not** mark the commission paid.
+
+Admins record offline collection on **Commissions**: **Mark paid** or **Waive**. That is the only way a vendor’s 10% is marked paid in v1.
 
 ## Demo seed
 
-14 approved vendors across categories in Tripoli and Benghazi, sample photos, one completed booking + review, one pending booking, and an admin profile. See `supabase/seed.sql`.
+14 approved vendors across categories in Tripoli and Benghazi, sample photos, one completed booking + review (with unpaid 10% commission), one accepted booking with unpaid commission, one pending booking, and an admin profile. See `supabase/seed.sql`.

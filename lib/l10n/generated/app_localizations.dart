@@ -172,6 +172,21 @@ abstract class AppLocalizations {
   String get photosLabel;
   String get addPhoto;
   String get photoUploadFailed;
+  String get quotedAmountLabel;
+  String get quotedAmountHint;
+  String get commissionDueLabel;
+  String get acceptBookingTitle;
+  String get confirmAccept;
+  String get quotedAmountRequired;
+  String get commissionUnpaid;
+  String get commissionPaid;
+  String get commissionWaived;
+  String get unpaidCommissionOwed;
+  String get noUnpaidCommission;
+  String get quotedAmountDisplay;
+  String get commissionNoteVendor;
+  String get invalidQuotedAmount;
+  String get commissionStatusLabel;
 }
 
 class _AppLocalizationsDelegate

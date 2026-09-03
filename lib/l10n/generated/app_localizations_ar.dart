@@ -425,4 +425,50 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get photoUploadFailed => "تعذر رفع الصورة";
+
+  @override
+  String get quotedAmountLabel => "المبلغ المتفق عليه (د.ل)";
+
+  @override
+  String get quotedAmountHint => "المبلغ المتفق عليه مع الزوجين";
+
+  @override
+  String get commissionDueLabel => "عمولة دهر (10%)";
+
+  @override
+  String get acceptBookingTitle => "قبول الحجز";
+
+  @override
+  String get confirmAccept => "تأكيد القبول";
+
+  @override
+  String get quotedAmountRequired => "أدخل مبلغاً أكبر من صفر";
+
+  @override
+  String get commissionUnpaid => "غير مدفوعة";
+
+  @override
+  String get commissionPaid => "مدفوعة";
+
+  @override
+  String get commissionWaived => "معفاة";
+
+  @override
+  String get unpaidCommissionOwed => "العمولة المستحقة لدهر";
+
+  @override
+  String get noUnpaidCommission => "لا توجد عمولة مستحقة";
+
+  @override
+  String get quotedAmountDisplay => "عرض السعر";
+
+  @override
+  String get commissionNoteVendor =>
+      "تدفع 10٪ من هذا المبلغ لدهر، ويُحصَّل خارج التطبيق.";
+
+  @override
+  String get invalidQuotedAmount => "أدخل مبلغاً صالحاً بالدينار الليبي";
+
+  @override
+  String get commissionStatusLabel => "حالة العمولة";
 }

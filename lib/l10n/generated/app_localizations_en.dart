@@ -425,4 +425,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get photoUploadFailed => "Could not upload photo";
+
+  @override
+  String get quotedAmountLabel => "Quoted amount (LYD)";
+
+  @override
+  String get quotedAmountHint => "Amount agreed with the couple";
+
+  @override
+  String get commissionDueLabel => "Dahr commission (10%)";
+
+  @override
+  String get acceptBookingTitle => "Accept booking";
+
+  @override
+  String get confirmAccept => "Confirm accept";
+
+  @override
+  String get quotedAmountRequired => "Enter a quoted amount greater than 0";
+
+  @override
+  String get commissionUnpaid => "Unpaid";
+
+  @override
+  String get commissionPaid => "Paid";
+
+  @override
+  String get commissionWaived => "Waived";
+
+  @override
+  String get unpaidCommissionOwed => "Commission owed to Dahr";
+
+  @override
+  String get noUnpaidCommission => "No unpaid commission";
+
+  @override
+  String get quotedAmountDisplay => "Quote";
+
+  @override
+  String get commissionNoteVendor =>
+      "You pay 10% of this quote to Dahr (collected offline).";
+
+  @override
+  String get invalidQuotedAmount => "Enter a valid amount in LYD";
+
+  @override
+  String get commissionStatusLabel => "Commission status";
 }

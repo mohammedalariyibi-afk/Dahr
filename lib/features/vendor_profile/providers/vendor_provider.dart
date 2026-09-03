@@ -22,28 +22,61 @@ final myVendorProfileProvider =
   return VendorProfile.fromJson(Map<String, dynamic>.from(row));
 });
 
+class VendorDashboardStats {
+  const VendorDashboardStats({
+    required this.views,
+    required this.pending,
+    required this.accepted,
+    required this.unpaidCommissionLyd,
+    required this.unpaidBookings,
+  });
+
+  final int views;
+  final int pending;
+  final int accepted;
+  final double unpaidCommissionLyd;
+  final List<BookingRequest> unpaidBookings;
+}
+
 final vendorDashboardStatsProvider =
-    FutureProvider<Map<String, int>>((ref) async {
+    FutureProvider<VendorDashboardStats>((ref) async {
   final vendor = await ref.watch(myVendorProfileProvider.future);
   if (vendor == null) {
-    return {'views': 0, 'pending': 0, 'accepted': 0};
+    return const VendorDashboardStats(
+      views: 0,
+      pending: 0,
+      accepted: 0,
+      unpaidCommissionLyd: 0,
+      unpaidBookings: [],
+    );
   }
   final rows = await DahrSupabase.client
       .from('booking_requests')
-      .select('status')
-      .eq('vendor_id', vendor.id);
+      .select()
+      .eq('vendor_id', vendor.id)
+      .order('created_at', ascending: false);
+  final bookings = (rows as List)
+      .map((e) => BookingRequest.fromJson(Map<String, dynamic>.from(e as Map)))
+      .toList();
   var pending = 0;
   var accepted = 0;
-  for (final r in rows as List) {
-    final s = (r as Map)['status'];
-    if (s == 'pending') pending++;
-    if (s == 'accepted') accepted++;
+  final unpaid = <BookingRequest>[];
+  var unpaidTotal = 0.0;
+  for (final b in bookings) {
+    if (b.status == BookingStatus.pending) pending++;
+    if (b.status == BookingStatus.accepted) accepted++;
+    if (b.isCommissionUnpaid) {
+      unpaid.add(b);
+      unpaidTotal += b.commissionAmountLyd ?? 0;
+    }
   }
-  return {
-    'views': vendor.viewCount,
-    'pending': pending,
-    'accepted': accepted,
-  };
+  return VendorDashboardStats(
+    views: vendor.viewCount,
+    pending: pending,
+    accepted: accepted,
+    unpaidCommissionLyd: unpaidTotal,
+    unpaidBookings: unpaid,
+  );
 });
 
 final vendorAvailabilityProvider =
