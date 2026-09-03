@@ -27,6 +27,17 @@ export default async function AdminLayout({
     redirect("/login?error=forbidden");
   }
 
+  const [{ count: pendingVendors }, { count: openReports }] = await Promise.all([
+    supabase
+      .from("vendor_profiles")
+      .select("*", { count: "exact", head: true })
+      .eq("is_approved", false),
+    supabase
+      .from("reports")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "open"),
+  ]);
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur">
@@ -40,7 +51,10 @@ export default async function AdminLayout({
                 Admin
               </p>
             </div>
-            <AdminNav />
+            <AdminNav
+              pendingVendors={pendingVendors ?? 0}
+              openReports={openReports ?? 0}
+            />
           </div>
           <div className="flex items-center gap-3">
             <span className="hidden text-sm text-[var(--muted)] sm:inline">

@@ -24,6 +24,11 @@ async function requireAdmin() {
   return supabase;
 }
 
+function fail(path: string, message: string): never {
+  const sep = path.includes("?") ? "&" : "?";
+  redirect(`${path}${sep}error=${encodeURIComponent(message)}`);
+}
+
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
@@ -36,7 +41,7 @@ export async function setVendorApproved(vendorId: string, approved: boolean) {
     .from("vendor_profiles")
     .update({ is_approved: approved })
     .eq("id", vendorId);
-  if (error) throw new Error(error.message);
+  if (error) fail("/vendors", error.message);
   revalidatePath("/vendors");
   revalidatePath("/");
 }
@@ -47,8 +52,9 @@ export async function toggleVendorVerified(vendorId: string, verified: boolean) 
     .from("vendor_profiles")
     .update({ is_verified: verified })
     .eq("id", vendorId);
-  if (error) throw new Error(error.message);
+  if (error) fail("/vendors", error.message);
   revalidatePath("/vendors");
+  revalidatePath("/");
 }
 
 export async function updateReportStatus(
@@ -60,18 +66,29 @@ export async function updateReportStatus(
     .from("reports")
     .update({ status })
     .eq("id", reportId);
-  if (error) throw new Error(error.message);
+  if (error) fail("/reports", error.message);
   revalidatePath("/reports");
+  revalidatePath("/");
 }
 
-export async function hideReview(reviewId: string) {
+export async function hideReview(reviewId: string, reportId?: string) {
   const supabase = await requireAdmin();
   const { error } = await supabase
     .from("reviews")
     .update({ is_hidden: true })
     .eq("id", reviewId);
-  if (error) throw new Error(error.message);
+  if (error) fail("/reports", error.message);
+
+  if (reportId) {
+    const { error: reportError } = await supabase
+      .from("reports")
+      .update({ status: "actioned" })
+      .eq("id", reportId);
+    if (reportError) fail("/reports", reportError.message);
+  }
+
   revalidatePath("/reports");
+  revalidatePath("/");
 }
 
 export async function setCommissionStatus(
@@ -83,7 +100,7 @@ export async function setCommissionStatus(
     p_booking_id: bookingId,
     p_status: status,
   });
-  if (error) throw new Error(error.message);
+  if (error) fail("/commissions", error.message);
   revalidatePath("/commissions");
   revalidatePath("/");
 }

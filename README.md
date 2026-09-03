@@ -95,6 +95,14 @@ Open http://localhost:3000 — only users with `profiles.role = 'admin'` can acc
 
 Add Auth redirect URL: `http://localhost:3000/auth/callback`.
 
+### Admin flows
+
+- **Dashboard** — live counts from Supabase: vendors, pending approvals, users, bookings, open reports, unpaid commission (LYD). Pending / reports / commission cards link to those pages.
+- **Approve a vendor** — Vendors → **Pending**. Review business, city, owner, WhatsApp. **Approve** lists them on Discover. **Revoke** on an approved row hides them again (confirm first).
+- **Verify a vendor** — same table, **Verify** / **Unverify**. Verification is a badge only; it does not replace approval.
+- **Moderate a report** — Reports (open queue). **Dismiss** if no action, **Mark actioned** after you handled it. For a review target, **Hide review** hides it in the app and marks the report actioned.
+- **Commissions** — record offline 10% collection with **Mark paid** or **Waive**.
+
 ## Stack choices
 
 | Area | Choice |
@@ -118,4 +126,4 @@ Admins record offline collection on **Commissions**: **Mark paid** or **Waive**.
 
 ## Demo seed
 
-14 approved vendors across categories in Tripoli and Benghazi, sample photos, one completed booking + review (with unpaid 10% commission), one accepted booking with unpaid commission, one pending booking, and an admin profile. See `supabase/seed.sql`.
+14 approved vendors across categories in Tripoli and Benghazi, one **pending** vendor (`قاعة الياسمين`) for the approve flow, sample photos, one completed booking + review (with unpaid 10% commission), one accepted booking with unpaid commission, one pending booking, two open reports (vendor + review), and an admin profile. See `supabase/seed.sql`.

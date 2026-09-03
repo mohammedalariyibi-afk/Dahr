@@ -1,6 +1,7 @@
 -- Seed data for Dahr local / demo environments.
 -- Creates demo auth users, approved vendors across Tripoli & Benghazi,
--- photos, availability, completed bookings + reviews, and one admin.
+-- one pending vendor for the admin approve flow, photos, availability,
+-- completed bookings + reviews, sample reports, and one admin.
 
 -- Fixed UUIDs for reproducibility
 -- Admin:     a0000000-0000-4000-8000-000000000001
@@ -83,6 +84,7 @@ SELECT public._seed_user('b0000000-0000-4000-8000-000000000011', 'decor1@dahr.ly
 SELECT public._seed_user('b0000000-0000-4000-8000-000000000012', 'cater2@dahr.ly', '+218912100012', 'ولائم الشرق');
 SELECT public._seed_user('b0000000-0000-4000-8000-000000000013', 'music2@dahr.ly', '+218912100013', 'فرقة الأندلس');
 SELECT public._seed_user('b0000000-0000-4000-8000-000000000014', 'other1@dahr.ly', '+218912100014', 'خدمات المناسبات');
+SELECT public._seed_user('b0000000-0000-4000-8000-000000000015', 'pending@dahr.ly', '+218912100015', 'قاعة الياسمين');
 
 -- Promote admin + consumer profiles
 UPDATE public.profiles
@@ -108,7 +110,8 @@ WHERE id IN (
   'b0000000-0000-4000-8000-000000000007',
   'b0000000-0000-4000-8000-000000000009',
   'b0000000-0000-4000-8000-000000000011',
-  'b0000000-0000-4000-8000-000000000014'
+  'b0000000-0000-4000-8000-000000000014',
+  'b0000000-0000-4000-8000-000000000015'
 );
 
 UPDATE public.profiles SET role = 'vendor', city = 'benghazi', locale = 'ar'
@@ -279,6 +282,17 @@ INSERT INTO public.vendor_profiles (
   200, 2000, '218912100014',
   ARRAY['منسق حفل', 'استقبال'],
   false, true, 12
+),
+(
+  'c0000000-0000-4000-8000-000000000015',
+  'b0000000-0000-4000-8000-000000000015',
+  'قاعة الياسمين',
+  'venues',
+  'tripoli',
+  'قاعة أفراح جديدة في طرابلس بانتظار موافقة الإدارة.',
+  3500, 9000, '218912100015',
+  ARRAY['قاعة داخلية', 'تزيين'],
+  false, false, 3
 )
 ON CONFLICT (id) DO NOTHING;
 
@@ -301,7 +315,8 @@ FROM (VALUES
   ('c0000000-0000-4000-8000-000000000011'::uuid, 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=800', 0),
   ('c0000000-0000-4000-8000-000000000012'::uuid, 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800', 0),
   ('c0000000-0000-4000-8000-000000000013'::uuid, 'https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800', 0),
-  ('c0000000-0000-4000-8000-000000000014'::uuid, 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800', 0)
+  ('c0000000-0000-4000-8000-000000000014'::uuid, 'https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=800', 0),
+  ('c0000000-0000-4000-8000-000000000015'::uuid, 'https://images.unsplash.com/photo-1519741497674-611481863552?w=800', 0)
 ) AS v(vendor_id, storage_url, sort_order)
 WHERE NOT EXISTS (
   SELECT 1 FROM public.vendor_photos p
@@ -362,6 +377,33 @@ INSERT INTO public.reviews (
   'تصوير رائع وخدمة محترفة. أنصح بهم بشدة.'
 )
 ON CONFLICT DO NOTHING;
+
+-- Sample moderation queue: one vendor report + one review report
+INSERT INTO public.reports (id, reported_by, target_type, target_id, reason, status)
+VALUES (
+  'f0000000-0000-4000-8000-000000000001',
+  'a0000000-0000-4000-8000-000000000002',
+  'vendor',
+  'c0000000-0000-4000-8000-000000000010',
+  'Listed photos look unrelated to the cars offered.',
+  'open'
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO public.reports (id, reported_by, target_type, target_id, reason, status)
+SELECT
+  'f0000000-0000-4000-8000-000000000002',
+  'a0000000-0000-4000-8000-000000000002',
+  'review',
+  r.id,
+  'Review looks copied / not a real customer.',
+  'open'
+FROM public.reviews r
+WHERE r.booking_request_id = 'd0000000-0000-4000-8000-000000000001'
+  AND NOT EXISTS (
+    SELECT 1 FROM public.reports x
+    WHERE x.id = 'f0000000-0000-4000-8000-000000000002'
+  );
 
 -- Auth identities so email OTP / password can resolve seeded users locally
 INSERT INTO auth.identities (
