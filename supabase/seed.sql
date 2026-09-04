@@ -369,6 +369,18 @@ INSERT INTO public.booking_requests (
 )
 ON CONFLICT (id) DO NOTHING;
 
+-- accept_booking_request marks the date booked in the same transaction; these
+-- rows are inserted directly, so the demo calendar needs the same entries.
+INSERT INTO public.availability (vendor_id, date, status)
+SELECT b.vendor_id, b.event_date, 'booked'::public.availability_status
+FROM public.booking_requests b
+WHERE b.status IN (
+  'accepted'::public.booking_status,
+  'completed'::public.booking_status
+)
+ON CONFLICT (vendor_id, date)
+DO UPDATE SET status = 'booked'::public.availability_status;
+
 INSERT INTO public.reviews (
   vendor_id, consumer_id, booking_request_id, rating, comment
 ) VALUES (

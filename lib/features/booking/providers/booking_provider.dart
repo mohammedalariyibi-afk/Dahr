@@ -108,19 +108,9 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
       BookingStatusWrite.acceptRpcName,
       params: payload.toRpcParams(),
     );
-    final vendorId = booking?.vendorId;
-    final eventDate = booking?.eventDate;
-    if (vendorId != null && vendorId.isNotEmpty && eventDate != null) {
-      await DahrSupabase.client.from('availability').upsert(
-            AvailabilityCalendar.upsertJson(
-              vendorId: vendorId,
-              date: eventDate,
-              status: AvailabilityStatus.booked,
-            ),
-            onConflict: 'vendor_id,date',
-          );
-      ref.invalidate(vendorAvailabilityProvider);
-    }
+    // The accept RPC marks the date booked in the same transaction, so the
+    // calendar only needs re-reading.
+    ref.invalidate(vendorAvailabilityProvider);
     _invalidateRelated();
   }
 
