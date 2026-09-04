@@ -125,7 +125,6 @@
   "errorGeneric": "Something went wrong. Try again.",
   "vendorNotApprovedError": "This listing is not taking requests yet.",
   "bookingAlreadyHandledError": "This request has already been handled. Refresh and try again.",
-  "guestCountInvalidError": "Enter a guest count between 1 and 10000.",
   "emptyDefault": "Nothing here yet",
   "loading": "Loading…",
   "cancel": "Cancel",

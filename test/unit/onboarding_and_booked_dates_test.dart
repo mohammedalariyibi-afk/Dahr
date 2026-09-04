@@ -31,16 +31,18 @@ void main() {
   });
 
   group('onboarding advances past role select', () {
-    test('setRole leaves needsRole so profile setup is reachable', () {
+    test('setRole records the pick so profile setup is reachable', () {
       // profiles.role defaults to consumer, so re-reading the row cannot tell
       // "picked consumer" from "never picked" and keeps reporting needsRole.
-      // Without this step the router bounces profile setup back to role select.
+      // Without this the router bounces profile setup back to role select.
+      // `auth_flow_status_test.dart` asserts the resulting routing.
       final setRole = _between(
         authProvider,
         'Future<void> setRole(',
         'Future<void> completeProfile(',
       );
-      expect(setRole.contains('AuthFlowStatus.needsProfile'), isTrue);
+      expect(setRole.contains('_roleChosenBy = uid'), isTrue);
+      expect(setRole.contains('await refreshProfile()'), isTrue);
     });
 
     test('every profiles write fails closed on zero rows', () {

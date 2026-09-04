@@ -98,33 +98,18 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
     _invalidateRelated();
   }
 
-  Future<void> acceptBooking(
-    AcceptBookingPayload payload, {
-    BookingRequest? booking,
-  }) async {
+  Future<void> acceptBooking(AcceptBookingPayload payload) async {
     final error = payload.validate();
     if (error != null) throw StateError(error);
     await DahrSupabase.client.rpc(
       BookingStatusWrite.acceptRpcName,
       params: payload.toRpcParams(),
     );
-    // The accept RPC marks the date booked in the same transaction, so the
-    // calendar only needs re-reading.
+    // The accept RPC marks the date booked in the same transaction, so both
+    // calendars only need re-reading — the vendor's own view and the booked
+    // dates a couple sees.
     ref.invalidate(vendorAvailabilityProvider);
-    final vendorId = booking?.vendorId;
-    final eventDate = booking?.eventDate;
-    if (vendorId != null && vendorId.isNotEmpty && eventDate != null) {
-      await DahrSupabase.client.from('availability').upsert(
-            AvailabilityCalendar.upsertJson(
-              vendorId: vendorId,
-              date: eventDate,
-              status: AvailabilityStatus.booked,
-            ),
-            onConflict: 'vendor_id,date',
-          );
-      ref.invalidate(vendorAvailabilityProvider);
-      ref.invalidate(vendorBookedDatesProvider);
-    }
+    ref.invalidate(vendorBookedDatesProvider);
     _invalidateRelated();
   }
 

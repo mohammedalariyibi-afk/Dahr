@@ -166,19 +166,14 @@ class AuthController extends StateNotifier<AppAuthState> {
         .upsert(payload)
         .select('id, role');
     requireMutatedRows(rows);
+    // `profiles.role` defaults to consumer, so a re-read cannot tell "picked
+    // consumer" from "never picked" and would keep reporting needsRole, with
+    // the router bouncing profile setup back to role select. Recording the
+    // pick here keeps that true for every later refresh in this session, not
+    // just the one below.
     _roleChosenBy = uid;
     // Keep a complete profile authenticated (e.g. consumer becoming vendor).
     await refreshProfile();
-    // `profiles.role` defaults to consumer, so a re-read cannot tell "picked
-    // consumer" from "never picked" and still reports needsRole. Advance the
-    // step here or the router bounces profile setup back to role select.
-    if (state.status == AuthFlowStatus.needsRole) {
-      state = AppAuthState(
-        status: AuthFlowStatus.needsProfile,
-        session: state.session,
-        profile: state.profile,
-      );
-    }
   }
 
   Future<void> completeProfile({

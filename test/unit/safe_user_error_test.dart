@@ -1,65 +1,18 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dahr/core/security/safe_user_error.dart';
 import 'package:dahr/l10n/generated/app_localizations.dart';
-
-void main() {
-  group('every known key has copy', () {
-    for (final locale in [const Locale('en'), const Locale('ar')]) {
-      test('in ${locale.languageCode}', () async {
-        final l10n = await AppLocalizations.delegate.load(locale);
-        for (final key in SafeUserError.knownKeys) {
-          final message = SafeUserError.fromKey(l10n, key);
-          expect(message.trim(), isNotEmpty, reason: key);
-          if (SafeUserError.opaqueKeys.contains(key)) continue;
-          expect(
-            message,
-            isNot(l10n.errorGeneric),
-            reason: '$key is listed as known but falls back to generic copy',
-          );
-        }
-      });
-    }
-
-    test('the booking guard keys raised by the DB are covered', () async {
-      final l10n = await AppLocalizations.delegate.load(const Locale('en'));
-      for (final key in [
-        'vendor_not_approved',
-        'booking_must_be_pending',
-        'invalid_booking_transition',
-        'date_has_accepted_booking',
-        'guest_count_invalid',
-      ]) {
-        expect(SafeUserError.knownKeys, contains(key), reason: key);
-        expect(SafeUserError.fromKey(l10n, key), isNot(l10n.errorGeneric),
-            reason: key);
-      }
-    });
-
-    test('an unknown or internal message stays generic', () async {
-      final l10n = await AppLocalizations.delegate.load(const Locale('en'));
-      expect(SafeUserError.fromKey(l10n, 'something_new'), l10n.errorGeneric);
-      expect(
-        SafeUserError.of(
-          l10n,
-          StateError('PostgrestException(message: permission denied)'),
-        ),
-        l10n.errorGeneric,
-      );
-    });
-  });
-
 import 'package:dahr/l10n/generated/app_localizations_ar.dart';
 import 'package:dahr/l10n/generated/app_localizations_en.dart';
 
 void main() {
   final en = AppLocalizationsEn();
   final ar = AppLocalizationsAr();
+  final locales = <AppLocalizations>[en, ar];
 
   group('validation keys reach the user', () {
-    // Regression: these are thrown by BookingRequestPayload.validate and
-    // ReviewPayload.validate but had no case, so a fixable input problem
-    // surfaced as the generic "something went wrong" copy.
+    // Thrown by BookingRequestPayload.validate and ReviewPayload.validate.
+    // These had no case, so a fixable input problem surfaced as the generic
+    // "something went wrong" copy.
     const fixable = {
       'guest_count_invalid',
       'message_too_long',
@@ -67,13 +20,45 @@ void main() {
       'comment_too_long',
     };
 
-    for (final locale in <AppLocalizations>[en, ar]) {
+    // Raised by the database guards in
+    // 20260903230000_booking_integrity_guards.sql.
+    const bookingGuards = {
+      'vendor_not_approved',
+      'booking_must_be_pending',
+      'invalid_booking_transition',
+      'date_has_accepted_booking',
+    };
+
+    for (final locale in locales) {
+      test('${locale.localeName}: every known key has its own copy', () {
+        for (final key in SafeUserError.knownKeys) {
+          final message = SafeUserError.fromKey(locale, key);
+          expect(message.trim(), isNotEmpty, reason: key);
+          if (SafeUserError.opaqueKeys.contains(key)) continue;
+          expect(
+            message,
+            isNot(locale.errorGeneric),
+            reason: '$key is listed as known but falls back to generic copy',
+          );
+        }
+      });
+
       test('${locale.localeName}: fixable input errors are not generic', () {
         for (final key in fixable) {
           expect(
             SafeUserError.fromKey(locale, key),
             isNot(locale.errorGeneric),
             reason: '$key must tell the user what to fix',
+          );
+        }
+      });
+
+      test('${locale.localeName}: booking guard errors are not generic', () {
+        for (final key in bookingGuards) {
+          expect(
+            SafeUserError.fromKey(locale, key),
+            isNot(locale.errorGeneric),
+            reason: key,
           );
         }
       });
@@ -94,9 +79,9 @@ void main() {
       });
     }
 
-    test('every validation key thrown by a payload is a known key', () {
-      for (final key in fixable) {
-        expect(SafeUserError.knownKeys, contains(key));
+    test('every key a payload or guard throws is a known key', () {
+      for (final key in {...fixable, ...bookingGuards}) {
+        expect(SafeUserError.knownKeys, contains(key), reason: key);
       }
       expect(SafeUserError.knownKeys, contains('booking_required'));
     });
@@ -110,8 +95,23 @@ void main() {
         SafeUserError.of(en, StateError('rating_invalid')),
         en.ratingRequired,
       );
+      expect(
+        SafeUserError.of(en, StateError('vendor_not_approved')),
+        en.vendorNotApprovedError,
+      );
+    });
+
+    test('an internal exception never reaches the user', () {
+      expect(
+        SafeUserError.of(
+          en,
+          StateError('PostgrestException(message: permission denied)'),
+        ),
+        en.errorGeneric,
+      );
     });
   });
+
   group('SafeUserError.looksInternal', () {
     test('treats API exceptions and tokens as internal', () {
       expect(SafeUserError.looksInternal(null), isTrue);
@@ -134,7 +134,10 @@ void main() {
     });
 
     test('allows short user-facing copy', () {
-      expect(SafeUserError.looksInternal('Something went wrong. Try again.'), isFalse);
+      expect(
+        SafeUserError.looksInternal('Something went wrong. Try again.'),
+        isFalse,
+      );
       expect(SafeUserError.looksInternal('Could not upload photo'), isFalse);
     });
   });

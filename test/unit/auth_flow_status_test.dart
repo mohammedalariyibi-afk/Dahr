@@ -92,18 +92,31 @@ void main() {
       );
     });
 
-    test('without the pick the same user is held on the role screen', () {
+    test('without the pick the same user cannot browse past the role screen',
+        () {
       final status = resolveAuthFlowStatus(
         profile: _profile(role: UserRole.vendor),
         roleChosen: false,
       );
+      expect(status, AuthFlowStatus.needsRole);
+      expect(
+        resolveAuthRedirect(
+          location: '/discover',
+          status: status,
+          uri: Uri.parse('/discover'),
+        ),
+        '/auth/role',
+      );
+      // Profile setup is the step after role, so the router lets it through
+      // either way — see auth_redirect_test.dart. Recording the pick is what
+      // keeps a later re-sync from reporting needsRole at all.
       expect(
         resolveAuthRedirect(
           location: '/auth/profile-setup',
           status: status,
           uri: Uri.parse('/auth/profile-setup'),
         ),
-        '/auth/role',
+        isNull,
       );
     });
   });

@@ -31,7 +31,6 @@ abstract final class SafeUserError {
     'vendor_not_approved',
     'booking_must_be_pending',
     'invalid_booking_transition',
-    'guest_count_invalid',
     'profile_required',
     'business_name_required',
     'description_required',
@@ -63,7 +62,13 @@ abstract final class SafeUserError {
       case 'profile_required':
         return l10n.requiredField;
       case 'guest_count_invalid':
-        return l10n.guestCountInvalidError;
+        return l10n.guestCountInvalid;
+      case 'message_too_long':
+        return l10n.messageTooLong;
+      case 'comment_too_long':
+        return l10n.commentTooLong;
+      case 'rating_invalid':
+        return l10n.ratingRequired;
       // Raised by the booking guards in
       // 20260903230000_booking_integrity_guards.sql.
       case 'vendor_not_approved':
