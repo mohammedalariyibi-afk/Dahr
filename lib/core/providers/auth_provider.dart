@@ -70,7 +70,14 @@ class AuthController extends StateNotifier<AppAuthState> {
   /// User id that picked a role on this device since sign-in.
   String? _roleChosenBy;
 
+  /// Bumped by every sync. A profile fetch that finishes after a newer sync
+  /// started must not write its result — otherwise a fetch still in flight
+  /// when the user signs out would resurrect the signed-in state.
+  int _syncGeneration = 0;
+
   Future<void> _syncFromSession(Session? session) async {
+    final generation = ++_syncGeneration;
+
     if (session == null) {
       _roleChosenBy = null;
       state = const AppAuthState(status: AuthFlowStatus.unauthenticated);
@@ -79,6 +86,7 @@ class AuthController extends StateNotifier<AppAuthState> {
 
     try {
       final profile = await fetchProfile(session.user.id);
+      if (!_isCurrent(generation, session)) return;
       state = AppAuthState(
         status: resolveAuthFlowStatus(
           profile: profile,
@@ -88,6 +96,7 @@ class AuthController extends StateNotifier<AppAuthState> {
         profile: profile,
       );
     } catch (_) {
+      if (!_isCurrent(generation, session)) return;
       // A failed profile read must not push a finished user back through
       // onboarding; keep what we already know.
       final known = state.profile;
@@ -107,6 +116,13 @@ class AuthController extends StateNotifier<AppAuthState> {
         session: session,
       );
     }
+  }
+
+  /// False once a newer sync has started, or once the client has moved on to
+  /// another session (or to none at all).
+  bool _isCurrent(int generation, Session session) {
+    if (generation != _syncGeneration) return false;
+    return DahrSupabase.auth.currentSession?.user.id == session.user.id;
   }
 
   Future<Profile?> fetchProfile(String userId) async {
