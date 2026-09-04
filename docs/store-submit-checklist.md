@@ -5,6 +5,16 @@ Ship target: **Saturday 5 Sep 2026** (Africa/Tripoli). Screenshots and listing c
 ## Before you open the consoles
 
 1. Pull latest `main`.
+2. Confirm `.env` / `admin/.env.local` point at **Dahr LY** (`cccusktgxrizfwpixddu`) with **anon key only** (never commit; never put `service_role` in the app).
+3. **Push the pending migrations** — `supabase link --project-ref cccusktgxrizfwpixddu && supabase db push`. Three files are not on live yet (booking integrity, admin audit log, guest read policies). The guest-read one is required: without it a signed-out user gets an error instead of Discover. Do **not** re-push the already-live overnight / freeze-admin files.
+4. **Smoke the signed-out app** — open Discover without signing in and confirm listings, a vendor page, its photos, and its reviews (with author names) all load. This is the first screen a store reviewer sees.
+5. Preferred: one **quoted-booking smoke** (accept with amount → commission fields). Do not block the whole submit on this if time is tight — note result in the room.
+6. Privacy / terms public URLs must resolve:
+   - `{ADMIN_ORIGIN}/privacy`
+   - `{ADMIN_ORIGIN}/terms`
+   - Routes exist on `main`; hosting still needs a deploy (Vercel or equivalent). In-app `/legal/privacy` and `/legal/terms` cover Profile links meanwhile.
+7. Have WhatsApp business number + email `mohammedalariyibi@gmail.com` for store support / contact fields.
+8. Optional for 10% collection path: bank / WhatsApp details for offline commission (not required for store listing).
 2. Confirm `.env` / `admin/.env.local` point at **Dahr LY** (`https://cccusktgxrizfwpixddu.supabase.co`) with **anon key only** (never commit; never put `service_role` in the app). Run `dart run tool/check_store_env.dart` before the Play AAB.
 3. Preferred: one **quoted-booking smoke** (accept with amount → commission fields). Do not block the whole submit on this if time is tight — note result in the room.
 4. Privacy / terms public URLs must resolve (GitHub Pages, not Vercel / not dahr.ly):
@@ -47,7 +57,8 @@ Upload order suggestion: email OTP → OTP verify → Discover → vendor detail
 ## Do not
 
 - Commit `.env` / service role keys
-- `db push` migrations already live on Dahr LY (e.g. booking/review scope from #16). **Do** push `20260903230000_booking_integrity_guards.sql` once if it is not on Dahr LY yet.
+- `db push` migrations already live on Dahr LY (e.g. booking/review scope from #16)
+- Re-grant `is_admin` / `owns_vendor` to `anon` to "fix" a guest read — that is what the guest-read migration avoids. **Do** push `20260903230000_booking_integrity_guards.sql` once if it is not on Dahr LY yet.
 - Use Sidra LY or the paused older `dahr` Supabase project
 
 ## Room signal

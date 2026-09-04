@@ -111,6 +111,9 @@ class VendorPhotosScreen extends ConsumerWidget {
                     child: ReorderableListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
                       itemCount: photos.length,
+                      // The new order is applied locally first, so a failed
+                      // write would otherwise leave the cover photo looking
+                      // changed while `sort_order` still says otherwise.
                       onReorderItem: (oldIndex, newIndex) => _runWrite(
                         context,
                         ref,

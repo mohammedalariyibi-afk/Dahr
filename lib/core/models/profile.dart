@@ -26,9 +26,6 @@ class Profile {
       fullName!.trim().isNotEmpty &&
       city != null;
 
-  bool get needsRoleSelection =>
-      fullName == null || fullName!.trim().isEmpty;
-
   factory Profile.fromJson(Map<String, dynamic> json) {
     return Profile(
       id: json['id'] as String,

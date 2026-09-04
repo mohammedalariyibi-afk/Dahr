@@ -123,6 +123,8 @@
   "guestBrowse": "Browse without account",
   "retry": "Retry",
   "errorGeneric": "Something went wrong. Try again.",
+  "vendorNotApprovedError": "This listing is not taking requests yet.",
+  "bookingAlreadyHandledError": "This request has already been handled. Refresh and try again.",
   "emptyDefault": "Nothing here yet",
   "loading": "Loading…",
   "cancel": "Cancel",

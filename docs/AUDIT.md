@@ -91,25 +91,25 @@ Severity is for a published marketplace whose API key is in the client.
 | M4 | Calendar `onDateChanged` swallowed toggle errors. | Await + `SafeUserError` snackbar. |
 | M5 | Guest count had no upper bound. | Reject `guestCount > 10000`. |
 
-### Medium — still open (not blocking Saturday if ops are careful)
+### Medium — closed 4 September (see “Follow-up round”)
 
-| ID | Finding | Recommendation |
-|----|---------|----------------|
-| M6 | Admin Email OTP / callback has no app-level rate limit. | Rely on Supabase Auth limits for Saturday; add IP/email throttle before a public admin URL. |
-| M7 | Successful OTP then “not an admin” confirms the email exists. | Generic failure copy; optionally refuse OTP unless `profiles.role = admin`. |
-| M8 | No Content-Security-Policy on the admin Next.js app. | Add a strict CSP when the admin origin is public. |
-| M9 | `hideReview` then close-report is two updates (partial state if the second fails). | Single `hide_review_and_close_report` RPC later. |
-| M10 | `increment_vendor_views` is an anon SECURITY DEFINER RPC with no rate limit. | Acceptable for v1 analytics; inflate-resistant ranking should not trust this number. |
+| ID | Finding | Fix |
+|----|---------|-----|
+| M6 | Admin Email OTP / callback has no app-level rate limit. | Send/verify moved to `/api/auth/otp*` routes with a per-address and per-e-mail fixed window applied before Supabase Auth. |
+| M7 | Successful OTP then “not an admin” confirms the email exists. | Send always answers “sent”; a wrong code and a valid non-admin login share one answer. |
+| M8 | No Content-Security-Policy on the admin Next.js app. | Nonce-based CSP from middleware (`strict-dynamic`, no script `unsafe-inline`, `frame-ancestors 'none'`). |
+| M9 | `hideReview` then close-report is two updates (partial state if the second fails). | `hide_review_and_close_report` does both in one transaction. |
+| M10 | `increment_vendor_views` is an anon SECURITY DEFINER RPC with no rate limit. | Still unlimited server-side, but the client now counts one view per vendor per app run. Ranking should still not trust this number. |
 
-### Low / info — still open
+### Low / info — closed 4 September
 
-| ID | Finding | Notes |
-|----|---------|-------|
-| L1 | Admin dashboard can render raw PostgREST `error.message` on stats failure. | Whitelist like other actions. |
-| L2 | No append-only `admin_audit_log`. | Useful after launch for approve / commission / hide. |
-| L3 | Admin CI is not in `.github/workflows` (Flutter only). | Add `npm run lint` / `next build` when time allows. |
+| ID | Finding | Fix |
+|----|---------|-----|
+| L1 | Admin dashboard can render raw PostgREST `error.message` on stats failure. | Whitelisted load-failed copy. |
+| L2 | No append-only `admin_audit_log`. | Added: trigger-enforced append-only, written only through the allowlisted `log_admin_action` RPC. |
+| L3 | Admin CI is not in `.github/workflows` (Flutter only). | `Admin CI` runs typecheck, lint, and build. |
 | L4 | `seed.sql` creates `admin@dahr.ly` / `password123`. | Local/Inbucket only. Comment added; never run seed on Dahr LY. |
-| L5 | Onboarding `needsRole` fires when `full_name` is empty, not when role is unset (role defaults to `consumer`). | UX loop if someone picks a role and drops off before a name. Not an authz bug. |
+| L5 | Onboarding `needsRole` fires when `full_name` is empty, not when role is unset (role defaults to `consumer`). | **Understated: this was a hard block, not a UX loop.** Fixed 4 September — see below. |
 | L6 | Users can set `role = vendor` themselves. | Intentional “become a vendor” path; vendor **writes** still need a `vendor_profiles` row and approval for public listing. |
 | L7 | Legal copy names “Dahr LY” and `eu-west-1`. | Appropriate for a privacy notice. |
 | I1 | `config.toml` `enable_confirmations = false` is local-only. | Keep Email confirmations **on** in the Dahr LY dashboard. |
@@ -140,8 +140,14 @@ Operator runbook: [`docs/store-submit-checklist.md`](store-submit-checklist.md).
 
 ```bash
 supabase link --project-ref cccusktgxrizfwpixddu
-supabase db push   # applies 20260903230000_booking_integrity_guards only if not present
+supabase db push   # applies the three 2026090[34] files that are not on live yet
 ```
+
+The three not yet on live: `20260903230000_booking_integrity_guards`,
+`20260904000000_admin_audit_log_and_atomic_moderation`, and
+`20260904010000_guest_read_policies_without_helper_execute`. The last one is
+what makes signed-out Discover work at all (F1), so it is the one to push even
+if time runs out.
 
 If `CREATE UNIQUE INDEX booking_requests_one_held_date` fails, two accepted/completed rows already share a vendor date — inspect and decline/move one, then retry.
 
@@ -149,13 +155,64 @@ Do **not** re-apply `20260903184000_overnight_security_hardening` or `2026090319
 
 ---
 
+## Follow-up round — 4 September 2026
+
+Everything listed above as “still open” is now closed. Working through them
+surfaced three functional bugs that the first pass missed, because that pass
+reasoned about the SQL and the Dart instead of running them.
+
+### Ship blockers found in this round
+
+| ID | Finding | Why it was missed | Fix |
+|----|---------|-------------------|-----|
+| F1 | **Guest browse fails on every read.** As `anon`, `vendor_profiles`, `vendor_photos`, `availability`, and `reviews` all return `permission denied for function is_admin` / `owns_vendor`, so Discover, vendor detail, photos, the booking calendar, and review lists are empty errors for a signed-out user. | `revoke_anon_definer_rpcs` did revoke EXECUTE and did split the public-read policies, so reading the SQL suggests a guest is covered by a helper-free policy. But permissive policies are OR-ed into one qual and EXECUTE is checked while the query is **prepared** — before any row or any `OR` branch. Even `EXPLAIN` of a Discover query fails for `anon`. | `20260904010000_guest_read_policies_without_helper_execute.sql`: every helper-calling policy is limited to `TO authenticated`. |
+| F2 | **New accounts could never finish onboarding.** After picking a role the router sent the user from `/auth/profile-setup` back to `/auth/role`, forever. | `AuthFlowStatus.needsRole` was derived from an empty `full_name`; `profiles.role` defaults to `consumer`, so `setRole` changed nothing the status could observe. Logged as cosmetic (L5). | `resolveAuthFlowStatus` takes the role pick as an explicit input. |
+| F3 | **Review author names never render**, and for a guest no name renders at all. | The reviews query embeds `profiles(full_name)`, which worked under `profiles_select_public_names` — the policy the already-live freeze-admin migration **dropped**. | Names come from the `profile_public` view that migration introduced. |
+
+### Also fixed
+
+- `increment_vendor_views` was an un-awaited Postgrest builder. Those are lazy: with no terminal `then()` the request never left the app, so the view counter had never incremented. It now fires, and counts once per vendor per app run (which is also the M10 mitigation).
+- A failed profile read no longer pushes a finished user back through onboarding.
+
+### Found by a second read of the client code
+
+| Finding | Severity | Fix |
+|---------|----------|-----|
+| The admin middleware returned a bare `NextResponse.redirect` from all three of its branches, dropping the session cookies `getUser()` had just rotated onto its own response. The browser kept sending the old token — the intermittent-logout footgun the `@supabase/ssr` guide warns about. | High | Redirects carry those cookies. |
+| `_syncFromSession` had no in-flight guard, so a profile read still running when the user signed out completed afterwards and wrote the signed-in state back. | High | A sync generation plus a current-session check; only the newest sync for the current user may publish. |
+| Freeing a booked date and reordering photos called into their providers without awaiting. A refused write (freeing a date the DB holds for an accepted booking is rejected outright) left the switch on, or the new order on screen, with no message. | Medium | Both await and report through `SafeUserError`; the photo reorder also restores the order the database still has. |
+| `knownKeys` listed `vendor_not_approved`, `booking_must_be_pending`, and `guest_count_invalid`, but `fromKey` had no case for them — as with `invalid_booking_transition`, which was not listed at all. All four showed “Something went wrong”. | Medium | AR + EN copy for all four, and a test that every known key resolves to something other than the generic message. |
+| `VendorProfile.fromJson` cast `price_min` / `price_max` / `view_count` and the computed rating fields straight to `num`, so a quoted `NUMERIC` would throw inside the Discover, vendor detail, and favorites providers. Booking money already parsed defensively. | Medium | Vendor fields go through `CommissionMath.parseLyd` too. |
+| A user who booked as a couple and then became a vendor lost every route to those bookings: the bottom nav sends vendors to the inbox and Profile had no bookings entry, so “leave a review” was unreachable. | Medium | Profile shows “My bookings” for vendors. |
+| The accept flow wrote `availability` again after `accept_booking_request` had already done it in-transaction — a second write that could only fail after the accept succeeded. `seed.sql` inserts accepted/completed bookings directly, so its demo calendar had no matching rows. | Low | Client write removed; the seed marks those dates itself. |
+
+### Known and deliberately not fixed before submit
+
+- **PostgREST caps a request at 1000 rows.** The admin dashboard derives the booking count, the category and status breakdowns, and the unpaid-commission total from unbounded `select`s, and the vendors / reports / commissions pages have no pagination (vendor search is also in-memory over that capped fetch). At launch scale — 15 vendors, 3 bookings — none of this can bite, but past 1000 rows the numbers under-report silently. Fixing it properly means SQL aggregates or a dashboard RPC plus pagination on three pages, which is not a change to make the night before a submit.
+- The vendors page tab counts are computed after the search filter, which reads oddly in isolation but is consistent: the tab links preserve `q`, so the count describes what clicking it shows.
+- The language toggle only writes `SharedPreferences`; `profiles.locale` is set at profile setup and never updated afterwards.
+- The favorites list skips the ratings roll-up, so cards there show no stars while Discover does.
+- `booking_protect_commission` and `booking_reject_if_date_booked` are both `BEFORE INSERT OR UPDATE` with no explicit order. Postgres fires them alphabetically, which happens to be the order the accept path needs; renaming either trigger would change behaviour silently.
+
+### How this round was verified
+
+The migrations were applied in filename order to a real PostgreSQL 16 with a
+Supabase-shaped shim (`auth.uid()` reading `request.jwt.claims`, `anon` /
+`authenticated` / `service_role` roles), then `seed.sql` on top — the
+equivalent of `supabase db reset`. Guards were then exercised as those roles:
+
+- 34 behavioural checks on the audit log, moderation, and the booking status machine, including that a bad report id leaves the review **not** hidden (the M9 atomicity claim) and that the append-only trigger refuses even the table owner
+- 28 read checks proving guest browse works and still exposes only approved listings and visible reviews, while vendor / couple / admin reads are unchanged
+- The admin CSP and throttle against a production `next build`: every script tag carries the nonce from the header, a fourth OTP send for one address returns `429`, and a wrong code and an unknown address are indistinguishable
+
 ## Suggested next work (after submit)
 
-1. Admin OTP rate limit + generic forbidden copy (M6, M7).
-2. CSP + hide-review RPC (M8, M9).
-3. Admin lint/build CI (L3).
-4. Audit log for approve / commission / hide (L2).
-5. Split `needsRole` vs missing name (L5).
+1. Admin data layer: SQL aggregates (or a dashboard RPC) for the counts and the unpaid-commission sum, pagination on vendors / reports / commissions, and SQL-side vendor search. See “deliberately not fixed” above — correctness degrades silently past 1000 rows.
+2. Share the OTP throttle across instances (Redis or a Postgres table) if the admin runs on more than one serverless instance; today the window is per instance.
+3. `storage.objects` still has a `vendor_photos_storage_admin_all` policy that calls `is_admin()`. Public photo downloads do not go through it, and the app only lists objects while signed in, so it is not F1 — but a future anonymous `storage.list` would hit the same wall.
+4. Audit-log retention / a dashboard view for it (rows are written but nothing renders them yet).
+5. Archive commissions before an account deletion cascade (I2).
+6. Write `profiles.locale` when the language toggle changes, and reuse the ratings roll-up on the favorites list.
 
 ---
 

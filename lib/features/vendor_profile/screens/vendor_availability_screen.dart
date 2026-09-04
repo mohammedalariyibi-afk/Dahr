@@ -113,6 +113,8 @@ class VendorAvailabilityScreen extends ConsumerWidget {
                       trailing: Switch(
                         value: true,
                         activeThumbColor: AppColors.burgundy,
+                        // Freeing a date the DB holds for an accepted booking
+                        // is refused, so the failure has to reach the vendor.
                         onChanged: (_) => _runWrite(
                           context,
                           l10n,

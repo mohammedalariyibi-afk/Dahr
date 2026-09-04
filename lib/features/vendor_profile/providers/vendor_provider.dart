@@ -302,7 +302,13 @@ class VendorPhotosNotifier extends AsyncNotifier<List<VendorPhoto>> {
     final current = state.valueOrNull ?? [];
     final next = VendorPhotoStorage.applyReorder(current, oldIndex, newIndex);
     state = AsyncData(next);
-    await persistPhotoOrder(next);
+    try {
+      await persistPhotoOrder(next);
+    } catch (_) {
+      // Put the visible order back where the database still has it.
+      state = AsyncData(current);
+      rethrow;
+    }
     ref.invalidate(myVendorProfileProvider);
   }
 

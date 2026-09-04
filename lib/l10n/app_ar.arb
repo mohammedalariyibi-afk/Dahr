@@ -123,6 +123,8 @@
   "guestBrowse": "تصفح بدون حساب",
   "retry": "إعادة المحاولة",
   "errorGeneric": "حدث خطأ. حاول مرة أخرى.",
+  "vendorNotApprovedError": "هذا المورّد لا يستقبل الطلبات بعد.",
+  "bookingAlreadyHandledError": "تم التعامل مع هذا الطلب بالفعل. حدّث الصفحة وحاول مرة أخرى.",
   "emptyDefault": "لا يوجد شيء هنا بعد",
   "loading": "جاري التحميل…",
   "cancel": "إلغاء",

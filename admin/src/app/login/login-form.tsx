@@ -18,28 +18,41 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(queryError);
   const [loading, setLoading] = useState(false);
 
+  async function postJson(url: string, payload: Record<string, string>) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const body = await response.json().catch(() => null);
+    return {
+      ok: response.ok && body?.ok === true,
+      code: typeof body?.code === "string" ? body.code : null,
+    };
+  }
+
+  // Send and verify go through our own routes so the IP / e-mail throttle
+  // cannot be skipped by talking to Supabase Auth directly from the browser.
   async function sendOtp(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setMessage(null);
 
-    const supabase = createClient();
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-        shouldCreateUser: false,
-      },
-    });
+    const result = await postJson("/api/auth/otp", { email: email.trim() });
 
     setLoading(false);
-    if (otpError) {
-      setError("Could not send a code. Check the email and try again.");
+    if (!result.ok) {
+      setError(
+        publicErrorMessage(result.code) ??
+          publicErrorMessage(PUBLIC_ERROR.signInFailed),
+      );
       return;
     }
     setSent(true);
-    setMessage("Check your email for a magic link or enter the OTP below.");
+    setMessage(
+      "If that address can access the dashboard, a magic link and code are on their way.",
+    );
   }
 
   async function verifyOtp(e: FormEvent) {
@@ -47,16 +60,17 @@ export default function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const supabase = createClient();
-    const { error: verifyError } = await supabase.auth.verifyOtp({
+    const result = await postJson("/api/auth/otp/verify", {
       email: email.trim(),
       token: otp.trim(),
-      type: "email",
     });
 
-    setLoading(false);
-    if (verifyError) {
-      setError("Invalid or expired code. Try again.");
+    if (!result.ok) {
+      setLoading(false);
+      setError(
+        publicErrorMessage(result.code) ??
+          publicErrorMessage(PUBLIC_ERROR.signInFailed),
+      );
       return;
     }
     window.location.href = "/";

@@ -18,6 +18,14 @@ export const metadata: Metadata = {
   description: "Dahr wedding marketplace admin dashboard",
 };
 
+/**
+ * The CSP in `middleware.ts` is nonce-based, and Next can only stamp a
+ * per-request nonce on a response it renders per request. A prerendered page
+ * would ship without one and, because the policy uses `strict-dynamic`, its
+ * scripts would all be refused.
+ */
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{
