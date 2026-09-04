@@ -47,16 +47,23 @@ Upload order suggestion: email OTP → OTP verify → Discover → vendor detail
 
 ## App Store Connect
 
-1. Bundle id matching iOS target; Arabic primary + English localization.
+1. Bundle id **`com.dahr.dahr`**; Arabic primary + English localization.
 2. Paste subtitle / keywords / description from `docs/store-listing.md`.
-3. Upload iPhone shots from `docs/store-shots/`. The Xcode target is **iPhone only** (`TARGETED_DEVICE_FAMILY = 1`) — no 13″ iPad screenshots.
+3. Upload iPhone shots from `docs/store-shots/ios-1320x2868/`. Target is **iPhone only** (`TARGETED_DEVICE_FAMILY = 1` on `main`) — do not enable iPad; no 13″ iPad screenshots.
 4. Privacy `https://mohammedalariyibi-afk.github.io/Dahr/privacy`, Terms `https://mohammedalariyibi-afk.github.io/Dahr/terms`.
-5. Review notes: Email OTP only; WhatsApp for vendor contact; no IAP; LYD; account deletion in Profile.
-6. Sign & archive release build when privacy URLs are live.
+5. Review notes: **Email OTP only** (code is emailed; operator reachable). Sign in with Apple is **not** required. WhatsApp for vendor contact; no IAP; LYD; account deletion in Profile.
+6. Archive (full runbook: `STORE.md` → **iOS archive**):
+   - Open **`ios/Runner.xcworkspace`** (not `.xcodeproj` alone). Flutter 3.47 uses SPM — no `Podfile`, no `pod install`.
+   - Runner → Signing & Capabilities: Team = Mohammed’s Apple Developer team, bundle `com.dahr.dahr`, **Automatically manage signing ON**. Pick Team in Xcode; do not put a team id in git.
+   - Confirm iPhone only (`TARGETED_DEVICE_FAMILY = 1`). Do not flip back to iPad.
+   - Same dart-defines as Play: `dart run tool/check_store_env.dart` then `flutter build ipa --dart-define-from-file=.env` (Dahr LY anon only). To Archive in Xcode, run `flutter build ios --release --dart-define-from-file=.env --config-only` first so `Generated.xcconfig` has the defines.
+   - Upload via **Organizer** or **Transporter**. Export compliance is already `ITSAppUsesNonExemptEncryption = false`.
+   - Do **not** commit `DEVELOPMENT_TEAM`, team ids, `.p12`, or provisioning profiles. If Xcode dirties `project.pbxproj`, revert it.
 
 ## Do not
 
 - Commit `.env` / service role keys
+- Commit `DEVELOPMENT_TEAM`, Apple team ids, `.p12`, or provisioning profiles (leave Team unset in the pbxproj)
 - `db push` migrations already live on Dahr LY (e.g. booking/review scope from #16)
 - Re-grant `is_admin` / `owns_vendor` to `anon` to "fix" a guest read — that is what the guest-read migration avoids. **Do** push `20260903230000_booking_integrity_guards.sql` once if it is not on Dahr LY yet.
 - Use Sidra LY or the paused older `dahr` Supabase project

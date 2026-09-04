@@ -152,16 +152,42 @@ flutter build appbundle --dart-define-from-file=.env
    - Demo account email + “code is emailed; operator is available”
    - WhatsApp opens an external app
    - No IAP; off-platform payment
-8. Export compliance: HTTPS only, no custom encryption. `ITSAppUsesNonExemptEncryption = false` is already in `ios/Runner/Info.plist`.
+   - **Email OTP only** — Sign in with Apple is **not** required
+8. Export compliance: HTTPS only, no custom encryption. `ITSAppUsesNonExemptEncryption = false` is already in `ios/Runner/Info.plist` (Organizer / Transporter will not ask again).
 9. Sign in with Apple: **not required** for Email OTP-only.
-10. Archive in Xcode with Mohammed’s **Team** (Automatic signing). No team id or `.p12` belongs in git.
+10. Archive + upload: follow **iOS archive** below. Do not paste a team id into git.
 
-Flutter 3.47 iOS stubs use **Swift Package Manager** (there is no `Podfile`). Open `ios/Runner.xcworkspace`, not a `.xcodeproj` alone.
+## iOS archive (Mohammed — App Developer)
 
-```bash
-flutter build ipa --dart-define-from-file=.env
-# or: open ios/Runner.xcworkspace in Xcode → Product → Archive
-```
+Saturday App Store submit. Do this on Mohammed’s Mac. Flutter **3.47** uses **Swift Package Manager** — there is **no** `Podfile`; do not run `pod install`.
+
+1. Open **`ios/Runner.xcworkspace`**. Do not open `ios/Runner.xcodeproj` alone (SPM packages will be missing).
+2. Select the **Runner** target → **Signing & Capabilities**:
+   - **Team** = Mohammed’s Apple Developer team (the one that owns this Apple ID / `com.dahr.dahr`). Pick it in the Xcode UI; do not type a team id into the repo.
+   - **Bundle Identifier** = `com.dahr.dahr`
+   - **Automatically manage signing** = **ON**
+3. Confirm **iPhone only**. `TARGETED_DEVICE_FAMILY = 1` is already on `main` (Debug / Release / Profile). Do **not** switch the destination to iPad or “iPhone + iPad” — App Store would then require 13″ iPad screenshots.
+4. Release must use `--dart-define-from-file=.env` with **Dahr LY anon only** (same rule as the Play AAB). From the repo root:
+
+   ```bash
+   dart run tool/check_store_env.dart
+   flutter build ipa --dart-define-from-file=.env
+   ```
+
+   `.env` must be `SUPABASE_URL=https://cccusktgxrizfwpixddu.supabase.co` plus the Dahr LY **anon / publishable** key. Never Zeen. Never `service_role`.
+
+   **If you Archive in Xcode instead of `flutter build ipa`:** write the same defines into the iOS config first, then archive. Otherwise the IPA ships **without** Dahr LY dart-defines:
+
+   ```bash
+   dart run tool/check_store_env.dart
+   flutter build ios --release --dart-define-from-file=.env --config-only
+   # then Xcode: Product → Archive
+   ```
+
+5. Upload with **Organizer** (Window → Organizer → Distribute App) or **Transporter**. Export compliance is already `ITSAppUsesNonExemptEncryption = false`.
+6. **Do not commit** `DEVELOPMENT_TEAM`, any Apple team id, `.p12`, or provisioning profiles. Leave Team **unset** in `ios/Runner.xcodeproj/project.pbxproj` so Xcode fills it on this Mac only. If Signing & Capabilities dirties that pbxproj, revert the file before you push. `.p12` / `.mobileprovision` are gitignored.
+
+Reviewer notes (Connect): Email OTP only; a one-time code is emailed; operator reachable. Sign in with Apple is not required.
 
 ## Signing (Mohammed only)
 
@@ -191,11 +217,7 @@ Android (Play):
    flutter build appbundle --dart-define-from-file=.env
    ```
 
-iOS:
-
-1. Open `ios/Runner.xcworkspace` in Xcode.
-2. Signing & Capabilities → Team = Mohammed’s Apple Developer team. Bundle Identifier `com.dahr.dahr`.
-3. Archive and upload with Transporter or Organizer. No certificates in git.
+iOS: Team, Automatic signing, and certificates stay on Mohammed’s Mac. Follow **iOS archive** above. **Never** commit `DEVELOPMENT_TEAM`, a team id, `.p12`, or provisioning profiles.
 
 ## Privacy / permissions the stores will ask about
 
