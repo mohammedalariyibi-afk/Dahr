@@ -11,6 +11,22 @@ import '../providers/vendor_provider.dart';
 class VendorAvailabilityScreen extends ConsumerWidget {
   const VendorAvailabilityScreen({super.key});
 
+  /// Availability writes can be rejected by RLS; report instead of dropping.
+  static Future<void> _runWrite(
+    BuildContext context,
+    AppLocalizations l10n,
+    Future<void> Function() write,
+  ) async {
+    try {
+      await write();
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(SafeUserError.of(l10n, e))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -30,16 +46,14 @@ class VendorAvailabilityScreen extends ConsumerWidget {
             lastDate: last,
           );
           if (picked == null) return;
-          try {
-            await ref
+          if (!context.mounted) return;
+          await _runWrite(
+            context,
+            l10n,
+            () => ref
                 .read(vendorAvailabilityProvider.notifier)
-                .toggleDate(picked);
-          } catch (e) {
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(SafeUserError.of(l10n, e))),
-            );
-          }
+                .toggleDate(picked),
+          );
         },
         icon: const Icon(Icons.event),
         label: Text(l10n.markBooked),
@@ -65,18 +79,13 @@ class VendorAvailabilityScreen extends ConsumerWidget {
                     currentDate: first,
                     firstDate: first,
                     lastDate: last,
-                    onDateChanged: (date) async {
-                      try {
-                        await ref
-                            .read(vendorAvailabilityProvider.notifier)
-                            .toggleDate(date);
-                      } catch (e) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(SafeUserError.of(l10n, e))),
-                        );
-                      }
-                    },
+                    onDateChanged: (date) => _runWrite(
+                      context,
+                      l10n,
+                      () => ref
+                          .read(vendorAvailabilityProvider.notifier)
+                          .toggleDate(date),
+                    ),
                   ),
                 ),
               ),
@@ -104,11 +113,13 @@ class VendorAvailabilityScreen extends ConsumerWidget {
                       trailing: Switch(
                         value: true,
                         activeThumbColor: AppColors.burgundy,
-                        onChanged: (_) {
-                          ref
+                        onChanged: (_) => _runWrite(
+                          context,
+                          l10n,
+                          () => ref
                               .read(vendorAvailabilityProvider.notifier)
-                              .upsertDate(d, AvailabilityStatus.available);
-                        },
+                              .upsertDate(d, AvailabilityStatus.available),
+                        ),
                       ),
                     ),
                   );

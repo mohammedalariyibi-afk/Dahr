@@ -213,5 +213,9 @@
   },
   "commissionBannerHint": "Dahr records this as unpaid. An admin marks it paid after offline collection.",
   "acceptQuoteSuccess": "Booking accepted. 10% commission is recorded as unpaid.",
-  "roleNotAssignable": "Choose couple or vendor. Admin cannot be self-assigned."
+  "roleNotAssignable": "Choose couple or vendor. Admin cannot be self-assigned.",
+  "guestCountInvalid": "Guest count must be at least 1",
+  "messageTooLong": "Message is too long",
+  "ratingRequired": "Choose a rating from 1 to 5",
+  "commentTooLong": "Comment is too long"
 }

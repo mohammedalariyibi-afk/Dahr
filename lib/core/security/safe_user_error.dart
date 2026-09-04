@@ -12,13 +12,17 @@ abstract final class SafeUserError {
     'event_date_past',
     'vendor_required',
     'consumer_required',
+    'booking_required',
+    'guest_count_invalid',
+    'message_too_long',
+    'rating_invalid',
+    'comment_too_long',
     'review_not_completed',
     'already_reviewed',
     'quoted_amount_required',
     'date_has_accepted_booking',
     'vendor_not_approved',
     'booking_must_be_pending',
-    'guest_count_invalid',
     'profile_required',
     'business_name_required',
     'description_required',
@@ -46,8 +50,17 @@ abstract final class SafeUserError {
       case 'event_date_past':
       case 'vendor_required':
       case 'consumer_required':
+      case 'booking_required':
       case 'profile_required':
         return l10n.requiredField;
+      case 'guest_count_invalid':
+        return l10n.guestCountInvalid;
+      case 'message_too_long':
+        return l10n.messageTooLong;
+      case 'rating_invalid':
+        return l10n.ratingRequired;
+      case 'comment_too_long':
+        return l10n.commentTooLong;
       case 'review_not_completed':
         return l10n.reviewNotCompleted;
       case 'already_reviewed':

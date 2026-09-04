@@ -133,6 +133,16 @@ class AuthController extends StateNotifier<AppAuthState> {
     requireMutatedRows(rows);
     // Keep a complete profile authenticated (e.g. consumer becoming vendor).
     await refreshProfile();
+    // `profiles.role` defaults to consumer, so a re-read cannot tell "picked
+    // consumer" from "never picked" and still reports needsRole. Advance the
+    // step here or the router bounces profile setup back to role select.
+    if (state.status == AuthFlowStatus.needsRole) {
+      state = AppAuthState(
+        status: AuthFlowStatus.needsProfile,
+        session: state.session,
+        profile: state.profile,
+      );
+    }
   }
 
   Future<void> completeProfile({
@@ -160,9 +170,12 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<void> updateLocale(String locale) async {
     final uid = DahrSupabase.currentUserId;
     if (uid == null) return;
-    await DahrSupabase.client
+    final rows = await DahrSupabase.client
         .from('profiles')
-        .update({'locale': locale}).eq('id', uid);
+        .update({'locale': locale})
+        .eq('id', uid)
+        .select('id');
+    requireMutatedRows(rows);
   }
 
   Future<void> signOut() async {

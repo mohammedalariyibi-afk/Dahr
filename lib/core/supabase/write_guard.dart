@@ -13,6 +13,7 @@ List<Map<String, dynamic>> requireMutatedRows(
     ];
   }
   if (result is Map) {
+    if (result.isEmpty) throw StateError(code);
     return [Map<String, dynamic>.from(result)];
   }
   throw StateError(code);
