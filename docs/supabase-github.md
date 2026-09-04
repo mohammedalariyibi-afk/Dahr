@@ -37,9 +37,10 @@ Branches > `main` > Require status checks to pass**, then select
 ## 2. One-time: reconcile the Dahr LY migration history
 
 Every migration in this repo except `20260903230000_booking_integrity_guards`
-is already live, but it was applied through the dashboard, so Supabase recorded
-different version numbers. Nothing in `supabase_migrations.schema_migrations`
-matches a filename in `supabase/migrations`:
+and `20260904120000_booking_party_contact` is already live, but the live ones
+were applied through the dashboard, so Supabase recorded different version
+numbers. Nothing in `supabase_migrations.schema_migrations` matches a filename
+in `supabase/migrations`:
 
 | In `supabase/migrations` | Recorded on Dahr LY |
 | --- | --- |
@@ -55,6 +56,7 @@ matches a filename in `supabase/migrations`:
 | `20260904000000_admin_audit_log_and_atomic_moderation` | `20260904104425_admin_audit_log_and_atomic_moderation` |
 | `20260904005000_customer_pays_dahr_fee` | `20260904105445_customer_pays_dahr_fee` |
 | `20260904010000_guest_read_policies_without_helper_execute` | `20260904104408_guest_read_policies_without_helper_execute` |
+| `20260904120000_booking_party_contact` | *(genuinely not applied)* |
 
 `supabase migration repair` only rewrites that history table; it runs no SQL
 and changes no schema. Point the repo's filenames at what is actually live:
@@ -80,22 +82,27 @@ supabase migration list --linked
 ```
 
 After that last command, every row should show the same version in the Local
-and Remote columns, with `20260903230000_booking_integrity_guards` local-only.
+and Remote columns, with `20260903230000_booking_integrity_guards` and
+`20260904120000_booking_party_contact` local-only. Do **not** mark
+`20260904120000` applied — that SQL is not on Dahr LY yet.
 
-### Then apply the one migration that is missing
+### Then apply the migrations that are missing
 
-`booking_integrity_guards` is older than the newest applied version, so a plain
-`db push` skips it. It needs `--include-all`:
+`booking_party_contact` is newer than the last applied version, so a plain
+`db push` will apply it. `booking_integrity_guards` is older, so a plain
+`db push` skips it. It needs `--include-all` (which also picks up the newer
+file if it is still pending):
 
 ```bash
-supabase db push --linked --dry-run --include-all   # expect exactly one migration
+supabase db push --linked --dry-run --include-all   # expect integrity guards + booking_party_contact
 supabase db push --linked --include-all
 ```
 
-That migration adds the availability held-date guard
+`booking_integrity_guards` adds the availability held-date guard
 (`protect_availability_held_dates` and its trigger) and the
 `booking_requests_one_held_date` / `idx_booking_requests_vendor_event_active`
-indexes. None of them exist on Dahr LY today.
+indexes. `booking_party_contact` adds the authenticated-only couple name/phone
+view the vendor inbox uses. None of them exist on Dahr LY today.
 
 ## 3. Automatic deploys: pick one
 

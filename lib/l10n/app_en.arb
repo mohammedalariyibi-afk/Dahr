@@ -232,5 +232,9 @@
   "guestCountInvalid": "Guest count must be at least 1",
   "messageTooLong": "Message is too long",
   "ratingRequired": "Choose a rating from 1 to 5",
-  "commentTooLong": "Comment is too long"
+  "commentTooLong": "Comment is too long",
+  "editProfile": "Edit profile",
+  "phoneForWhatsappHint": "Vendors use this to WhatsApp you about a booking. It is not used to sign in.",
+  "coupleContactUnknown": "Couple",
+  "reportReview": "Report review"
 }

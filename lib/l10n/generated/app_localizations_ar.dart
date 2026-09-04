@@ -703,4 +703,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get commentTooLong => 'التعليق طويل جداً';
+
+  @override
+  String get editProfile => 'تعديل الملف';
+
+  @override
+  String get phoneForWhatsappHint =>
+      'يستخدم المورّد هذا الرقم للتواصل عبر واتساب حول الحجز. لا يُستخدم لتسجيل الدخول.';
+
+  @override
+  String get coupleContactUnknown => 'الزوجان';
+
+  @override
+  String get reportReview => 'الإبلاغ عن التقييم';
 }

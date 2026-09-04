@@ -101,9 +101,10 @@ class VendorInboxNotifier extends AsyncNotifier<List<BookingRequest>> {
         .select(BookingSelect.vendor)
         .eq('vendor_id', vendorId)
         .order('created_at', ascending: false);
-    return (rows as List)
+    final bookings = (rows as List)
         .map((e) => BookingRequest.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
+    return attachBookingPartyContacts(bookings);
   }
 
   void _invalidateRelated() {
@@ -202,3 +203,38 @@ final transferNotesByBookingProvider = FutureProvider.family<
     return const [];
   }
 });
+
+/// Couple name + WhatsApp for the vendor inbox.
+///
+/// `profiles` RLS only exposes your own row. Names and phones for a shared
+/// booking live in the authenticated-only `booking_party_contact` view.
+Future<List<BookingRequest>> attachBookingPartyContacts(
+  List<BookingRequest> bookings,
+) async {
+  if (bookings.isEmpty) return bookings;
+  final ids = {for (final b in bookings) b.consumerId}.toList();
+  final rows = await DahrSupabase.client
+      .from(BookingSelect.partyContactTable)
+      .select(BookingSelect.partyContactSelect)
+      .inFilter('id', ids);
+
+  final names = <String, String>{};
+  final phones = <String, String>{};
+  for (final raw in rows as List) {
+    final row = Map<String, dynamic>.from(raw as Map);
+    final id = row['id'] as String?;
+    if (id == null) continue;
+    final name = (row['full_name'] as String?)?.trim();
+    final phone = (row['phone'] as String?)?.trim();
+    if (name != null && name.isNotEmpty) names[id] = name;
+    if (phone != null && phone.isNotEmpty) phones[id] = phone;
+  }
+
+  return [
+    for (final booking in bookings)
+      booking.withConsumerContact(
+        name: names[booking.consumerId],
+        phone: phones[booking.consumerId],
+      ),
+  ];
+}

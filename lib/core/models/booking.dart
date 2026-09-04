@@ -21,6 +21,8 @@ class BookingRequest {
     this.createdAt,
     this.vendor,
     this.review,
+    this.consumerName,
+    this.consumerPhone,
   });
 
   final String id;
@@ -38,6 +40,13 @@ class BookingRequest {
   final DateTime? createdAt;
   final VendorProfile? vendor;
   final Review? review;
+
+  /// From `booking_party_contact` — vendor inbox only, never public Discover.
+  final String? consumerName;
+  final String? consumerPhone;
+
+  bool get hasCoupleWhatsApp =>
+      consumerPhone != null && consumerPhone!.trim().isNotEmpty;
 
   bool get hasQuote => quotedAmountLyd != null;
   bool get isCommissionUnpaid =>
@@ -96,6 +105,27 @@ class BookingRequest {
     );
   }
 
+  BookingRequest withConsumerContact({String? name, String? phone}) =>
+      BookingRequest(
+        id: id,
+        vendorId: vendorId,
+        consumerId: consumerId,
+        eventDate: eventDate,
+        guestCount: guestCount,
+        message: message,
+        status: status,
+        quotedAmountLyd: quotedAmountLyd,
+        commissionRate: commissionRate,
+        commissionAmountLyd: commissionAmountLyd,
+        commissionStatus: commissionStatus,
+        commissionPaidAt: commissionPaidAt,
+        createdAt: createdAt,
+        vendor: vendor,
+        review: review,
+        consumerName: name,
+        consumerPhone: phone,
+      );
+
   Map<String, dynamic> toInsertJson() => BookingStatusWrite.consumerInsert({
         'vendor_id': vendorId,
         'consumer_id': consumerId,
@@ -112,6 +142,8 @@ class BookingRequest {
     CommissionStatus? commissionStatus,
     VendorProfile? vendor,
     Review? review,
+    String? consumerName,
+    String? consumerPhone,
   }) {
     return BookingRequest(
       id: id,
@@ -129,6 +161,8 @@ class BookingRequest {
       createdAt: createdAt,
       vendor: vendor ?? this.vendor,
       review: review ?? this.review,
+      consumerName: consumerName ?? this.consumerName,
+      consumerPhone: consumerPhone ?? this.consumerPhone,
     );
   }
 }

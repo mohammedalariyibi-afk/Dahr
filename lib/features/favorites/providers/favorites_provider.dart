@@ -8,6 +8,7 @@ import '../../../core/security/safe_user_error.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/supabase/write_guard.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../discovery/providers/vendors_provider.dart';
 
 final favoriteVendorIdsProvider = FutureProvider<Set<String>>((ref) async {
   final auth = ref.watch(authProvider);
@@ -31,9 +32,10 @@ final favoriteVendorsProvider =
       .select('*, vendor_photos(*)')
       .inFilter('id', ids.toList())
       .eq('is_approved', true);
-  return (rows as List)
+  final vendors = (rows as List)
       .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
       .toList();
+  return attachVendorRatings(vendors);
 });
 
 final favoritesProvider =

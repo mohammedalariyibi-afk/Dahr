@@ -41,11 +41,19 @@ void main() {
     policies = _policies(sql);
   });
 
-  test('migration applies last and only once', () {
-    expect(migrationNames.last, _migration);
+  test('migration is uniquely named and after freeze-admin', () {
+    expect(migrationNames, contains(_migration));
     expect(
       migrationNames.where((n) => n.contains('guest_read_policies')),
       hasLength(1),
+    );
+    expect(
+      migrationNames.indexOf(_migration),
+      greaterThan(
+        migrationNames.indexOf(
+          '20260903190000_freeze_admin_role_and_private_profile_rows.sql',
+        ),
+      ),
     );
   });
 

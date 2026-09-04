@@ -53,6 +53,7 @@ void main() {
         '/vendor-tools/dashboard',
         '/vendor-tools/availability',
         '/vendor-tools/photos',
+        '/profile/edit',
       ];
       for (final loc in protected) {
         final uri = Uri.parse(loc);
