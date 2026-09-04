@@ -1,0 +1,49 @@
+name: Supabase CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/supabase.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/supabase.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  migrations:
+    name: Apply migrations to a throwaway database
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          # Same version as the `supabase` devDependency in package.json.
+          version: 2.116.0
+
+      # Applies every file in supabase/migrations in filename order, then
+      # seed.sql. Fails on a broken migration, a duplicate version, or a
+      # migration that assumes an object an earlier one never created.
+      - name: Start Postgres and apply migrations and seed
+        run: supabase db start
+
+      - name: Show the resulting migration history
+        run: supabase migration list --local
+
+      - name: Lint schema
+        run: supabase db lint --local --level warning --fail-on error
+
+      # Advisory only: `db advisors` reports pre-existing findings too, so it
+      # reports without failing the build.
+      - name: Security and performance advisors
+        run: supabase db advisors --local --type all --level warn --fail-on none
