@@ -263,6 +263,39 @@ void main() {
       );
     });
 
+    test('needsRole may still walk forward into profile setup', () {
+      // Regression: role select pushes /auth/profile-setup, and a session
+      // re-sync still reports needsRole while full_name is blank. Redirecting
+      // back to /auth/role made onboarding unfinishable.
+      expect(
+        resolveAuthRedirect(
+          location: '/auth/profile-setup',
+          status: AuthFlowStatus.needsRole,
+          uri: Uri.parse('/auth/profile-setup'),
+        ),
+        isNull,
+      );
+      expect(
+        resolveAuthRedirect(
+          location: '/auth/role',
+          status: AuthFlowStatus.needsRole,
+          uri: Uri.parse('/auth/role'),
+        ),
+        isNull,
+      );
+    });
+
+    test('needsProfile still cannot walk back into role select', () {
+      expect(
+        resolveAuthRedirect(
+          location: '/auth/role',
+          status: AuthFlowStatus.needsProfile,
+          uri: Uri.parse('/auth/role'),
+        ),
+        '/auth/profile-setup',
+      );
+    });
+
     test('legal screens stay open during onboarding', () {
       expect(
         resolveAuthRedirect(

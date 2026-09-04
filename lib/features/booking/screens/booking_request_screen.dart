@@ -106,7 +106,9 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final bookedAsync = ref.watch(vendorBookedDatesProvider(widget.vendorId));
-    final bookedKeys = bookedAsync.valueOrNull ?? <String>{};
+    // Until the vendor's booked dates load, an empty set would let the couple
+    // pick and submit a date the vendor already blocked.
+    final bookedKeys = bookedAsync.valueOrNull;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bookingTitle)),
@@ -124,7 +126,8 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
                     : AvailabilityCalendar.dateKey(_eventDate!),
               ),
               trailing: const Icon(Icons.calendar_today),
-              onTap: () => _pickDate(bookedKeys),
+              enabled: bookedKeys != null,
+              onTap: bookedKeys == null ? null : () => _pickDate(bookedKeys),
             ),
             const SizedBox(height: 8),
             Text(
@@ -172,7 +175,9 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
             ),
             const SizedBox(height: 28),
             FilledButton(
-              onPressed: _loading ? null : () => _submit(bookedKeys),
+              onPressed: bookedKeys == null || _loading
+                  ? null
+                  : () => _submit(bookedKeys),
               child: Text(l10n.submitBooking),
             ),
           ],

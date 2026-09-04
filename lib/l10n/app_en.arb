@@ -123,6 +123,8 @@
   "guestBrowse": "Browse without account",
   "retry": "Retry",
   "errorGeneric": "Something went wrong. Try again.",
+  "vendorNotApprovedError": "This listing is not taking requests yet.",
+  "bookingAlreadyHandledError": "This request has already been handled. Refresh and try again.",
   "emptyDefault": "Nothing here yet",
   "loading": "Loading…",
   "cancel": "Cancel",
@@ -227,4 +229,11 @@
   "transferNoteRequired": "Add a short transfer reference",
   "vendorDahrFeeStatus": "Dahr fee status",
   "vendorDahrFeeHint": "Status only. The couple pays this 10% fee to Dahr by bank transfer."
+  "commissionBannerHint": "Dahr records this as unpaid. An admin marks it paid after offline collection.",
+  "acceptQuoteSuccess": "Booking accepted. 10% commission is recorded as unpaid.",
+  "roleNotAssignable": "Choose couple or vendor. Admin cannot be self-assigned.",
+  "guestCountInvalid": "Guest count must be at least 1",
+  "messageTooLong": "Message is too long",
+  "ratingRequired": "Choose a rating from 1 to 5",
+  "commentTooLong": "Comment is too long"
 }

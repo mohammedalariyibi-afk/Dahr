@@ -54,6 +54,20 @@ class Review {
         'comment': comment,
       });
 
+  /// Display name looked up separately: `profiles` RLS hides other users'
+  /// rows, so the name cannot ride along on the review query.
+  Review withConsumerName(String? name) => Review(
+        id: id,
+        vendorId: vendorId,
+        consumerId: consumerId,
+        bookingRequestId: bookingRequestId,
+        rating: rating,
+        comment: comment,
+        isHidden: isHidden,
+        createdAt: createdAt,
+        consumerName: name,
+      );
+
   bool get isVisibleToPublic => !isHidden;
 }
 

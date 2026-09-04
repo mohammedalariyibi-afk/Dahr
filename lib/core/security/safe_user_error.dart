@@ -4,6 +4,13 @@ import '../../l10n/generated/app_localizations.dart';
 /// Maps known validation keys to copy. Everything else is a generic message
 /// so PostgREST / Auth exceptions never land on screen or in a snackbar.
 abstract final class SafeUserError {
+  /// Keys that deliberately fall back to the generic message: they describe a
+  /// client guard the user cannot act on, not something they typed.
+  static const opaqueKeys = {
+    'write_rejected',
+    'not_vendor',
+  };
+
   static const knownKeys = {
     'role_not_assignable',
     'write_rejected',
@@ -12,13 +19,18 @@ abstract final class SafeUserError {
     'event_date_past',
     'vendor_required',
     'consumer_required',
+    'booking_required',
+    'guest_count_invalid',
+    'message_too_long',
+    'rating_invalid',
+    'comment_too_long',
     'review_not_completed',
     'already_reviewed',
     'quoted_amount_required',
     'date_has_accepted_booking',
     'vendor_not_approved',
     'booking_must_be_pending',
-    'guest_count_invalid',
+    'invalid_booking_transition',
     'profile_required',
     'business_name_required',
     'description_required',
@@ -47,8 +59,24 @@ abstract final class SafeUserError {
       case 'event_date_past':
       case 'vendor_required':
       case 'consumer_required':
+      case 'booking_required':
       case 'profile_required':
         return l10n.requiredField;
+      case 'guest_count_invalid':
+        return l10n.guestCountInvalid;
+      case 'message_too_long':
+        return l10n.messageTooLong;
+      case 'comment_too_long':
+        return l10n.commentTooLong;
+      case 'rating_invalid':
+        return l10n.ratingRequired;
+      // Raised by the booking guards in
+      // 20260903230000_booking_integrity_guards.sql.
+      case 'vendor_not_approved':
+        return l10n.vendorNotApprovedError;
+      case 'booking_must_be_pending':
+      case 'invalid_booking_transition':
+        return l10n.bookingAlreadyHandledError;
       case 'review_not_completed':
         return l10n.reviewNotCompleted;
       case 'already_reviewed':

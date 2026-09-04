@@ -379,6 +379,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorGeneric => 'Something went wrong. Try again.';
 
   @override
+  String get vendorNotApprovedError =>
+      'This listing is not taking requests yet.';
+
+  @override
+  String get bookingAlreadyHandledError =>
+      'This request has already been handled. Refresh and try again.';
+
+  @override
   String get emptyDefault => 'Nothing here yet';
 
   @override
@@ -688,4 +696,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vendorDahrFeeHint =>
       'Status only. The couple pays this 10% fee to Dahr by bank transfer.';
+  String get roleNotAssignable =>
+      'Choose couple or vendor. Admin cannot be self-assigned.';
+
+  @override
+  String get guestCountInvalid => 'Guest count must be at least 1';
+
+  @override
+  String get messageTooLong => 'Message is too long';
+
+  @override
+  String get ratingRequired => 'Choose a rating from 1 to 5';
+
+  @override
+  String get commentTooLong => 'Comment is too long';
 }

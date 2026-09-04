@@ -15,6 +15,24 @@ enum AuthFlowStatus {
   authenticated,
 }
 
+/// Maps a signed-in profile onto the onboarding step that is still missing.
+///
+/// `profiles.role` defaults to `consumer`, so the row itself cannot say
+/// whether the user ever saw the role screen. [roleChosen] carries that,
+/// otherwise picking a role would leave the status on [AuthFlowStatus.needsRole]
+/// and the router would bounce the user back to `/auth/role` forever.
+AuthFlowStatus resolveAuthFlowStatus({
+  required Profile? profile,
+  required bool roleChosen,
+}) {
+  final hasName = profile?.fullName?.trim().isNotEmpty ?? false;
+  if (!roleChosen && !hasName) return AuthFlowStatus.needsRole;
+  if (profile == null || !profile.isProfileComplete) {
+    return AuthFlowStatus.needsProfile;
+  }
+  return AuthFlowStatus.authenticated;
+}
+
 class AppAuthState {
   const AppAuthState({
     required this.status,
@@ -49,45 +67,62 @@ class AuthController extends StateNotifier<AppAuthState> {
 
   late final StreamSubscription<AuthState> _authSub;
 
+  /// User id that picked a role on this device since sign-in.
+  String? _roleChosenBy;
+
+  /// Bumped by every sync. A profile fetch that finishes after a newer sync
+  /// started must not write its result — otherwise a fetch still in flight
+  /// when the user signs out would resurrect the signed-in state.
+  int _syncGeneration = 0;
+
   Future<void> _syncFromSession(Session? session) async {
+    final generation = ++_syncGeneration;
+
     if (session == null) {
+      _roleChosenBy = null;
       state = const AppAuthState(status: AuthFlowStatus.unauthenticated);
       return;
     }
 
     try {
       final profile = await fetchProfile(session.user.id);
-      if (profile == null ||
-          profile.fullName == null ||
-          profile.fullName!.trim().isEmpty) {
-        state = AppAuthState(
-          status: AuthFlowStatus.needsRole,
-          session: session,
-          profile: profile,
-        );
-        return;
-      }
-
-      if (!profile.isProfileComplete) {
-        state = AppAuthState(
-          status: AuthFlowStatus.needsProfile,
-          session: session,
-          profile: profile,
-        );
-        return;
-      }
-
+      if (!_isCurrent(generation, session)) return;
       state = AppAuthState(
-        status: AuthFlowStatus.authenticated,
+        status: resolveAuthFlowStatus(
+          profile: profile,
+          roleChosen: _roleChosenBy == session.user.id,
+        ),
         session: session,
         profile: profile,
       );
     } catch (_) {
+      if (!_isCurrent(generation, session)) return;
+      // A failed profile read must not push a finished user back through
+      // onboarding; keep what we already know.
+      final known = state.profile;
+      if (known != null && known.id == session.user.id) {
+        state = AppAuthState(
+          status: resolveAuthFlowStatus(
+            profile: known,
+            roleChosen: _roleChosenBy == session.user.id,
+          ),
+          session: session,
+          profile: known,
+        );
+        return;
+      }
       state = AppAuthState(
         status: AuthFlowStatus.needsProfile,
         session: session,
       );
     }
+  }
+
+  /// False once a newer sync has started, or once the client has moved on to
+  /// another session (or to none at all).
+  bool _isCurrent(int generation, Session session) {
+    if (generation != _syncGeneration) return false;
+    return DahrSupabase.auth.currentSession?.user.id == session.user.id;
   }
 
   Future<Profile?> fetchProfile(String userId) async {
@@ -131,6 +166,12 @@ class AuthController extends StateNotifier<AppAuthState> {
         .upsert(payload)
         .select('id, role');
     requireMutatedRows(rows);
+    // `profiles.role` defaults to consumer, so a re-read cannot tell "picked
+    // consumer" from "never picked" and would keep reporting needsRole, with
+    // the router bouncing profile setup back to role select. Recording the
+    // pick here keeps that true for every later refresh in this session, not
+    // just the one below.
+    _roleChosenBy = uid;
     // Keep a complete profile authenticated (e.g. consumer becoming vendor).
     await refreshProfile();
   }
@@ -160,13 +201,17 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<void> updateLocale(String locale) async {
     final uid = DahrSupabase.currentUserId;
     if (uid == null) return;
-    await DahrSupabase.client
+    final rows = await DahrSupabase.client
         .from('profiles')
-        .update({'locale': locale}).eq('id', uid);
+        .update({'locale': locale})
+        .eq('id', uid)
+        .select('id');
+    requireMutatedRows(rows);
   }
 
   Future<void> signOut() async {
     await DahrSupabase.auth.signOut();
+    _roleChosenBy = null;
     state = const AppAuthState(status: AuthFlowStatus.unauthenticated);
   }
 

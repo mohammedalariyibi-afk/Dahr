@@ -4,6 +4,12 @@
 
 export const REVIEW_HIDDEN_COLUMN = "is_hidden";
 
+/** Hides a review and closes its report in one transaction. */
+export const HIDE_REVIEW_RPC = "hide_review_and_close_report";
+
+/** PostgREST code for "function is not in the schema cache". */
+export const RPC_MISSING_CODE = "PGRST202";
+
 export function touchesHidden(
   payload: Record<string, unknown>,
 ): boolean {

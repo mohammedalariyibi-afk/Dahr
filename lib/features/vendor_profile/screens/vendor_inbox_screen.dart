@@ -70,7 +70,6 @@ class VendorInboxScreen extends ConsumerWidget {
               bookingId: booking.id,
               quotedAmountLyd: quoted,
             ),
-            booking: booking,
           );
       if (!context.mounted) return;
       final l10n = AppLocalizations.of(context);

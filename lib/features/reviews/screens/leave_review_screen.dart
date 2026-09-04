@@ -11,6 +11,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../booking/providers/booking_provider.dart';
+import '../../discovery/providers/vendors_provider.dart';
 
 class LeaveReviewScreen extends ConsumerStatefulWidget {
   const LeaveReviewScreen({
@@ -74,6 +75,13 @@ class _LeaveReviewScreenState extends ConsumerState<LeaveReviewScreen> {
           .single();
       ref.invalidate(consumerBookingsProvider);
       ref.invalidate(bookingByIdProvider(widget.bookingRequestId));
+      // The rating and review count are computed per query, so the vendor
+      // page and Discover would keep showing the pre-review numbers.
+      if (widget.vendorId.isNotEmpty) {
+        ref.invalidate(vendorReviewsProvider(widget.vendorId));
+        ref.invalidate(vendorDetailProvider(widget.vendorId));
+      }
+      ref.invalidate(vendorsProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.reviewSuccess)),

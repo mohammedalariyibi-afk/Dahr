@@ -33,6 +33,25 @@ class VendorPhotosScreen extends ConsumerWidget {
     }
   }
 
+  /// Delete and reorder update state optimistically, so a rejected write has
+  /// to be reported and the list resynced from the server.
+  Future<void> _runWrite(
+    BuildContext context,
+    WidgetRef ref,
+    Future<void> Function() write,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    try {
+      await write();
+    } catch (e) {
+      await ref.read(vendorPhotosProvider.notifier).refresh();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(SafeUserError.of(l10n, e))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
@@ -92,11 +111,16 @@ class VendorPhotosScreen extends ConsumerWidget {
                     child: ReorderableListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
                       itemCount: photos.length,
-                      onReorderItem: (oldIndex, newIndex) {
-                        ref
+                      // The new order is applied locally first, so a failed
+                      // write would otherwise leave the cover photo looking
+                      // changed while `sort_order` still says otherwise.
+                      onReorderItem: (oldIndex, newIndex) => _runWrite(
+                        context,
+                        ref,
+                        () => ref
                             .read(vendorPhotosProvider.notifier)
-                            .reorder(oldIndex, newIndex);
-                      },
+                            .reorder(oldIndex, newIndex),
+                      ),
                       itemBuilder: (context, i) {
                         final photo = photos[i];
                         return Card(
@@ -120,9 +144,13 @@ class VendorPhotosScreen extends ConsumerWidget {
                               children: [
                                 IconButton(
                                   tooltip: l10n.deletePhoto,
-                                  onPressed: () => ref
-                                      .read(vendorPhotosProvider.notifier)
-                                      .remove(photo),
+                                  onPressed: () => _runWrite(
+                                    context,
+                                    ref,
+                                    () => ref
+                                        .read(vendorPhotosProvider.notifier)
+                                        .remove(photo),
+                                  ),
                                   icon: const Icon(Icons.delete_outline),
                                   color: AppColors.error,
                                 ),

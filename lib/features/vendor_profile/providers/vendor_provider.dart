@@ -166,6 +166,9 @@ class VendorAvailabilityNotifier
         .select('id');
     requireMutatedRows(rows);
     ref.invalidate(vendorDashboardStatsProvider);
+    // Couples read booked dates from this family; without it they keep seeing
+    // the stale set and can request a date the vendor just blocked.
+    ref.invalidate(vendorBookedDatesProvider);
     ref.invalidateSelf();
   }
 
@@ -299,7 +302,13 @@ class VendorPhotosNotifier extends AsyncNotifier<List<VendorPhoto>> {
     final current = state.valueOrNull ?? [];
     final next = VendorPhotoStorage.applyReorder(current, oldIndex, newIndex);
     state = AsyncData(next);
-    await persistPhotoOrder(next);
+    try {
+      await persistPhotoOrder(next);
+    } catch (_) {
+      // Put the visible order back where the database still has it.
+      state = AsyncData(current);
+      rethrow;
+    }
     ref.invalidate(myVendorProfileProvider);
   }
 

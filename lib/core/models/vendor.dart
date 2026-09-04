@@ -1,4 +1,5 @@
 import '../constants/app_constants.dart';
+import 'commission.dart';
 import 'enums.dart';
 
 class VendorPhoto {
@@ -19,7 +20,7 @@ class VendorPhoto {
       id: json['id'] as String,
       vendorId: json['vendor_id'] as String,
       storageUrl: json['storage_url'] as String,
-      sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
+      sortOrder: CommissionMath.parseLyd(json['sort_order'])?.toInt() ?? 0,
     );
   }
 
@@ -246,19 +247,21 @@ class VendorProfile {
       category: VendorCategory.fromString(json['category'] as String?),
       city: CityCode.fromString(json['city'] as String?),
       description: (json['description'] as String?) ?? '',
-      priceMin: json['price_min'] as num?,
-      priceMax: json['price_max'] as num?,
+      // NUMERIC columns: parsed like the booking money fields rather than
+      // cast, so a quoted value cannot take down Discover.
+      priceMin: CommissionMath.parseLyd(json['price_min']),
+      priceMax: CommissionMath.parseLyd(json['price_max']),
       whatsappNumber: json['whatsapp_number'] as String?,
       services: services,
       isVerified: json['is_verified'] as bool? ?? false,
       isApproved: json['is_approved'] as bool? ?? false,
-      viewCount: (json['view_count'] as num?)?.toInt() ?? 0,
+      viewCount: CommissionMath.parseLyd(json['view_count'])?.toInt() ?? 0,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
       photos: photos,
-      avgRating: (json['avg_rating'] as num?)?.toDouble(),
-      reviewCount: (json['review_count'] as num?)?.toInt() ?? 0,
+      avgRating: CommissionMath.parseLyd(json['avg_rating']),
+      reviewCount: CommissionMath.parseLyd(json['review_count'])?.toInt() ?? 0,
     );
   }
 

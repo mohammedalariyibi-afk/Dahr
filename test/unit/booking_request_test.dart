@@ -290,5 +290,37 @@ void main() {
       expect(booking.review, isNotNull);
       expect(booking.canLeaveReview, isFalse);
     });
+
+    test('review embed is read whatever Map type the client decodes', () {
+      // Regression: only Map<String, dynamic> was parsed, so a plain Map left
+      // review null and re-offered the review to a couple who already left one.
+      for (final embed in <Map>[
+        <String, dynamic>{
+          'id': 'r1',
+          'vendor_id': 'v1',
+          'consumer_id': 'c1',
+          'booking_request_id': 'b1',
+          'rating': 5,
+        },
+        <dynamic, dynamic>{
+          'id': 'r1',
+          'vendor_id': 'v1',
+          'consumer_id': 'c1',
+          'booking_request_id': 'b1',
+          'rating': 5,
+        },
+      ]) {
+        final booking = BookingRequest.fromJson({
+          'id': 'b1',
+          'vendor_id': 'v1',
+          'consumer_id': 'c1',
+          'event_date': '2030-06-15',
+          'status': 'completed',
+          'reviews': embed,
+        });
+        expect(booking.review, isNotNull, reason: '${embed.runtimeType}');
+        expect(booking.canLeaveReview, isFalse, reason: '${embed.runtimeType}');
+      }
+    });
   });
 }

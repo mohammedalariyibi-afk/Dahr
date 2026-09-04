@@ -379,6 +379,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorGeneric => 'حدث خطأ. حاول مرة أخرى.';
 
   @override
+  String get vendorNotApprovedError => 'هذا المورّد لا يستقبل الطلبات بعد.';
+
+  @override
+  String get bookingAlreadyHandledError =>
+      'تم التعامل مع هذا الطلب بالفعل. حدّث الصفحة وحاول مرة أخرى.';
+
+  @override
   String get emptyDefault => 'لا يوجد شيء هنا بعد';
 
   @override
@@ -684,4 +691,18 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get vendorDahrFeeHint =>
       'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي.';
+  String get roleNotAssignable =>
+      'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.';
+
+  @override
+  String get guestCountInvalid => 'عدد الضيوف يجب أن يكون 1 على الأقل';
+
+  @override
+  String get messageTooLong => 'الرسالة طويلة جداً';
+
+  @override
+  String get ratingRequired => 'اختر تقييماً من 1 إلى 5';
+
+  @override
+  String get commentTooLong => 'التعليق طويل جداً';
 }
