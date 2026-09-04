@@ -1429,8 +1429,6 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي.'**
   String get vendorDahrFeeHint;
-  /// **'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.'**
-  String get roleNotAssignable;
 
   /// No description provided for @guestCountInvalid.
   ///

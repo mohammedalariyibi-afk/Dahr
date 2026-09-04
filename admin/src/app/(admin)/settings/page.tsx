@@ -41,7 +41,7 @@ export default async function SettingsPage({
       {missingTable ? (
         <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
           Bank-details table is not on live yet. This is a git-only migration
-          (`20260904010000_customer_pays_dahr_fee.sql`). Syber applies it on
+          (`20260904005000_customer_pays_dahr_fee.sql`). Syber applies it on
           Dahr LY — do not db push from the app PR. Until then, the couple app
           shows “bank details coming from ops”.
         </p>
