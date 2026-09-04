@@ -656,4 +656,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get roleNotAssignable =>
       'Choose couple or vendor. Admin cannot be self-assigned.';
+
+  @override
+  String get guestCountInvalid => 'Guest count must be at least 1';
+
+  @override
+  String get messageTooLong => 'Message is too long';
+
+  @override
+  String get ratingRequired => 'Choose a rating from 1 to 5';
+
+  @override
+  String get commentTooLong => 'Comment is too long';
 }

@@ -49,6 +49,69 @@ void main() {
     });
   });
 
+import 'package:dahr/l10n/generated/app_localizations_ar.dart';
+import 'package:dahr/l10n/generated/app_localizations_en.dart';
+
+void main() {
+  final en = AppLocalizationsEn();
+  final ar = AppLocalizationsAr();
+
+  group('validation keys reach the user', () {
+    // Regression: these are thrown by BookingRequestPayload.validate and
+    // ReviewPayload.validate but had no case, so a fixable input problem
+    // surfaced as the generic "something went wrong" copy.
+    const fixable = {
+      'guest_count_invalid',
+      'message_too_long',
+      'rating_invalid',
+      'comment_too_long',
+    };
+
+    for (final locale in <AppLocalizations>[en, ar]) {
+      test('${locale.localeName}: fixable input errors are not generic', () {
+        for (final key in fixable) {
+          expect(
+            SafeUserError.fromKey(locale, key),
+            isNot(locale.errorGeneric),
+            reason: '$key must tell the user what to fix',
+          );
+        }
+      });
+
+      test('${locale.localeName}: booking_required asks for the field', () {
+        expect(
+          SafeUserError.fromKey(locale, 'booking_required'),
+          locale.requiredField,
+        );
+      });
+
+      test('${locale.localeName}: unknown keys stay generic', () {
+        expect(
+          SafeUserError.fromKey(locale, 'pgrst_internal_detail'),
+          locale.errorGeneric,
+        );
+        expect(SafeUserError.fromKey(locale, null), locale.errorGeneric);
+      });
+    }
+
+    test('every validation key thrown by a payload is a known key', () {
+      for (final key in fixable) {
+        expect(SafeUserError.knownKeys, contains(key));
+      }
+      expect(SafeUserError.knownKeys, contains('booking_required'));
+    });
+
+    test('StateError validation keys map through of()', () {
+      expect(
+        SafeUserError.of(en, StateError('guest_count_invalid')),
+        en.guestCountInvalid,
+      );
+      expect(
+        SafeUserError.of(en, StateError('rating_invalid')),
+        en.ratingRequired,
+      );
+    });
+  });
   group('SafeUserError.looksInternal', () {
     test('treats API exceptions and tokens as internal', () {
       expect(SafeUserError.looksInternal(null), isTrue);

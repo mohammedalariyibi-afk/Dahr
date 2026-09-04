@@ -52,7 +52,13 @@ String? resolveAuthRedirect({
 
   // Incomplete onboarding must finish before browsing.
   // Legal screens stay reachable (store reviewers and the user).
-  if (status == AuthFlowStatus.needsRole && !onRole && !onLegal) {
+  // Profile setup is the step after role, so it stays reachable too: a session
+  // re-sync still reports needsRole while the name is blank, and bouncing back
+  // would discard what the user typed.
+  if (status == AuthFlowStatus.needsRole &&
+      !onRole &&
+      !onProfileSetup &&
+      !onLegal) {
     return '/auth/role';
   }
   if (status == AuthFlowStatus.needsProfile && !onProfileSetup && !onLegal) {

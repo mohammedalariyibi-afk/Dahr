@@ -1357,6 +1357,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.'**
   String get roleNotAssignable;
+
+  /// No description provided for @guestCountInvalid.
+  ///
+  /// In ar, this message translates to:
+  /// **'عدد الضيوف يجب أن يكون 1 على الأقل'**
+  String get guestCountInvalid;
+
+  /// No description provided for @messageTooLong.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرسالة طويلة جداً'**
+  String get messageTooLong;
+
+  /// No description provided for @ratingRequired.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر تقييماً من 1 إلى 5'**
+  String get ratingRequired;
+
+  /// No description provided for @commentTooLong.
+  ///
+  /// In ar, this message translates to:
+  /// **'التعليق طويل جداً'**
+  String get commentTooLong;
 }
 
 class _AppLocalizationsDelegate

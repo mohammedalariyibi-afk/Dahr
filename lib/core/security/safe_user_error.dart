@@ -19,6 +19,11 @@ abstract final class SafeUserError {
     'event_date_past',
     'vendor_required',
     'consumer_required',
+    'booking_required',
+    'guest_count_invalid',
+    'message_too_long',
+    'rating_invalid',
+    'comment_too_long',
     'review_not_completed',
     'already_reviewed',
     'quoted_amount_required',
@@ -54,6 +59,7 @@ abstract final class SafeUserError {
       case 'event_date_past':
       case 'vendor_required':
       case 'consumer_required':
+      case 'booking_required':
       case 'profile_required':
         return l10n.requiredField;
       case 'guest_count_invalid':

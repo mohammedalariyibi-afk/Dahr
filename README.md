@@ -17,6 +17,8 @@ dahr/
     seed.sql           # Demo vendors (Tripoli & Benghazi)
     config.toml
   docs/store-listing.md
+  legal-pages/         # Public privacy/terms for GitHub Pages (store URLs)
+  tool/check_store_env.dart
   STORE.md             # App Store + Google Play submit checklist
   .env.example         # Flutter env names (copy to gitignored .env)
   admin/.env.example   # Admin NEXT_PUBLIC_* names (copy to .env.local)
@@ -48,7 +50,7 @@ How Flutter loads them (first non-empty wins):
 1. `--dart-define` or `--dart-define-from-file=.env` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, optional `SUPABASE_PUBLISHABLE_KEY`)
 2. `flutter_dotenv` from the bundled `.env.example` asset
 
-`.env` is not a Flutter asset (it is gitignored, so bundling it would break `flutter test` on a fresh clone). Pass real keys with `--dart-define-from-file=.env`.
+`.env` is not a Flutter asset (it is gitignored, so bundling it would break `flutter test` on a fresh clone). Pass real keys with `--dart-define-from-file=.env`. Store / Play builds must fail closed if that file is missing, still has placeholders, points at the wrong project, or looks like `service_role` — run `dart run tool/check_store_env.dart` first.
 
 `supabase_flutter` `initialize()` uses `url` + `publishableKey` (the anon/publishable key, not `service_role`).
 
@@ -160,8 +162,8 @@ Open http://localhost:3000 — only users with `profiles.role = 'admin'` can acc
 
 Public store URLs (no admin login):
 
-- Privacy: `http://localhost:3000/privacy` (deployed: `{ADMIN_ORIGIN}/privacy`)
-- Terms: `http://localhost:3000/terms` (deployed: `{ADMIN_ORIGIN}/terms`)
+- Privacy: `http://localhost:3000/privacy` (store URL: `https://mohammedalariyibi-afk.github.io/Dahr/privacy`)
+- Terms: `http://localhost:3000/terms` (store URL: `https://mohammedalariyibi-afk.github.io/Dahr/terms`)
 
 Add Auth redirect URL: `http://localhost:3000/auth/callback`.
 
@@ -205,8 +207,8 @@ Ship target: Saturday 5 September 2026. Mohammed signs and uploads; this repo do
 | Org / bundle root | `com.dahr` |
 | Android `applicationId` | `com.dahr.dahr` |
 | iOS bundle identifier | `com.dahr.dahr` |
-| Privacy | `{ADMIN_ORIGIN}/privacy` |
-| Terms | `{ADMIN_ORIGIN}/terms` |
+| Privacy | `https://mohammedalariyibi-afk.github.io/Dahr/privacy` |
+| Terms | `https://mohammedalariyibi-afk.github.io/Dahr/terms` |
 | Account deletion | Profile → Delete account |
 | Auth to declare | Email OTP only |
 | IAP / payments | None |
@@ -250,7 +252,8 @@ flutter create . --project-name dahr --org com.dahr --platforms=android,ios
 #    - queries: https, http, com.whatsapp
 #    - Info.plist: CFBundleDevelopmentRegion=ar, iPhone portrait, dahr URL scheme,
 #      LSApplicationQueriesSchemes (whatsapp, https, http), camera/photo usage strings
-#    - release signing stays debug in git; Mohammed adds a local key.properties to upload
+#    - release signing reads gitignored android/key.properties when present;
+#      otherwise debug signing (local flutter run --release)
 
 # 4. Confirm identifiers:
 grep applicationId android/app/build.gradle.kts
@@ -271,14 +274,16 @@ Do **not** run `flutter create` without `--platforms=android,ios` if you want to
 ### Build artifacts (Mohammed uploads)
 
 ```bash
-# Play (AAB) — requires local signing for a store upload
+# Play (AAB) — drop android/key.properties locally, then:
+dart run tool/check_store_env.dart
 flutter build appbundle --dart-define-from-file=.env
 
-# App Store (IPA) — Xcode Team on Mohammed’s Mac
+# App Store (IPA) — Xcode Team on Mohammed’s Mac; iPhone only
+dart run tool/check_store_env.dart
 flutter build ipa --dart-define-from-file=.env
 ```
 
-Use Dahr LY keys in `.env`. Never Zeen. Never `service_role`.
+`.env` must be Dahr LY (`https://cccusktgxrizfwpixddu.supabase.co`) + anon/publishable key. Never Zeen. Never `service_role`. Gradle uses `signingConfigs.release` when `android/key.properties` exists; otherwise debug signing so `flutter run --release` still works.
 
 ## Demo seed
 
