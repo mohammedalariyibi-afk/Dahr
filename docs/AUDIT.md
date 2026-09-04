@@ -174,6 +174,26 @@ reasoned about the SQL and the Dart instead of running them.
 - `increment_vendor_views` was an un-awaited Postgrest builder. Those are lazy: with no terminal `then()` the request never left the app, so the view counter had never incremented. It now fires, and counts once per vendor per app run (which is also the M10 mitigation).
 - A failed profile read no longer pushes a finished user back through onboarding.
 
+### Found by a second read of the client code
+
+| Finding | Severity | Fix |
+|---------|----------|-----|
+| The admin middleware returned a bare `NextResponse.redirect` from all three of its branches, dropping the session cookies `getUser()` had just rotated onto its own response. The browser kept sending the old token — the intermittent-logout footgun the `@supabase/ssr` guide warns about. | High | Redirects carry those cookies. |
+| `_syncFromSession` had no in-flight guard, so a profile read still running when the user signed out completed afterwards and wrote the signed-in state back. | High | A sync generation plus a current-session check; only the newest sync for the current user may publish. |
+| Freeing a booked date and reordering photos called into their providers without awaiting. A refused write (freeing a date the DB holds for an accepted booking is rejected outright) left the switch on, or the new order on screen, with no message. | Medium | Both await and report through `SafeUserError`; the photo reorder also restores the order the database still has. |
+| `knownKeys` listed `vendor_not_approved`, `booking_must_be_pending`, and `guest_count_invalid`, but `fromKey` had no case for them — as with `invalid_booking_transition`, which was not listed at all. All four showed “Something went wrong”. | Medium | AR + EN copy for all four, and a test that every known key resolves to something other than the generic message. |
+| `VendorProfile.fromJson` cast `price_min` / `price_max` / `view_count` and the computed rating fields straight to `num`, so a quoted `NUMERIC` would throw inside the Discover, vendor detail, and favorites providers. Booking money already parsed defensively. | Medium | Vendor fields go through `CommissionMath.parseLyd` too. |
+| A user who booked as a couple and then became a vendor lost every route to those bookings: the bottom nav sends vendors to the inbox and Profile had no bookings entry, so “leave a review” was unreachable. | Medium | Profile shows “My bookings” for vendors. |
+| The accept flow wrote `availability` again after `accept_booking_request` had already done it in-transaction — a second write that could only fail after the accept succeeded. `seed.sql` inserts accepted/completed bookings directly, so its demo calendar had no matching rows. | Low | Client write removed; the seed marks those dates itself. |
+
+### Known and deliberately not fixed before submit
+
+- **PostgREST caps a request at 1000 rows.** The admin dashboard derives the booking count, the category and status breakdowns, and the unpaid-commission total from unbounded `select`s, and the vendors / reports / commissions pages have no pagination (vendor search is also in-memory over that capped fetch). At launch scale — 15 vendors, 3 bookings — none of this can bite, but past 1000 rows the numbers under-report silently. Fixing it properly means SQL aggregates or a dashboard RPC plus pagination on three pages, which is not a change to make the night before a submit.
+- The vendors page tab counts are computed after the search filter, which reads oddly in isolation but is consistent: the tab links preserve `q`, so the count describes what clicking it shows.
+- The language toggle only writes `SharedPreferences`; `profiles.locale` is set at profile setup and never updated afterwards.
+- The favorites list skips the ratings roll-up, so cards there show no stars while Discover does.
+- `booking_protect_commission` and `booking_reject_if_date_booked` are both `BEFORE INSERT OR UPDATE` with no explicit order. Postgres fires them alphabetically, which happens to be the order the accept path needs; renaming either trigger would change behaviour silently.
+
 ### How this round was verified
 
 The migrations were applied in filename order to a real PostgreSQL 16 with a
@@ -187,10 +207,12 @@ equivalent of `supabase db reset`. Guards were then exercised as those roles:
 
 ## Suggested next work (after submit)
 
-1. Share the OTP throttle across instances (Redis or a Postgres table) if the admin runs on more than one serverless instance; today the window is per instance.
-2. `storage.objects` still has a `vendor_photos_storage_admin_all` policy that calls `is_admin()`. Public photo downloads do not go through it, and the app only lists objects while signed in, so it is not F1 — but a future anonymous `storage.list` would hit the same wall.
-3. Audit-log retention / a dashboard view for it (rows are written but nothing renders them yet).
-4. Archive commissions before an account deletion cascade (I2).
+1. Admin data layer: SQL aggregates (or a dashboard RPC) for the counts and the unpaid-commission sum, pagination on vendors / reports / commissions, and SQL-side vendor search. See “deliberately not fixed” above — correctness degrades silently past 1000 rows.
+2. Share the OTP throttle across instances (Redis or a Postgres table) if the admin runs on more than one serverless instance; today the window is per instance.
+3. `storage.objects` still has a `vendor_photos_storage_admin_all` policy that calls `is_admin()`. Public photo downloads do not go through it, and the app only lists objects while signed in, so it is not F1 — but a future anonymous `storage.list` would hit the same wall.
+4. Audit-log retention / a dashboard view for it (rows are written but nothing renders them yet).
+5. Archive commissions before an account deletion cascade (I2).
+6. Write `profiles.locale` when the language toggle changes, and reuse the ratings roll-up on the favorites list.
 
 ---
 
