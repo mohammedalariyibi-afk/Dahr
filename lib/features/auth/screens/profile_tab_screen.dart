@@ -86,6 +86,14 @@ class ProfileTabScreen extends ConsumerWidget {
           ),
           if (auth.isVendor) ...[
             const Divider(),
+            // A vendor may also have booked as a couple. The bottom nav gives
+            // them the inbox instead of /bookings, so this is their only way
+            // back to those requests and to "leave a review".
+            ListTile(
+              leading: const Icon(Icons.event_note_outlined),
+              title: Text(l10n.myBookings),
+              onTap: () => context.go('/bookings'),
+            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Text(
