@@ -53,8 +53,8 @@ matches a filename in `supabase/migrations`:
 | `20260903210000_scope_booking_updates_and_insert_only_reviews` | `20260903211019_scope_booking_updates_and_insert_only_reviews` |
 | `20260903230000_booking_integrity_guards` | *(genuinely not applied)* |
 | `20260904000000_admin_audit_log_and_atomic_moderation` | `20260904104425_admin_audit_log_and_atomic_moderation` |
-| `20260904010000_customer_pays_dahr_fee` | `20260904105445_customer_pays_dahr_fee` |
-| `20260904020000_guest_read_policies_without_helper_execute` | `20260904104408_guest_read_policies_without_helper_execute` |
+| `20260904005000_customer_pays_dahr_fee` | `20260904105445_customer_pays_dahr_fee` |
+| `20260904010000_guest_read_policies_without_helper_execute` | `20260904104408_guest_read_policies_without_helper_execute` |
 
 `supabase migration repair` only rewrites that history table; it runs no SQL
 and changes no schema. Point the repo's filenames at what is actually live:
@@ -74,7 +74,7 @@ supabase migration repair --linked --status reverted \
 supabase migration repair --linked --status applied \
   20260328000001 20260903000001 20260903120000 20260903140000 \
   20260903184000 20260903190000 20260903210000 20260904000000 \
-  20260904010000 20260904020000
+  20260904005000 20260904010000
 
 supabase migration list --linked
 ```

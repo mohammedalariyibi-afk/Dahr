@@ -7,7 +7,7 @@ void main() {
 
   setUpAll(() {
     sql = File(
-      'supabase/migrations/20260904010000_customer_pays_dahr_fee.sql',
+      'supabase/migrations/20260904005000_customer_pays_dahr_fee.sql',
     ).readAsStringSync();
   });
 

@@ -696,8 +696,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get vendorDahrFeeHint =>
       'Status only. The couple pays this 10% fee to Dahr by bank transfer.';
-  String get roleNotAssignable =>
-      'Choose couple or vendor. Admin cannot be self-assigned.';
 
   @override
   String get guestCountInvalid => 'Guest count must be at least 1';
