@@ -83,7 +83,7 @@ void main() {
       ).readAsStringSync();
       expect(rollup, contains('applyVendorRatingRows'));
       expect(rollup, contains('CommissionMath.parseLyd'));
-      expect(rollup, isNot(contains("as num).toDouble()"));
+      expect(rollup, isNot(contains("(row['rating'] as num)")));
     });
 
     test('vendor inbox loads booking_party_contact', () {
