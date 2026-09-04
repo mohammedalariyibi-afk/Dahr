@@ -20,6 +20,20 @@ export async function updateSession(
 
   let supabaseResponse = NextResponse.next(forwardRequest());
 
+  /**
+   * `getUser()` can rotate the session, and those cookies are written onto
+   * `supabaseResponse`. A bare redirect would drop them, so the browser would
+   * keep sending the old token — the intermittent-logout footgun in the
+   * `@supabase/ssr` guide.
+   */
+  const redirectTo = (url: URL) => {
+    const redirect = NextResponse.redirect(url);
+    for (const cookie of supabaseResponse.cookies.getAll()) {
+      redirect.cookies.set(cookie);
+    }
+    return redirect;
+  };
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -65,7 +79,7 @@ export async function updateSession(
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.delete("error");
-    return NextResponse.redirect(url);
+    return redirectTo(url);
   }
 
   let isAdmin = false;
@@ -82,14 +96,14 @@ export async function updateSession(
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("error", PUBLIC_ERROR.forbidden);
-    return NextResponse.redirect(url);
+    return redirectTo(url);
   }
 
   if (user && isAdmin && isLogin) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.searchParams.delete("error");
-    return NextResponse.redirect(url);
+    return redirectTo(url);
   }
 
   return supabaseResponse;
