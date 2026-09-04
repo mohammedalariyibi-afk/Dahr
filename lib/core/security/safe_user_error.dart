@@ -38,6 +38,7 @@ abstract final class SafeUserError {
     'whatsapp_invalid',
     'price_range_required',
     'price_range_invalid',
+    'transfer_note_invalid',
   };
 
   static String of(AppLocalizations l10n, Object error) {
@@ -96,6 +97,8 @@ abstract final class SafeUserError {
         return l10n.priceRangeInvalid;
       case 'role_not_assignable':
         return l10n.roleNotAssignable;
+      case 'transfer_note_invalid':
+        return l10n.transferNoteRequired;
       case 'write_rejected':
       case 'not_vendor':
         return l10n.errorGeneric;

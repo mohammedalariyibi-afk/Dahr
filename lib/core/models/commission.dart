@@ -1,4 +1,7 @@
-/// 10% vendor-paid commission on an accepted booking quote (LYD).
+/// 10% platform fee on an accepted booking quote (LYD).
+///
+/// The **couple** pays this amount to Dahr by online bank transfer.
+/// The rest of the quote is settled with the vendor off-platform.
 ///
 /// Matches Postgres `ROUND(quoted_amount_lyd * commission_rate, 2)` for
 /// typical 2-decimal currency inputs (half away from zero).

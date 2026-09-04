@@ -240,6 +240,7 @@ void main() {
       expect(booking.commissionAmountLyd, 450);
       expect(booking.commissionStatus, CommissionStatus.unpaid);
       expect(booking.isCommissionUnpaid, isTrue);
+      expect(booking.showsCouplePlatformFee, isTrue);
     });
 
     test('pending booking has no quote or commission', () {

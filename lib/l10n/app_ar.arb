@@ -152,10 +152,10 @@
   "commissionUnpaid": "غير مدفوعة",
   "commissionPaid": "مدفوعة",
   "commissionWaived": "معفاة",
-  "unpaidCommissionOwed": "العمولة المستحقة لدهر",
-  "noUnpaidCommission": "لا توجد عمولة مستحقة",
+  "unpaidCommissionOwed": "رسوم دهر (غير مدفوعة)",
+  "noUnpaidCommission": "لا توجد رسوم دهر غير مدفوعة",
   "quotedAmountDisplay": "عرض السعر",
-  "commissionNoteVendor": "تدفع 10٪ من هذا المبلغ لدهر، ويُحصَّل خارج التطبيق.",
+  "commissionNoteVendor": "يسجّل دهر 10٪ من هذا المبلغ. يدفع الزوجان هذه الرسوم لدهر بتحويل بنكي. تُسوّى بقية المبلغ معهم خارج المنصة.",
   "invalidQuotedAmount": "أدخل مبلغاً صالحاً بالدينار الليبي",
   "commissionStatusLabel": "حالة العمولة",
   "bookedDatesTitle": "التواريخ المحجوزة",
@@ -204,15 +204,31 @@
   "inboxEmptyAccepted": "لا توجد حجوزات مقبولة في هذه التصفية.",
   "inboxEmptyDeclined": "لا توجد طلبات مرفوضة في هذه التصفية.",
   "inboxEmptyCompleted": "لا توجد حجوزات مكتملة في هذه التصفية.",
-  "commissionBannerTitle": "العمولة المستحقة لدهر",
-  "commissionBannerBody": "المجموع غير المدفوع: {amount}",
-  "@commissionBannerBody": {
+  "acceptQuoteSuccess": "تم قبول الحجز. يدفع الزوجان رسوم دهر 10٪ بتحويل بنكي.",
+  "roleNotAssignable": "اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.",
+  "bookingDetailTitle": "الحجز",
+  "platformFeeTitle": "رسوم منصة دهر (10%)",
+  "platformFeeBody": "حوّل {amount} إلى دهر بتحويل بنكي عبر الإنترنت. هذه رسوم المنصة — وليست دفعاً ببطاقة داخل التطبيق.",
+  "@platformFeeBody": {
     "placeholders": {
       "amount": {
         "type": "String"
       }
     }
   },
+  "platformFeeVendorRest": "بقية عرض السعر ما زالت تُسوّى مع المورّد خارج المنصة (غالباً واتساب).",
+  "bankDetailsTitle": "بيانات بنك دهر",
+  "bankDetailsPending": "بيانات البنك ستأتي من التشغيل.",
+  "bankNameLabel": "البنك",
+  "accountHolderLabel": "صاحب الحساب",
+  "accountNumberLabel": "رقم الحساب / IBAN",
+  "transferNoteLabel": "مرجع التحويل",
+  "transferNoteHint": "مرجع البنك أو ملاحظة قصيرة",
+  "iTransferred": "حوّلت المبلغ",
+  "transferReported": "أُرسلت ملاحظة التحويل. سيؤكّد دهر بعد وصول المبلغ.",
+  "transferNoteRequired": "أضف مرجعاً قصيراً للتحويل",
+  "vendorDahrFeeStatus": "حالة رسوم دهر",
+  "vendorDahrFeeHint": "للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي."
   "commissionBannerHint": "يسجّل دهر هذا كمبلغ غير مدفوع. يعلّمه المشرف مدفوعاً بعد التحصيل خارج التطبيق.",
   "acceptQuoteSuccess": "تم قبول الحجز. سُجّلت عمولة 10٪ كغير مدفوعة.",
   "roleNotAssignable": "اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.",

@@ -46,10 +46,6 @@ class VendorDashboardScreen extends ConsumerWidget {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  VendorCommissionBanner(
-                    unpaidTotalLyd: stats.unpaidCommissionLyd,
-                    margin: EdgeInsets.zero,
-                  ),
                   if (!vendor.isApproved)
                     Card(
                       color: AppColors.creamDark,
@@ -80,9 +76,9 @@ class VendorDashboardScreen extends ConsumerWidget {
                     icon: Icons.photo_library_outlined,
                   ),
                   _StatTile(
-                    label: l10n.unpaidCommissionOwed,
-                    value: AppConstants.formatPrice(stats.unpaidCommissionLyd),
-                    icon: Icons.account_balance_wallet_outlined,
+                    label: l10n.vendorDahrFeeStatus,
+                    value: '${stats.unpaidBookings.length}',
+                    icon: Icons.account_balance_outlined,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -114,9 +110,16 @@ class VendorDashboardScreen extends ConsumerWidget {
                     ),
                   const SizedBox(height: 16),
                   Text(
-                    l10n.unpaidCommissionOwed,
+                    l10n.vendorDahrFeeStatus,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.vendorDahrFeeHint,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.inkMuted,
                         ),
                   ),
                   const SizedBox(height: 8),

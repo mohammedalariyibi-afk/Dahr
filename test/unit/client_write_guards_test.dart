@@ -16,6 +16,7 @@ void main() {
   late String bookingProvider;
   late String leaveReview;
   late String consumerBookingsScreen;
+  late String consumerBookingDetailScreen;
   late String bookingRequestScreen;
   late String vendorInbox;
   late String vendorProvider;
@@ -32,6 +33,9 @@ void main() {
             .readAsStringSync();
     consumerBookingsScreen =
         File('lib/features/booking/screens/consumer_bookings_screen.dart')
+            .readAsStringSync();
+    consumerBookingDetailScreen =
+        File('lib/features/booking/screens/consumer_booking_detail_screen.dart')
             .readAsStringSync();
     bookingRequestScreen =
         File('lib/features/booking/screens/booking_request_screen.dart')
@@ -64,8 +68,13 @@ void main() {
 
     test('couple booking screens never .update() booking_requests', () {
       expect(consumerBookingsScreen.contains('.update('), isFalse);
+      expect(consumerBookingDetailScreen.contains('.update('), isFalse);
       expect(bookingRequestScreen.contains('.update('), isFalse);
       expect(consumerBookingsScreen.contains('.from(\'booking_requests\')'), isFalse);
+      expect(
+        consumerBookingDetailScreen.contains('.from(\'booking_requests\')'),
+        isFalse,
+      );
     });
 
     test('vendor inbox still updates via vendor guard and accept RPC', () {
@@ -146,5 +155,30 @@ void main() {
       expect(adminActions.contains('consumerReviewUpdate'), isFalse);
       expect(adminActions.contains('consumerBookingUpdate'), isFalse);
     });
+
+    test('admin settings write bank details, not commission_status', () {
+      expect(adminActions.contains('from("platform_settings")'), isTrue);
+      expect(adminActions.contains('set_booking_commission_status'), isTrue);
+      expect(adminActions.contains('updatePlatformBankDetails'), isTrue);
+      expect(
+        adminActions.contains('commission_status: "paid"'),
+        isFalse,
+      );
+    });
+  });
+
+  test('couple transfer path never writes commission_status paid', () {
+    expect(bookingProvider.contains('CommissionTransferWrite.consumerInsert'), isTrue);
+    expect(bookingProvider.contains('set_booking_commission_status'), isFalse);
+    expect(
+      File('lib/features/booking/screens/consumer_booking_detail_screen.dart')
+          .readAsStringSync()
+          .contains('.update('),
+      isFalse,
+    );
+    expect(
+      File('lib/core/security/commission_write.dart').readAsStringSync(),
+      contains('consumerMaySetCommissionPaid = false'),
+    );
   });
 }

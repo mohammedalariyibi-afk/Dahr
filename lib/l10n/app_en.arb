@@ -152,10 +152,10 @@
   "commissionUnpaid": "Unpaid",
   "commissionPaid": "Paid",
   "commissionWaived": "Waived",
-  "unpaidCommissionOwed": "Commission owed to Dahr",
-  "noUnpaidCommission": "No unpaid commission",
+  "unpaidCommissionOwed": "Dahr fee (unpaid)",
+  "noUnpaidCommission": "No unpaid Dahr fee",
   "quotedAmountDisplay": "Quote",
-  "commissionNoteVendor": "You pay 10% of this quote to Dahr (collected offline).",
+  "commissionNoteVendor": "Dahr records 10% of this quote. The couple pays that fee to Dahr by bank transfer. You settle the rest with them off-platform.",
   "invalidQuotedAmount": "Enter a valid amount in LYD",
   "commissionStatusLabel": "Commission status",
   "bookedDatesTitle": "Booked dates",
@@ -204,15 +204,31 @@
   "inboxEmptyAccepted": "No accepted bookings in this filter.",
   "inboxEmptyDeclined": "No declined requests in this filter.",
   "inboxEmptyCompleted": "No completed bookings in this filter.",
-  "commissionBannerTitle": "Commission owed to Dahr",
-  "commissionBannerBody": "Unpaid total: {amount}",
-  "@commissionBannerBody": {
+  "acceptQuoteSuccess": "Booking accepted. The couple pays Dahr’s 10% fee by bank transfer.",
+  "roleNotAssignable": "Choose couple or vendor. Admin cannot be self-assigned.",
+  "bookingDetailTitle": "Booking",
+  "platformFeeTitle": "Dahr platform fee (10%)",
+  "platformFeeBody": "Transfer {amount} to Dahr by online bank transfer. This is the platform fee — not a card payment in the app.",
+  "@platformFeeBody": {
     "placeholders": {
       "amount": {
         "type": "String"
       }
     }
   },
+  "platformFeeVendorRest": "The rest of the quote is still settled with the vendor off-platform (often WhatsApp).",
+  "bankDetailsTitle": "Dahr bank details",
+  "bankDetailsPending": "Bank details coming from ops.",
+  "bankNameLabel": "Bank",
+  "accountHolderLabel": "Account holder",
+  "accountNumberLabel": "Account number / IBAN",
+  "transferNoteLabel": "Transfer reference",
+  "transferNoteHint": "Bank reference or a short note",
+  "iTransferred": "I transferred",
+  "transferReported": "Transfer note sent. Dahr will confirm after it arrives.",
+  "transferNoteRequired": "Add a short transfer reference",
+  "vendorDahrFeeStatus": "Dahr fee status",
+  "vendorDahrFeeHint": "Status only. The couple pays this 10% fee to Dahr by bank transfer."
   "commissionBannerHint": "Dahr records this as unpaid. An admin marks it paid after offline collection.",
   "acceptQuoteSuccess": "Booking accepted. 10% commission is recorded as unpaid.",
   "roleNotAssignable": "Choose couple or vendor. Admin cannot be self-assigned.",

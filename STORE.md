@@ -69,7 +69,7 @@ No in-app chat. No IAP support URL required.
 - Advertising / third-party analytics / crash SDKs
 - Push notifications, maps, SMS login
 
-Couples pay vendors **off-platform** (often WhatsApp). Currency shown in-app is **LYD**. Vendors owe a 10% commission recorded in the database and collected **offline** by the operator (admin “Mark paid” / “Waive”). That is not an IAP.
+Couples pay vendors **off-platform** (often WhatsApp) for the rest of the quote. Currency shown in-app is **LYD**. Couples pay Dahr a **10% platform fee by online bank transfer** (recorded as unpaid until admin “Mark paid” / “Waive”). That is not an IAP. Mohammed pastes real bank details in admin Settings.
 
 ## Languages, locale, devices
 

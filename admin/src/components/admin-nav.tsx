@@ -7,6 +7,7 @@ const links = [
   { href: "/", label: "Dashboard" },
   { href: "/vendors", label: "Vendors", badge: "pendingVendors" as const },
   { href: "/commissions", label: "Commissions" },
+  { href: "/settings", label: "Settings" },
   { href: "/reports", label: "Reports", badge: "openReports" as const },
 ];
 

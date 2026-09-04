@@ -468,17 +468,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commissionWaived => 'Waived';
 
   @override
-  String get unpaidCommissionOwed => 'Commission owed to Dahr';
+  String get unpaidCommissionOwed => 'Dahr fee (unpaid)';
 
   @override
-  String get noUnpaidCommission => 'No unpaid commission';
+  String get noUnpaidCommission => 'No unpaid Dahr fee';
 
   @override
   String get quotedAmountDisplay => 'Quote';
 
   @override
   String get commissionNoteVendor =>
-      'You pay 10% of this quote to Dahr (collected offline).';
+      'Dahr records 10% of this quote. The couple pays that fee to Dahr by bank transfer. You settle the rest with them off-platform.';
 
   @override
   String get invalidQuotedAmount => 'Enter a valid amount in LYD';
@@ -637,22 +637,65 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inboxEmptyCompleted => 'No completed bookings in this filter.';
 
   @override
-  String get commissionBannerTitle => 'Commission owed to Dahr';
+  String get acceptQuoteSuccess =>
+      'Booking accepted. The couple pays Dahr’s 10% fee by bank transfer.';
 
   @override
-  String commissionBannerBody(String amount) {
-    return 'Unpaid total: $amount';
+  String get roleNotAssignable =>
+      'Choose couple or vendor. Admin cannot be self-assigned.';
+
+  @override
+  String get bookingDetailTitle => 'Booking';
+
+  @override
+  String get platformFeeTitle => 'Dahr platform fee (10%)';
+
+  @override
+  String platformFeeBody(String amount) {
+    return 'Transfer $amount to Dahr by online bank transfer. This is the platform fee — not a card payment in the app.';
   }
 
   @override
-  String get commissionBannerHint =>
-      'Dahr records this as unpaid. An admin marks it paid after offline collection.';
+  String get platformFeeVendorRest =>
+      'The rest of the quote is still settled with the vendor off-platform (often WhatsApp).';
 
   @override
-  String get acceptQuoteSuccess =>
-      'Booking accepted. 10% commission is recorded as unpaid.';
+  String get bankDetailsTitle => 'Dahr bank details';
 
   @override
+  String get bankDetailsPending => 'Bank details coming from ops.';
+
+  @override
+  String get bankNameLabel => 'Bank';
+
+  @override
+  String get accountHolderLabel => 'Account holder';
+
+  @override
+  String get accountNumberLabel => 'Account number / IBAN';
+
+  @override
+  String get transferNoteLabel => 'Transfer reference';
+
+  @override
+  String get transferNoteHint => 'Bank reference or a short note';
+
+  @override
+  String get iTransferred => 'I transferred';
+
+  @override
+  String get transferReported =>
+      'Transfer note sent. Dahr will confirm after it arrives.';
+
+  @override
+  String get transferNoteRequired => 'Add a short transfer reference';
+
+  @override
+  String get vendorDahrFeeStatus => 'Dahr fee status';
+
+  @override
+  String get vendorDahrFeeHint =>
+      'Status only. The couple pays this 10% fee to Dahr by bank transfer.';
   String get roleNotAssignable =>
       'Choose couple or vendor. Admin cannot be self-assigned.';
 

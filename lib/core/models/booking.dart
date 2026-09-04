@@ -42,6 +42,10 @@ class BookingRequest {
   bool get hasQuote => quotedAmountLyd != null;
   bool get isCommissionUnpaid =>
       commissionStatus == CommissionStatus.unpaid;
+  bool get showsCouplePlatformFee =>
+      hasQuote &&
+      commissionAmountLyd != null &&
+      (status == BookingStatus.accepted || status == BookingStatus.completed);
   bool get canLeaveReview =>
       status == BookingStatus.completed && review == null;
 

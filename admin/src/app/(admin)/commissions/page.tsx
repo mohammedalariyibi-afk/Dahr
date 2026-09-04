@@ -23,6 +23,12 @@ type CommissionRow = {
   vendor_profiles: VendorEmbed;
 };
 
+type TransferNoteRow = {
+  booking_id: string;
+  reference_note: string;
+  created_at: string;
+};
+
 function money(value: number | string | null | undefined): string {
   if (value === null || value === undefined || value === "") return "—";
   const n = typeof value === "number" ? value : Number(value);
@@ -83,6 +89,22 @@ export default async function CommissionsPage({
   }
 
   const rows = (data ?? []) as CommissionRow[];
+  const notesByBooking = new Map<string, TransferNoteRow>();
+  if (rows.length > 0) {
+    const notesResult = await supabase
+      .from("commission_transfer_notes")
+      .select("booking_id, reference_note, created_at")
+      .in(
+        "booking_id",
+        rows.map((r) => r.id),
+      )
+      .order("created_at", { ascending: false });
+    for (const note of (notesResult.data ?? []) as TransferNoteRow[]) {
+      if (!notesByBooking.has(note.booking_id)) {
+        notesByBooking.set(note.booking_id, note);
+      }
+    }
+  }
   const unpaidTotal = rows
     .filter((r) => r.commission_status === "unpaid")
     .reduce((sum, r) => sum + Number(r.commission_amount_lyd ?? 0), 0);
@@ -99,8 +121,9 @@ export default async function CommissionsPage({
       <div>
         <h1 className="font-display text-3xl text-[var(--ink)]">Commissions</h1>
         <p className="mt-1 text-sm text-[var(--muted)]">
-          10% of each accepted quote, paid by the vendor to Dahr offline. Mark
-          paid after you collect, or waive. Couples are not charged in-app.
+          10% of each accepted quote, paid by the couple to Dahr by online bank
+          transfer. Mark paid after you confirm the transfer, or waive. Couples
+          cannot mark the fee paid themselves.
         </p>
       </div>
 
@@ -151,6 +174,7 @@ export default async function CommissionsPage({
                   <th className="px-4 py-3 font-medium">Booking</th>
                   <th className="px-4 py-3 font-medium">Commission</th>
                   <th className="px-4 py-3 font-medium">Paid at</th>
+                  <th className="px-4 py-3 font-medium">Transfer note</th>
                   <th className="px-4 py-3 font-medium text-right">Record</th>
                 </tr>
               </thead>
@@ -188,6 +212,9 @@ export default async function CommissionsPage({
                       {row.commission_paid_at
                         ? new Date(row.commission_paid_at).toLocaleString()
                         : "—"}
+                    </td>
+                    <td className="max-w-[14rem] px-4 py-3 text-xs text-[var(--muted)]">
+                      {notesByBooking.get(row.id)?.reference_note ?? "—"}
                     </td>
                     <td className="px-4 py-3">
                       {row.commission_status === "unpaid" ? (
