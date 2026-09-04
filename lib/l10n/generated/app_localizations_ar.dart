@@ -691,8 +691,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get vendorDahrFeeHint =>
       'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي.';
-  String get roleNotAssignable =>
-      'اختر زوجين أو مورّداً. لا يمكن تعيين دور المشرف ذاتياً.';
 
   @override
   String get guestCountInvalid => 'عدد الضيوف يجب أن يكون 1 على الأقل';

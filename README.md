@@ -60,7 +60,6 @@ Migrations (applied in filename order):
 
 - `supabase/migrations/20260328000001_init_schema.sql` — core schema, RLS, `vendor-photos` bucket
 - `supabase/migrations/20260903000001_booking_commission.sql` — `quoted_amount_lyd`, 10% platform fee, `accept_booking_request` RPC
-- `supabase/migrations/20260904010000_customer_pays_dahr_fee.sql` — couple pays Dahr 10% by bank transfer; `platform_settings` + `commission_transfer_notes`. **Git-only — Syber applies live. Do not `db push` from the app PR.**
 - `supabase/migrations/20260903120000_revoke_anon_definer_rpcs.sql` — split public-read RLS; revoke anon EXECUTE on admin/vendor helpers (already applied on live Dahr LY)
 - `supabase/migrations/20260903140000_delete_own_account.sql` — `delete_own_account` RPC (self-serve account deletion)
 - `supabase/migrations/20260903184000_overnight_security_hardening.sql` — revoke `reject_booking_if_date_booked` (trigger only); replace `profile_public` with `security_invoker=true` view of `id,full_name`; `profiles_select_public_names` for review/vendor/booking display names (already applied on live Dahr LY)
@@ -68,6 +67,7 @@ Migrations (applied in filename order):
 - `supabase/migrations/20260903210000_scope_booking_updates_and_insert_only_reviews.sql` — consumers cannot UPDATE bookings; reviews are insert-only for authors (admin hide only)
 - `supabase/migrations/20260903230000_booking_integrity_guards.sql` — booking status machine, one held date per vendor, accept marks availability, approved-vendor insert, `is_hidden`/`view_count` locks. **Not yet on live** — apply with `supabase db push` (do not re-push the already-live files above).
 - `supabase/migrations/20260904000000_admin_audit_log_and_atomic_moderation.sql` — append-only `admin_audit_log` + `log_admin_action`; `hide_review_and_close_report` does both moderation writes in one transaction. **Not yet on live.**
+- `supabase/migrations/20260904005000_customer_pays_dahr_fee.sql` — couple pays Dahr 10% by bank transfer; `platform_settings` + `commission_transfer_notes`. **Git-only — Syber applies live. Do not `db push` from the app PR.**
 - `supabase/migrations/20260904010000_guest_read_policies_without_helper_execute.sql` — limits every `is_admin()` / `owns_vendor()` policy to the `authenticated` role. **Not yet on live — this one unbreaks guest browse.**
 
 **Security note:** Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions including `reject_booking_if_date_booked`) are not anon RPCs — `authenticated` only, or no client EXECUTE. Do **not** re-grant `is_admin` / `owns_vendor` to anon (live once had `grant_rls_helpers_to_anon`; that must stay revoked).
