@@ -1,11 +1,16 @@
 # Local Play upload signing. Copy to android/key.properties (gitignored).
-# Generate the JKS on Mohammed's machine only — never commit the keystore
-# or a filled-in key.properties. See STORE.md § Signing.
+# Required for tool/release.sh / flutter build appbundle --release — Gradle is
+# fail-closed and will not debug-sign if this file is missing, a required key
+# is empty, or storeFile does not exist. Generate the JKS on Mohammed's
+# machine only — never commit the keystore or a filled-in key.properties.
+# See STORE.md Signing.
 #
 #   keytool -genkey -v -keystore ~/dahr-upload.jks -keyalg RSA -keysize 2048 \
 #     -validity 10000 -alias dahr
 #
 # storeFile must be an absolute path (Gradle does not expand ~).
+# Local flutter run --release without a keystore only:
+#   -PallowDebugReleaseSigning=true
 
 storePassword=replace-with-store-password
 keyPassword=replace-with-key-password

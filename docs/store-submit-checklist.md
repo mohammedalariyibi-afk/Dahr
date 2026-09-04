@@ -43,7 +43,7 @@ Upload order suggestion: email OTP → OTP verify → Discover → vendor detail
 4. Privacy URL `https://mohammedalariyibi-afk.github.io/Dahr/privacy`. Data safety: account deletion in-app (Profile).
 5. Contact: WhatsApp + `mohammedalariyibi@gmail.com`.
 6. No IAP / no ads SDKs.
-7. Build the AAB on Mohammed’s machine: local `android/key.properties` + `dart run tool/check_store_env.dart` + `flutter build appbundle --dart-define-from-file=.env`.
+7. Build the AAB on Mohammed’s machine with `./tool/release.sh` (requires `android/key.properties`, store env preflight, `flutter build appbundle --release --dart-define-from-file=.env`). Release signing is fail-closed — it will not debug-sign. Do not pass `-PallowDebugReleaseSigning=true`.
 
 ## App Store Connect
 
