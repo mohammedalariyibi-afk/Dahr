@@ -50,6 +50,10 @@ abstract final class BookingSelect {
   /// Vendor inbox and dashboard. Fee status only — vendors do not pay.
   static String get vendor => vendorColumns.join(', ');
 
+  /// Authenticated-only view: couple name + phone for a shared booking.
+  static const String partyContactTable = 'booking_party_contact';
+  static const String partyContactSelect = 'id, full_name, phone';
+
   static bool includesCommission(String select) {
     return commissionColumns.any(select.contains);
   }

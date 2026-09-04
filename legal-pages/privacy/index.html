@@ -27,13 +27,13 @@
         <h2>من نحن</h2>
         <p>يساعد دهر الأزواج في ليبيا على تصفح مورّدي الزفاف، وطلب حجز، وترك تقييم بعد تعليم الحجز مكتملاً. يمكن للمورّد عرض نشاطه ورفع صور واستقبال الطلبات. الخلفية التشغيلية هي مشروع Dahr LY على Supabase في المنطقة eu-west-1 (أيرلندا، الاتحاد الأوروبي).</p>
         <h2>الحسابات وتسجيل الدخول</h2>
-        <p>يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى بريدك الإلكتروني. لا نستخدم رمز هاتف لتسجيل الدخول. نخزّن معرّف الحساب والبريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين. قد يخزّن المورّد أيضاً رقم واتساب في عرضه.</p>
+        <p>يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى بريدك الإلكتروني. لا نستخدم رمز هاتف لتسجيل الدخول. نخزّن معرّف الحساب والبريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد، ورقم جوّال قد تضيفه حتى يتواصل مورّد الحجز معك عبر واتساب. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين. قد يخزّن المورّد أيضاً رقم واتساب في عرضه. رقم جوّال الزوجين لا يُستخدم لتسجيل الدخول ولا يظهر في الاكتشاف.</p>
         <h2>عروض المورّدين والصور</h2>
         <p>إذا سجّلت كمورّد نخزّن اسم النشاط، والتصنيف، والمدينة، والوصف، ونطاق السعر بالدينار الليبي، ورقم واتساب، والخدمات، وعلامات الموافقة أو التوثيق. الصور تُرفع إلى تخزين Supabase (حاوية vendor-photos) تحت معرّف حسابك. صور العرض تصبح ظاهرة لأي مستخدم لدهر بعد موافقة الإدارة.</p>
         <h2>الحجوزات والرسائل والتقييمات</h2>
         <p>طلب الحجز يخزّن تاريخ المناسبة، وعدد الضيوف الاختياري، والرسالة التي ترسلها للمورّد. قد يضيف المورّد مبلغاً متفقاً عليه بالدينار عند القبول. بعد تعليم الحجز مكتملاً يمكن للزوجين ترك تقييم وتعليق. البلاغات (السبب والهدف) تُحفظ للمراجعة.</p>
         <h2>واتساب خارج التطبيق</h2>
-        <p>التواصل مع المورّد يفتح واتساب (wa.me) بالرقم الظاهر في عرضه. رسائل واتساب لا تُحفظ في دهر. واتساب خدمة طرف ثالث لها شروطها وسياسة خصوصيتها. أي شيء تكتبه هناك خارج دهر.</p>
+        <p>التواصل مع المورّد يفتح واتساب (wa.me) بالرقم الظاهر في عرضه. مورّد لديه حجز معك يمكنه أيضاً فتح واتساب برقم الجوّال في ملفك. رسائل واتساب لا تُحفظ في دهر. واتساب خدمة طرف ثالث لها شروطها وسياسة خصوصيتها. أي شيء تكتبه هناك خارج دهر.</p>
         <h2>المدفوعات والبطاقات</h2>
         <p>يدفع الأزواج بقية عرض السعر للمورّد خارج المنصة (غالباً عبر واتساب أو مباشرة). يدفع الأزواج لدهر رسوم منصة 10٪ بتحويل بنكي عبر الإنترنت. دهر لا يعالج مدفوعات البطاقات ولا يخزّن أرقام بطاقات أو رموز CVV أو رموز مزوّد دفع. لا يوجد Stripe أو مشتريات داخل تطبيق آبل أو فوترة Google Play. نسجّل رسوم 10٪ على العروض المقبولة (المبلغ بالدينار وحالة غير مدفوعة/مدفوعة/معفاة) حتى يؤكّد المشغّل التحويل البنكي.</p>
         <h2>التحليلات والتتبع</h2>
@@ -45,7 +45,7 @@
         <h2>حذف حسابك</h2>
         <p>يمكن للمستخدم المسجّل حذف حسابه من التطبيق: حسابي ← حذف الحساب، ثم التأكيد. لا تحتاج إلى التواصل مع الدعم. الحذف يزيل مستخدم المصادقة؛ ويتبعه الملف الشخصي، فيُحذف عرض المورّد وبيانات الصور والتوفر والحجوزات المرتبطة والتقييمات والمفضلة حسب مفاتيح قاعدة البيانات. تُحذف ملفات الصور في التخزين ضمن عملية الحذف. إذا فشل الحذف من التطبيق راسل mohammedalariyibi@gmail.com من نفس البريد المرتبط بالحساب واطلب الحذف. لن نحذف حساب شخص آخر دون التمكّن من التحقق من الهوية.</p>
         <h2>خياراتك</h2>
-        <p>يمكنك استخدام دهر كزائر للاكتشاف. يمكنك تغيير اللغة من حسابي. يمكنك تسجيل الخروج دون حذف الحساب. يمكنك تعديل عرض المورّد وحذف صور منفردة طالما الحساب موجود.</p>
+        <p>يمكنك استخدام دهر كزائر للاكتشاف. يمكنك تغيير اللغة من حسابي (ونحفظ تلك اللغة على حسابك عندما تكون مسجّلاً). يمكنك تسجيل الخروج دون حذف الحساب. يمكنك تعديل الاسم والمدينة وتاريخ الزفاف ورقم الجوّال من حسابي. يمكنك تعديل عرض المورّد وحذف صور منفردة طالما الحساب موجود.</p>
         <h2>الأطفال</h2>
         <p>دهر موجّه للبالغين الذين ينظّمون زفافاً، وليس للأطفال. لا تنشئ حساباً إن لم تكن في سن تؤهلك للتعاقد في بلدك.</p>
         <h2>التغييرات</h2>
@@ -60,13 +60,13 @@
         <h2>Who we are</h2>
         <p>Dahr helps couples in Libya browse wedding vendors, request bookings, and leave a review after a booking is marked complete. Vendors can list a business, upload photos, and receive requests. The live backend is the Dahr LY Supabase project in region eu-west-1 (Ireland, EU).</p>
         <h2>Accounts and sign-in</h2>
-        <p>You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to your email address. Phone OTP is not used. We store the account id and email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), and whether you use Dahr as a couple or a vendor. We do not use passwords in the consumer app. Vendors may also store a WhatsApp number on their listing.</p>
+        <p>You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to your email address. Phone OTP is not used. We store the account id and email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), whether you use Dahr as a couple or a vendor, and a mobile number you may add so the vendor of a booking can WhatsApp you. We do not use passwords in the consumer app. Vendors may also store a WhatsApp number on their listing. The couple mobile number is not used to sign in and is not shown on Discover.</p>
         <h2>Vendor listings and photos</h2>
         <p>If you onboard as a vendor we store business name, category, city, description, price range in LYD, WhatsApp number, services, and approval or verification flags. Photos you upload go to Supabase Storage (bucket vendor-photos) under your account id. Public listing photos are visible to anyone using Dahr once an admin approves the listing.</p>
         <h2>Bookings, messages, and reviews</h2>
         <p>A booking request stores the event date, optional guest count, and the message you send the vendor. Vendors may add a quoted amount in LYD when they accept. After a booking is marked complete, the couple may leave a rating and comment. Reports you submit (reason + target) are stored so we can moderate.</p>
         <h2>WhatsApp leaves the app</h2>
-        <p>Contacting a vendor opens WhatsApp (wa.me) with the number on their listing. WhatsApp messages are not stored in Dahr. WhatsApp is operated by a third party with its own terms and privacy policy. Anything you type there is outside Dahr.</p>
+        <p>Contacting a vendor opens WhatsApp (wa.me) with the number on their listing. A vendor who has a booking with you can also open WhatsApp with the mobile number on your profile. WhatsApp messages are not stored in Dahr. WhatsApp is operated by a third party with its own terms and privacy policy. Anything you type there is outside Dahr.</p>
         <h2>Payments and cards</h2>
         <p>Couples pay vendors the rest of the quote off-platform (often via WhatsApp or in person). Couples pay Dahr a 10% platform fee by online bank transfer. Dahr does not process card payments and does not store card numbers, CVVs, or payment-provider tokens. There is no Stripe, Apple IAP, or Google Play Billing in this app. We record the 10% fee on accepted quotes (amount in LYD and unpaid/paid/waived status) so the operator can confirm the bank transfer.</p>
         <h2>Analytics and tracking</h2>
@@ -78,7 +78,7 @@
         <h2>Delete your account</h2>
         <p>Signed-in users can delete their account in the app: Profile → Delete account, then confirm. You do not need to contact support. Deletion removes the auth user; the profile cascades, so a vendor listing, photos metadata, availability, related bookings, reviews, and favorites are removed as the database foreign keys allow. Storage photo files for that account are removed as part of deletion. If in-app deletion fails, email mohammedalariyibi@gmail.com from the same email as the account and ask us to delete it. We will only delete the account that matches that identity — we will not delete someone else’s account on request without being able to verify it.</p>
         <h2>Your choices</h2>
-        <p>You can use Dahr as a guest for discovery. You can change language in Profile. You can sign out without deleting the account. You can edit a vendor listing and delete individual photos while the account exists.</p>
+        <p>You can use Dahr as a guest for discovery. You can change language in Profile (we also save that language on your account when you are signed in). You can sign out without deleting the account. You can edit your name, city, wedding date, and mobile number from Profile. You can edit a vendor listing and delete individual photos while the account exists.</p>
         <h2>Children</h2>
         <p>Dahr is meant for adults arranging a wedding, not for children. Do not create an account if you are not old enough to contract in your country.</p>
         <h2>Changes</h2>

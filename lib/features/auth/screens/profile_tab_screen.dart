@@ -72,6 +72,11 @@ class ProfileTabScreen extends ConsumerWidget {
                     : l10n.cityTripoli,
               ),
             ),
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: Text(l10n.editProfile),
+              onTap: () => context.push('/profile/edit'),
+            ),
             const Divider(),
           ],
           ListTile(
@@ -82,7 +87,14 @@ class ProfileTabScreen extends ConsumerWidget {
                   ? l10n.languageArabic
                   : l10n.languageEnglish,
             ),
-            onTap: () => ref.read(localeProvider.notifier).toggle(),
+            onTap: () async {
+              await ref.read(localeProvider.notifier).toggle();
+              try {
+                await ref.read(authProvider.notifier).updateLocale(
+                      ref.read(localeProvider).languageCode,
+                    );
+              } catch (_) {}
+            },
           ),
           if (auth.isVendor) ...[
             const Divider(),

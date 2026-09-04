@@ -69,6 +69,7 @@ Migrations (applied in filename order):
 - `supabase/migrations/20260904000000_admin_audit_log_and_atomic_moderation.sql` — append-only `admin_audit_log` + `log_admin_action`; `hide_review_and_close_report` does both moderation writes in one transaction. **Not yet on live.**
 - `supabase/migrations/20260904005000_customer_pays_dahr_fee.sql` — couple pays Dahr 10% by bank transfer; `platform_settings` + `commission_transfer_notes`. **Git-only — Syber applies live. Do not `db push` from the app PR.**
 - `supabase/migrations/20260904010000_guest_read_policies_without_helper_execute.sql` — limits every `is_admin()` / `owns_vendor()` policy to the `authenticated` role. **Not yet on live — this one unbreaks guest browse.**
+- `supabase/migrations/20260904120000_booking_party_contact.sql` — authenticated-only `booking_party_contact` view (couple name + phone for a shared booking). **Not yet on live.**
 
 **Security note:** Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions including `reject_booking_if_date_booked`) are not anon RPCs — `authenticated` only, or no client EXECUTE. Do **not** re-grant `is_admin` / `owns_vendor` to anon (live once had `grant_rls_helpers_to_anon`; that must stay revoked).
 

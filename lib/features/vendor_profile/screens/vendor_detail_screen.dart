@@ -8,12 +8,12 @@ import '../../../core/constants/whatsapp.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/security/safe_user_error.dart';
-import '../../../core/supabase/supabase_client.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
 import '../../discovery/providers/vendors_provider.dart';
 import '../../favorites/providers/favorites_provider.dart';
+import '../../reviews/report_flow.dart';
 
 class VendorDetailScreen extends ConsumerStatefulWidget {
   const VendorDetailScreen({super.key, required this.vendorId});
@@ -60,60 +60,24 @@ class _VendorDetailScreenState extends ConsumerState<VendorDetailScreen> {
     }
   }
 
-  Future<void> _report(BuildContext context) async {
-    final l10n = AppLocalizations.of(context);
-    final auth = ref.read(authProvider);
-    if (!auth.isLoggedIn) {
-      final from = Uri.encodeComponent('/vendor/${widget.vendorId}');
-      context.push('/auth/login?from=$from');
-      return;
-    }
-    final reasonCtrl = TextEditingController();
-    final ok = await showDialog<bool>(
+  Future<void> _reportVendor(BuildContext context) {
+    return submitContentReport(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.report),
-        content: TextField(
-          controller: reasonCtrl,
-          decoration: InputDecoration(labelText: l10n.reportReason),
-          maxLines: 3,
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.reportSubmit),
-          ),
-        ],
-      ),
+      ref: ref,
+      targetType: ReportWrite.vendorTarget,
+      targetId: widget.vendorId,
+      loginReturnPath: '/vendor/${widget.vendorId}',
     );
-    final reason = reasonCtrl.text.trim();
-    reasonCtrl.dispose();
-    if (ok != true || reason.isEmpty) return;
+  }
 
-    try {
-      await DahrSupabase.client.from('reports').insert({
-        'reported_by': auth.session!.user.id,
-        'target_type': 'vendor',
-        'target_id': widget.vendorId,
-        'reason': reason,
-      });
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.reportSuccess)),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.errorGeneric)),
-        );
-      }
-    }
+  Future<void> _reportReview(BuildContext context, String reviewId) {
+    return submitContentReport(
+      context: context,
+      ref: ref,
+      targetType: ReportWrite.reviewTarget,
+      targetId: reviewId,
+      loginReturnPath: '/vendor/${widget.vendorId}',
+    );
   }
 
   @override
@@ -127,6 +91,7 @@ class _VendorDetailScreenState extends ConsumerState<VendorDetailScreen> {
       data: (ids) => ids.contains(vendorId),
       orElse: () => false,
     );
+    final currentUserId = ref.watch(authProvider).session?.user.id;
 
     return Scaffold(
       appBar: vendorAsync.hasValue ? null : AppBar(),
@@ -159,7 +124,7 @@ class _VendorDetailScreenState extends ConsumerState<VendorDetailScreen> {
                   IconButton(
                     tooltip: l10n.report,
                     icon: const Icon(Icons.flag_outlined),
-                    onPressed: () => _report(context),
+                    onPressed: () => _reportVendor(context),
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
@@ -336,12 +301,28 @@ class _VendorDetailScreenState extends ConsumerState<VendorDetailScreen> {
                                             const SizedBox(width: 8),
                                             if (r.consumerName != null &&
                                                 r.consumerName!.isNotEmpty)
-                                              Text(
-                                                r.consumerName!,
-                                                style: const TextStyle(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.inkMuted,
+                                              Expanded(
+                                                child: Text(
+                                                  r.consumerName!,
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.inkMuted,
+                                                  ),
                                                 ),
+                                              )
+                                            else
+                                              const Spacer(),
+                                            if (currentUserId != r.consumerId)
+                                              IconButton(
+                                                tooltip: l10n.reportReview,
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                                icon: const Icon(
+                                                  Icons.flag_outlined,
+                                                  size: 18,
+                                                ),
+                                                onPressed: () =>
+                                                    _reportReview(context, r.id),
                                               ),
                                           ],
                                         ),

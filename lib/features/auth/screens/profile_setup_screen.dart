@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../../core/security/safe_user_error.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../auth/providers/auth_form_validators.dart';
+import '../widgets/profile_details_fields.dart';
 
 class ProfileSetupScreen extends ConsumerStatefulWidget {
-  const ProfileSetupScreen({super.key});
+  const ProfileSetupScreen({super.key, this.isEditing = false});
+
+  final bool isEditing;
 
   @override
   ConsumerState<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
@@ -18,6 +22,7 @@ class ProfileSetupScreen extends ConsumerStatefulWidget {
 
 class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _nameCtrl = TextEditingController();
+  final _phoneCtrl = TextEditingController();
   CityCode? _city;
   DateTime? _weddingDate;
   bool _loading = false;
@@ -32,6 +37,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     if (profile?.fullName != null) {
       _nameCtrl.text = profile!.fullName!;
     }
+    if (profile?.phone != null && profile!.phone!.isNotEmpty) {
+      _phoneCtrl.text = AppConstants.normalizeLibyaPhone(profile.phone!);
+    }
     _city = profile?.city;
     _weddingDate = profile?.weddingDate;
   }
@@ -39,8 +47,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
+    _phoneCtrl.dispose();
     super.dispose();
   }
+
+  bool get _isConsumer =>
+      (ref.read(authProvider).profile?.role ?? UserRole.consumer) ==
+      UserRole.consumer;
 
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
@@ -50,17 +63,37 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       );
       return;
     }
+    final phoneErr = _isConsumer
+        ? AuthFormValidators.validatePhone(_phoneCtrl.text)
+        : (_phoneCtrl.text.trim().isEmpty
+            ? null
+            : AuthFormValidators.validatePhone(_phoneCtrl.text));
+    if (phoneErr != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            phoneErr == 'invalid_phone' ? l10n.invalidPhone : l10n.requiredField,
+          ),
+        ),
+      );
+      return;
+    }
     setState(() => _loading = true);
     try {
       final locale = ref.read(localeProvider).languageCode;
-      final role = ref.read(authProvider).profile?.role ?? UserRole.consumer;
       await ref.read(authProvider.notifier).completeProfile(
             fullName: _nameCtrl.text,
             city: _city!,
-            weddingDate: role == UserRole.consumer ? _weddingDate : null,
+            weddingDate: _isConsumer ? _weddingDate : null,
             locale: locale,
+            phone: _phoneCtrl.text,
+            requirePhone: _isConsumer,
           );
       if (!mounted) return;
+      if (widget.isEditing) {
+        context.pop();
+        return;
+      }
       final isVendor = ref.read(authProvider).isVendor;
       context.go(isVendor ? '/vendor-tools/onboarding' : '/discover');
     } catch (e) {
@@ -76,10 +109,13 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final first = widget.isEditing
+        ? DateTime(now.year - 1, now.month, now.day)
+        : now;
     final picked = await showDatePicker(
       context: context,
       initialDate: _weddingDate ?? now.add(const Duration(days: 90)),
-      firstDate: now,
+      firstDate: first,
       lastDate: now.add(const Duration(days: 365 * 5)),
     );
     if (picked != null) setState(() => _weddingDate = picked);
@@ -93,62 +129,25 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
             UserRole.consumer;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.profileSetupTitle)),
+      appBar: AppBar(
+        title: Text(
+          widget.isEditing ? l10n.editProfile : l10n.profileSetupTitle,
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            TextFormField(
-              controller: _nameCtrl,
-              decoration: InputDecoration(labelText: l10n.fullNameLabel),
+            ProfileDetailsFields(
+              nameController: _nameCtrl,
+              phoneController: _phoneCtrl,
+              city: _city,
+              onCityChanged: (city) => setState(() => _city = city),
+              showCoupleFields: isConsumer,
+              weddingDate: _weddingDate,
+              onPickWeddingDate: _pickDate,
             ),
-            const SizedBox(height: 20),
-            Text(l10n.cityLabel, style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                ChoiceChip(
-                  label: Text(l10n.cityTripoli),
-                  selected: _city == CityCode.tripoli,
-                  onSelected: (_) =>
-                      setState(() => _city = CityCode.tripoli),
-                  selectedColor: AppColors.burgundy,
-                  labelStyle: TextStyle(
-                    color: _city == CityCode.tripoli
-                        ? AppColors.onBurgundy
-                        : AppColors.ink,
-                  ),
-                ),
-                ChoiceChip(
-                  label: Text(l10n.cityBenghazi),
-                  selected: _city == CityCode.benghazi,
-                  onSelected: (_) =>
-                      setState(() => _city = CityCode.benghazi),
-                  selectedColor: AppColors.burgundy,
-                  labelStyle: TextStyle(
-                    color: _city == CityCode.benghazi
-                        ? AppColors.onBurgundy
-                        : AppColors.ink,
-                  ),
-                ),
-              ],
-            ),
-            if (isConsumer) ...[
-              const SizedBox(height: 20),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(l10n.weddingDateLabel),
-                subtitle: Text(
-                  _weddingDate == null
-                      ? l10n.pickDate
-                      : _weddingDate!.toIso8601String().split('T').first,
-                ),
-                trailing: const Icon(Icons.calendar_today),
-                onTap: _pickDate,
-              ),
-            ],
             const SizedBox(height: 32),
             FilledButton(
               onPressed: _loading ? null : _save,

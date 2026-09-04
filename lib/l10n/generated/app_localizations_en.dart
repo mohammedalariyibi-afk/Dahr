@@ -708,4 +708,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commentTooLong => 'Comment is too long';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get phoneForWhatsappHint =>
+      'Vendors use this to WhatsApp you about a booking. It is not used to sign in.';
+
+  @override
+  String get coupleContactUnknown => 'Couple';
+
+  @override
+  String get reportReview => 'Report review';
 }

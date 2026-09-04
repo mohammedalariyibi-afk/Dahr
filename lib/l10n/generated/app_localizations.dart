@@ -1453,6 +1453,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'التعليق طويل جداً'**
   String get commentTooLong;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعديل الملف'**
+  String get editProfile;
+
+  /// No description provided for @phoneForWhatsappHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'يستخدم المورّد هذا الرقم للتواصل عبر واتساب حول الحجز. لا يُستخدم لتسجيل الدخول.'**
+  String get phoneForWhatsappHint;
+
+  /// No description provided for @coupleContactUnknown.
+  ///
+  /// In ar, this message translates to:
+  /// **'الزوجان'**
+  String get coupleContactUnknown;
+
+  /// No description provided for @reportReview.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإبلاغ عن التقييم'**
+  String get reportReview;
 }
 
 class _AppLocalizationsDelegate

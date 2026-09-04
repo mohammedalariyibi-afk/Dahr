@@ -232,5 +232,9 @@
   "guestCountInvalid": "عدد الضيوف يجب أن يكون 1 على الأقل",
   "messageTooLong": "الرسالة طويلة جداً",
   "ratingRequired": "اختر تقييماً من 1 إلى 5",
-  "commentTooLong": "التعليق طويل جداً"
+  "commentTooLong": "التعليق طويل جداً",
+  "editProfile": "تعديل الملف",
+  "phoneForWhatsappHint": "يستخدم المورّد هذا الرقم للتواصل عبر واتساب حول الحجز. لا يُستخدم لتسجيل الدخول.",
+  "coupleContactUnknown": "الزوجان",
+  "reportReview": "الإبلاغ عن التقييم"
 }

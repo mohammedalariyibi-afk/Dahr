@@ -72,7 +72,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'Accounts and sign-in',
         body:
-            'You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to your email address. Phone OTP is not used. We store the account id and email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), and whether you use Dahr as a couple or a vendor. We do not use passwords in the consumer app. Vendors may also store a WhatsApp number on their listing.',
+            'You can browse Discover as a guest. Creating an account uses a one-time code (OTP) sent to your email address. Phone OTP is not used. We store the account id and email from sign-in, the name and city you enter, optional wedding date, language (Arabic or English), whether you use Dahr as a couple or a vendor, and a mobile number you may add so the vendor of a booking can WhatsApp you. We do not use passwords in the consumer app. Vendors may also store a WhatsApp number on their listing. The couple mobile number is not used to sign in and is not shown on Discover.',
       ),
       LegalSection(
         heading: 'Vendor listings and photos',
@@ -87,7 +87,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'WhatsApp leaves the app',
         body:
-            'Contacting a vendor opens WhatsApp (wa.me) with the number on their listing. WhatsApp messages are not stored in Dahr. WhatsApp is operated by a third party with its own terms and privacy policy. Anything you type there is outside Dahr.',
+            'Contacting a vendor opens WhatsApp (wa.me) with the number on their listing. A vendor who has a booking with you can also open WhatsApp with the mobile number on your profile. WhatsApp messages are not stored in Dahr. WhatsApp is operated by a third party with its own terms and privacy policy. Anything you type there is outside Dahr.',
       ),
       LegalSection(
         heading: 'Payments and cards',
@@ -117,7 +117,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'Your choices',
         body:
-            'You can use Dahr as a guest for discovery. You can change language in Profile. You can sign out without deleting the account. You can edit a vendor listing and delete individual photos while the account exists.',
+            'You can use Dahr as a guest for discovery. You can change language in Profile (we also save that language on your account when you are signed in). You can sign out without deleting the account. You can edit your name, city, wedding date, and mobile number from Profile. You can edit a vendor listing and delete individual photos while the account exists.',
       ),
       LegalSection(
         heading: 'Children',
@@ -225,7 +225,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'الحسابات وتسجيل الدخول',
         body:
-            'يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى بريدك الإلكتروني. لا نستخدم رمز هاتف لتسجيل الدخول. نخزّن معرّف الحساب والبريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين. قد يخزّن المورّد أيضاً رقم واتساب في عرضه.',
+            'يمكنك تصفح الاكتشاف كزائر. إنشاء حساب يتم برمز لمرة واحدة (OTP) يُرسل إلى بريدك الإلكتروني. لا نستخدم رمز هاتف لتسجيل الدخول. نخزّن معرّف الحساب والبريد من تسجيل الدخول، والاسم والمدينة التي تدخلها، وتاريخ الزفاف الاختياري، واللغة (العربية أو الإنجليزية)، وما إذا كنت تستخدم دهر كزوجين أو كمورّد، ورقم جوّال قد تضيفه حتى يتواصل مورّد الحجز معك عبر واتساب. لا نستخدم كلمات مرور في تطبيق الأزواج/المورّدين. قد يخزّن المورّد أيضاً رقم واتساب في عرضه. رقم جوّال الزوجين لا يُستخدم لتسجيل الدخول ولا يظهر في الاكتشاف.',
       ),
       LegalSection(
         heading: 'عروض المورّدين والصور',
@@ -240,7 +240,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'واتساب خارج التطبيق',
         body:
-            'التواصل مع المورّد يفتح واتساب (wa.me) بالرقم الظاهر في عرضه. رسائل واتساب لا تُحفظ في دهر. واتساب خدمة طرف ثالث لها شروطها وسياسة خصوصيتها. أي شيء تكتبه هناك خارج دهر.',
+            'التواصل مع المورّد يفتح واتساب (wa.me) بالرقم الظاهر في عرضه. مورّد لديه حجز معك يمكنه أيضاً فتح واتساب برقم الجوّال في ملفك. رسائل واتساب لا تُحفظ في دهر. واتساب خدمة طرف ثالث لها شروطها وسياسة خصوصيتها. أي شيء تكتبه هناك خارج دهر.',
       ),
       LegalSection(
         heading: 'المدفوعات والبطاقات',
@@ -270,7 +270,7 @@ abstract final class LegalDocuments {
       LegalSection(
         heading: 'خياراتك',
         body:
-            'يمكنك استخدام دهر كزائر للاكتشاف. يمكنك تغيير اللغة من حسابي. يمكنك تسجيل الخروج دون حذف الحساب. يمكنك تعديل عرض المورّد وحذف صور منفردة طالما الحساب موجود.',
+            'يمكنك استخدام دهر كزائر للاكتشاف. يمكنك تغيير اللغة من حسابي (ونحفظ تلك اللغة على حسابك عندما تكون مسجّلاً). يمكنك تسجيل الخروج دون حذف الحساب. يمكنك تعديل الاسم والمدينة وتاريخ الزفاف ورقم الجوّال من حسابي. يمكنك تعديل عرض المورّد وحذف صور منفردة طالما الحساب موجود.',
       ),
       LegalSection(
         heading: 'الأطفال',

@@ -9,6 +9,7 @@ const kAuthProtectedPrefixes = [
   '/review',
   '/inbox',
   '/vendor-tools',
+  '/profile/edit',
 ];
 
 /// Vendor product surfaces. Onboarding stays open so a couple can become a

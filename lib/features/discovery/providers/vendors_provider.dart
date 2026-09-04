@@ -141,7 +141,7 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
     final vendors = (rows as List)
         .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
-    return _withRatings(vendors);
+    return attachVendorRatings(vendors);
   }
 
   Future<void> refresh() async {
@@ -151,8 +151,10 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
 }
 
 /// Attaches avg rating / review count from the reviews table
-/// (columns are not stored on vendor_profiles).
-Future<List<VendorProfile>> _withRatings(List<VendorProfile> vendors) async {
+/// (columns are not stored on vendor_profiles). Used by Discover and Favorites.
+Future<List<VendorProfile>> attachVendorRatings(
+  List<VendorProfile> vendors,
+) async {
   if (vendors.isEmpty) return vendors;
   final ids = vendors.map((v) => v.id).toList();
   final rows = await DahrSupabase.client
@@ -195,7 +197,7 @@ final vendorDetailProvider =
   _countVendorView(id);
 
   final vendor = VendorProfile.fromJson(Map<String, dynamic>.from(row));
-  final withRatings = await _withRatings([vendor]);
+  final withRatings = await attachVendorRatings([vendor]);
   return withRatings.first;
 });
 

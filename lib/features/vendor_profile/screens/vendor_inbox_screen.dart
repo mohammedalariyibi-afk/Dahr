@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/whatsapp.dart';
 import '../../../core/models/models.dart';
 import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
@@ -51,6 +52,21 @@ class VendorInboxScreen extends ConsumerWidget {
         return l10n.inboxEmptyCompleted;
       case null:
         return l10n.inboxEmptyAll;
+    }
+  }
+
+  Future<void> _openCoupleWhatsApp(
+    BuildContext context,
+    BookingRequest booking,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final phone = booking.consumerPhone;
+    if (phone == null) return;
+    final ok = await openWhatsApp(phone);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.errorGeneric)),
+      );
     }
   }
 
@@ -191,8 +207,13 @@ class VendorInboxScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              AvailabilityCalendar.dateKey(b.eventDate),
+                              b.consumerName?.isNotEmpty == true
+                                  ? b.consumerName!
+                                  : l10n.coupleContactUnknown,
                               style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                            Text(
+                              AvailabilityCalendar.dateKey(b.eventDate),
                             ),
                             Text(_statusLabel(l10n, b.status)),
                             if (b.message.isNotEmpty) Text(b.message),
@@ -215,6 +236,16 @@ class VendorInboxScreen extends ConsumerWidget {
                                 ),
                             ],
                             const SizedBox(height: 8),
+                            if (b.hasCoupleWhatsApp)
+                              Align(
+                                alignment: AlignmentDirectional.centerStart,
+                                child: OutlinedButton.icon(
+                                  onPressed: () =>
+                                      _openCoupleWhatsApp(context, b),
+                                  icon: const Icon(Icons.chat),
+                                  label: Text(l10n.whatsapp),
+                                ),
+                              ),
                             if (b.status == BookingStatus.pending)
                               Row(
                                 children: [

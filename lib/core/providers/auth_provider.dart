@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../constants/app_constants.dart';
 import '../models/models.dart';
 import '../supabase/supabase_client.dart';
 import '../supabase/write_guard.dart';
@@ -128,7 +129,9 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<Profile?> fetchProfile(String userId) async {
     final row = await DahrSupabase.client
         .from('profiles')
-        .select('id, full_name, role, city, wedding_date, locale, created_at')
+        .select(
+          'id, phone, full_name, role, city, wedding_date, locale, created_at',
+        )
         .eq('id', userId)
         .maybeSingle();
     if (row == null) return null;
@@ -181,9 +184,18 @@ class AuthController extends StateNotifier<AppAuthState> {
     required CityCode city,
     DateTime? weddingDate,
     String? locale,
+    String? phone,
+    bool requirePhone = false,
   }) async {
     final uid = DahrSupabase.currentUserId;
     if (uid == null) throw StateError('Not signed in');
+    final trimmedPhone = phone?.trim() ?? '';
+    if (requirePhone && trimmedPhone.isEmpty) {
+      throw StateError('phone_required');
+    }
+    if (trimmedPhone.isNotEmpty && !AppConstants.isValidLibyaPhone(trimmedPhone)) {
+      throw StateError('phone_invalid');
+    }
     final payload = <String, dynamic>{
       'id': uid,
       'full_name': fullName.trim(),
@@ -191,6 +203,10 @@ class AuthController extends StateNotifier<AppAuthState> {
       if (weddingDate != null)
         'wedding_date': weddingDate.toIso8601String().split('T').first,
       if (locale != null) 'locale': locale,
+      if (requirePhone || phone != null)
+        'phone': trimmedPhone.isEmpty
+            ? null
+            : AppConstants.toE164Libya(trimmedPhone),
     };
     final rows =
         await DahrSupabase.client.from('profiles').upsert(payload).select('id');

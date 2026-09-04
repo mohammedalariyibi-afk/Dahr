@@ -291,3 +291,33 @@ class Report {
         'reason': reason,
       };
 }
+
+/// Client insert for `reports`. Target is vendor listing or a review.
+abstract final class ReportWrite {
+  static const String vendorTarget = 'vendor';
+  static const String reviewTarget = 'review';
+  static const Set<String> targets = {vendorTarget, reviewTarget};
+
+  static Map<String, dynamic> insert({
+    required String reportedBy,
+    required String targetType,
+    required String targetId,
+    required String reason,
+  }) {
+    if (reportedBy.isEmpty || targetId.isEmpty) {
+      throw StateError('write_rejected');
+    }
+    if (!targets.contains(targetType)) {
+      throw StateError('write_rejected');
+    }
+    final trimmed = reason.trim();
+    if (trimmed.isEmpty) throw StateError('report_reason_required');
+    if (trimmed.length > 2000) throw StateError('comment_too_long');
+    return {
+      'reported_by': reportedBy,
+      'target_type': targetType,
+      'target_id': targetId,
+      'reason': trimmed,
+    };
+  }
+}

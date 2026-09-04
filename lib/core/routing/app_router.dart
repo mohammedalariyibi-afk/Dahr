@@ -117,6 +117,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
+        path: '/profile/edit',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (_, __) => const ProfileSetupScreen(isEditing: true),
+      ),
+      GoRoute(
         path: '/vendor/:id',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
