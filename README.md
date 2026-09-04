@@ -32,7 +32,7 @@ dahr/
 - [Supabase CLI](https://supabase.com/docs/guides/cli) (local backend)
 - Docker (for local Supabase)
 
-CI runs `flutter analyze lib test` and `flutter test` on pull requests and pushes to `main` (no secrets, no live Dahr LY). Latest security/integrity notes: [`docs/AUDIT.md`](docs/AUDIT.md).
+CI runs `flutter analyze lib test` and `flutter test`, the admin typecheck/lint/build, and a full `supabase/migrations` apply on a throwaway Postgres — on pull requests and pushes to `main` (no secrets, no live Dahr LY). Latest security/integrity notes: [`docs/AUDIT.md`](docs/AUDIT.md).
 
 ## Environment files
 
@@ -65,11 +65,13 @@ Migrations (applied in filename order):
 - `supabase/migrations/20260903184000_overnight_security_hardening.sql` — revoke `reject_booking_if_date_booked` (trigger only); replace `profile_public` with `security_invoker=true` view of `id,full_name`; `profiles_select_public_names` for review/vendor/booking display names (already applied on live Dahr LY)
 - `supabase/migrations/20260903190000_freeze_admin_role_and_private_profile_rows.sql` — freeze `profiles.role` (non-admins cannot self-promote); drop `profiles_select_public_names`; display names via `private.public_profile_rows()` + `profile_public` invoker/barrier view. **Already on live** (Syber’s two migrations); this repo file is combined so local `db reset` matches. Do **not** re-apply on Dahr LY. Does not touch `vendor-photos`.
 - `supabase/migrations/20260903210000_scope_booking_updates_and_insert_only_reviews.sql` — consumers cannot UPDATE bookings; reviews are insert-only for authors (admin hide only)
-- `supabase/migrations/20260903230000_booking_integrity_guards.sql` — booking status machine, one held date per vendor, accept marks availability, approved-vendor insert, `is_hidden`/`view_count` locks. **Not yet on live** — apply with `supabase db push` (do not re-push the already-live files above).
-- `supabase/migrations/20260904000000_admin_audit_log_and_atomic_moderation.sql` — append-only `admin_audit_log` + `log_admin_action`; `hide_review_and_close_report` does both moderation writes in one transaction. **Not yet on live.**
-- `supabase/migrations/20260904005000_customer_pays_dahr_fee.sql` — couple pays Dahr 10% by bank transfer; `platform_settings` + `commission_transfer_notes`. **Git-only — Syber applies live. Do not `db push` from the app PR.**
-- `supabase/migrations/20260904010000_guest_read_policies_without_helper_execute.sql` — limits every `is_admin()` / `owns_vendor()` policy to the `authenticated` role. **Not yet on live — this one unbreaks guest browse.**
-- `supabase/migrations/20260904120000_booking_party_contact.sql` — authenticated-only `booking_party_contact` view (couple name + phone for a shared booking). **Not yet on live.**
+- `supabase/migrations/20260903230000_booking_integrity_guards.sql` — booking status machine, one held date per vendor, accept marks availability, approved-vendor insert, `is_hidden`/`view_count` locks. **Not yet on live** — `protect_availability_held_dates` and both booking indexes are missing there. It is older than the newest applied version, so it needs `db push --include-all`; see [`docs/supabase-github.md`](docs/supabase-github.md).
+- `supabase/migrations/20260904000000_admin_audit_log_and_atomic_moderation.sql` — append-only `admin_audit_log` + `log_admin_action`; `hide_review_and_close_report` does both moderation writes in one transaction. **Already on live.**
+- `supabase/migrations/20260904005000_customer_pays_dahr_fee.sql` — couple pays Dahr 10% by bank transfer; `platform_settings` + `commission_transfer_notes`. **Already on live** (Syber applied it); `CREATE TABLE` here is not `IF NOT EXISTS`, so a re-push fails.
+- `supabase/migrations/20260904010000_guest_read_policies_without_helper_execute.sql` — limits every `is_admin()` / `owns_vendor()` policy to the `authenticated` role. **Already on live — this is what unbroke guest browse.**
+- `supabase/migrations/20260904120000_booking_party_contact.sql` — authenticated-only `booking_party_contact` view (couple name + phone for a shared booking). **Not yet on live.** Newer than the last applied version, so a normal `db push` after history repair will apply it.
+
+Two files may never share a version prefix: the version is the primary key of `supabase_migrations.schema_migrations`, so a duplicate breaks both `db reset` and `db push`. Create migrations with `supabase migration new <name>` rather than by hand.
 
 **Security note:** Admin/vendor helpers (`is_admin`, `owns_vendor`, accept/commission RPCs, trigger functions including `reject_booking_if_date_booked`) are not anon RPCs — `authenticated` only, or no client EXECUTE. Do **not** re-grant `is_admin` / `owns_vendor` to anon (live once had `grant_rls_helpers_to_anon`; that must stay revoked).
 
@@ -97,9 +99,15 @@ URL: `https://cccusktgxrizfwpixddu.supabase.co`
 
 ```bash
 supabase link --project-ref cccusktgxrizfwpixddu
-supabase db push         # do not re-push overnight_security_hardening or freeze_admin_role_and_private_profile_rows — already on Dahr LY
-# seed.sql is optional on cloud (SQL editor); do not rewrite schema
+supabase migration list --linked   # read this before pushing anything
+supabase db push --dry-run         # seed.sql is optional on cloud (SQL editor); do not rewrite schema
 ```
+
+Every migration except `booking_integrity_guards` and `booking_party_contact` is already live, but the live ones were applied through the dashboard, so Dahr LY recorded different version numbers and `migration list` shows no version in common with this repo. Reconcile the history once with `supabase migration repair` before pushing or before enabling automatic deploys — the exact commands, and the GitHub ↔ Supabase setup they unblock, are in [`docs/supabase-github.md`](docs/supabase-github.md).
+
+### CI
+
+`Supabase CI` (`.github/workflows/supabase.yml`) applies every migration plus `seed.sql` to a throwaway Postgres on each PR touching `supabase/**`, so a broken or out-of-order migration fails before merge. It never touches Dahr LY. Pushing to the live project is a separate manual workflow, `Deploy Supabase migrations`.
 
 Put that URL and the **anon / publishable** key (Project Settings → API) in `.env` / `admin/.env.local`. Do not put real keys in git.
 

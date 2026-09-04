@@ -1,0 +1,76 @@
+name: Deploy Supabase migrations
+
+# Manual on purpose. Read docs/supabase-github.md before the first real run:
+# the Dahr LY migration history has to be reconciled with supabase/migrations
+# once, or this workflow will try to re-apply migrations that are already live.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'List the pending migrations without applying them'
+        type: boolean
+        default: true
+      include_all:
+        description: 'Also apply migrations older than the newest version in the project history'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-deploy
+  cancel-in-progress: false
+
+jobs:
+  push:
+    name: Push migrations to Dahr LY
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Holds the three secrets below. Add required reviewers here to gate
+    # production pushes.
+    environment: dahr-ly
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.116.0
+
+      - name: Check the deploy secrets are set
+        run: |
+          missing=0
+          for name in SUPABASE_ACCESS_TOKEN SUPABASE_DB_PASSWORD SUPABASE_PROJECT_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not set on the dahr-ly environment. See docs/supabase-github.md."
+              missing=1
+            fi
+          done
+          exit $missing
+
+      - name: Link the project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+
+      - name: Compare supabase/migrations with the project history
+        run: supabase migration list --linked
+
+      - name: Push
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+          INCLUDE_ALL: ${{ inputs.include_all }}
+        run: |
+          args=(--linked)
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          if [ "$INCLUDE_ALL" = "true" ]; then
+            args+=(--include-all)
+          fi
+          echo "supabase db push ${args[*]}"
+          supabase db push "${args[@]}"
