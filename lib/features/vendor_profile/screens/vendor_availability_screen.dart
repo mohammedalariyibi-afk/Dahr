@@ -104,10 +104,21 @@ class VendorAvailabilityScreen extends ConsumerWidget {
                       trailing: Switch(
                         value: true,
                         activeThumbColor: AppColors.burgundy,
-                        onChanged: (_) {
-                          ref
-                              .read(vendorAvailabilityProvider.notifier)
-                              .upsertDate(d, AvailabilityStatus.available);
+                        // Freeing a date the DB holds for an accepted booking
+                        // is refused, so the failure has to reach the vendor.
+                        onChanged: (_) async {
+                          try {
+                            await ref
+                                .read(vendorAvailabilityProvider.notifier)
+                                .upsertDate(d, AvailabilityStatus.available);
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(SafeUserError.of(l10n, e)),
+                              ),
+                            );
+                          }
                         },
                       ),
                     ),

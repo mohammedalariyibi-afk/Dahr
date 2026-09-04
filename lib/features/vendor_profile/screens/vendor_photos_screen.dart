@@ -92,10 +92,20 @@ class VendorPhotosScreen extends ConsumerWidget {
                     child: ReorderableListView.builder(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
                       itemCount: photos.length,
-                      onReorderItem: (oldIndex, newIndex) {
-                        ref
-                            .read(vendorPhotosProvider.notifier)
-                            .reorder(oldIndex, newIndex);
+                      // The new order is applied locally first, so a failed
+                      // write would otherwise leave the cover photo looking
+                      // changed while `sort_order` still says otherwise.
+                      onReorderItem: (oldIndex, newIndex) async {
+                        try {
+                          await ref
+                              .read(vendorPhotosProvider.notifier)
+                              .reorder(oldIndex, newIndex);
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(SafeUserError.of(l10n, e))),
+                          );
+                        }
                       },
                       itemBuilder: (context, i) {
                         final photo = photos[i];
