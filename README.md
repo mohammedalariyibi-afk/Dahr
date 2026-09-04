@@ -19,6 +19,7 @@ dahr/
   docs/store-listing.md
   legal-pages/         # Public privacy/terms for GitHub Pages (store URLs)
   tool/check_store_env.dart
+  tool/release.sh      # Play AAB: key.properties + env preflight + appbundle
   STORE.md             # App Store + Google Play submit checklist
   .env.example         # Flutter env names (copy to gitignored .env)
   admin/.env.example   # Admin NEXT_PUBLIC_* names (copy to .env.local)
@@ -261,8 +262,9 @@ flutter create . --project-name dahr --org com.dahr --platforms=android,ios
 #    - queries: https, http, com.whatsapp
 #    - Info.plist: CFBundleDevelopmentRegion=ar, iPhone portrait, dahr URL scheme,
 #      LSApplicationQueriesSchemes (whatsapp, https, http), camera/photo usage strings
-#    - release signing reads gitignored android/key.properties when present;
-#      otherwise debug signing (local flutter run --release)
+#    - fail-closed release signing from gitignored android/key.properties
+#      (no debug fallback; local flutter run --release hatch:
+#      -PallowDebugReleaseSigning=true)
 
 # 4. Confirm identifiers:
 grep applicationId android/app/build.gradle.kts
@@ -283,16 +285,15 @@ Do **not** run `flutter create` without `--platforms=android,ios` if you want to
 ### Build artifacts (Mohammed uploads)
 
 ```bash
-# Play (AAB) — drop android/key.properties locally, then:
-dart run tool/check_store_env.dart
-flutter build appbundle --dart-define-from-file=.env
+# Play (AAB) — android/key.properties on Mohammed’s machine, then:
+./tool/release.sh
 
 # App Store (IPA) — Xcode Team on Mohammed’s Mac; iPhone only
 dart run tool/check_store_env.dart
 flutter build ipa --dart-define-from-file=.env
 ```
 
-`.env` must be Dahr LY (`https://cccusktgxrizfwpixddu.supabase.co`) + anon/publishable key. Never Zeen. Never `service_role`. Gradle uses `signingConfigs.release` when `android/key.properties` exists; otherwise debug signing so `flutter run --release` still works.
+`.env` must be Dahr LY (`https://cccusktgxrizfwpixddu.supabase.co`) + anon/publishable key. Never Zeen. Never `service_role`. Gradle **fail-closes** Android release: missing/empty `android/key.properties` or a missing `storeFile` fails `flutter build appbundle` / `assembleRelease` (no debug-signed AAB). `./tool/release.sh` never passes `-PallowDebugReleaseSigning=true`. That hatch is local `flutter run --release` only.
 
 ## Demo seed
 

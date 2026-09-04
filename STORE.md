@@ -128,12 +128,11 @@ Do not screenshot debug banners, `.env` URLs, or `127.0.0.1`.
 8. Target audience: **18+** (adults arranging a wedding).
 9. Ads: **No**. In-app products: **No**.
 10. Photos/videos permission: vendors upload listing photos (`image_picker`).
-11. Sign the **upload** AAB with Mohammed’s upload keystore (see Signing). Gradle already wires `signingConfigs.release` from local `android/key.properties`. Without that file, release still uses debug signing so `flutter run --release` works locally.
+11. Sign the **upload** AAB with Mohammed’s upload keystore (see Signing). Gradle is **fail-closed**: `flutter build appbundle --release` / `assembleRelease` will not debug-sign. They fail if `android/key.properties` is missing, a required key is empty, or `storeFile` does not exist. Build with `./tool/release.sh` (never pass `-PallowDebugReleaseSigning=true`).
 12. Production track → submit. Mohammed must accept Play policies and pay the developer fee if not already done.
 
 ```bash
-dart run tool/check_store_env.dart
-flutter build appbundle --dart-define-from-file=.env
+./tool/release.sh
 # Output: build/app/outputs/bundle/release/app-release.aab
 ```
 
@@ -210,11 +209,19 @@ Android (Play):
 
    `storeFile` must be an **absolute** path (Gradle does not expand `~`).
 
-3. Gradle already reads that file: when it exists, release builds use `signingConfigs.release`. When it is absent, release uses debug signing so local `flutter run --release` still works. **Do not commit** `key.properties` or the `.jks`. Then:
+3. Gradle reads that file and signs release with `signingConfigs.release`. It is **fail-closed**: if the file is missing, `storeFile` / `storePassword` / `keyAlias` / `keyPassword` is empty, or `storeFile` does not exist, `flutter build appbundle` / `assembleRelease` **fails** (it does **not** fall back to debug). The error points at `android/key.properties.example` and this section. **Do not commit** `key.properties` or the `.jks`.
+
+   Play AAB (requires `android/key.properties`, runs `dart run tool/check_store_env.dart`, then `flutter build appbundle --release --dart-define-from-file=.env`; never passes the debug hatch):
 
    ```bash
-   dart run tool/check_store_env.dart
-   flutter build appbundle --dart-define-from-file=.env
+   ./tool/release.sh
+   ```
+
+   Local `flutter run --release` without an upload keystore **only** (never for Play / never in `tool/release.sh`):
+
+   ```bash
+   ORG_GRADLE_PROJECT_allowDebugReleaseSigning=true flutter run --release --dart-define-from-file=.env
+   # same hatch: -PallowDebugReleaseSigning=true
    ```
 
 iOS: Team, Automatic signing, and certificates stay on Mohammed’s Mac. Follow **iOS archive** above. **Never** commit `DEVELOPMENT_TEAM`, a team id, `.p12`, or provisioning profiles.
