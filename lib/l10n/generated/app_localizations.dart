@@ -836,6 +836,24 @@ abstract class AppLocalizations {
   /// **'حدث خطأ. حاول مرة أخرى.'**
   String get errorGeneric;
 
+  /// No description provided for @vendorNotApprovedError.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا المورّد لا يستقبل الطلبات بعد.'**
+  String get vendorNotApprovedError;
+
+  /// No description provided for @bookingAlreadyHandledError.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم التعامل مع هذا الطلب بالفعل. حدّث الصفحة وحاول مرة أخرى.'**
+  String get bookingAlreadyHandledError;
+
+  /// No description provided for @guestCountInvalidError.
+  ///
+  /// In ar, this message translates to:
+  /// **'أدخل عدد ضيوف بين 1 و10000.'**
+  String get guestCountInvalidError;
+
   /// No description provided for @emptyDefault.
   ///
   /// In ar, this message translates to:

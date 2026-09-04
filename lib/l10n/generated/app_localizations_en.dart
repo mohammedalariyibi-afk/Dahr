@@ -379,6 +379,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorGeneric => 'Something went wrong. Try again.';
 
   @override
+  String get vendorNotApprovedError => 'This listing is not taking requests yet.';
+
+  @override
+  String get bookingAlreadyHandledError => 'This request has already been handled. Refresh and try again.';
+
+  @override
+  String get guestCountInvalidError => 'Enter a guest count between 1 and 10000.';
+
+  @override
   String get emptyDefault => 'Nothing here yet';
 
   @override

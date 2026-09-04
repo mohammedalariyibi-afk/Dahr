@@ -378,6 +378,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorGeneric => 'حدث خطأ. حاول مرة أخرى.';
 
   @override
+  String get vendorNotApprovedError => 'هذا المورّد لا يستقبل الطلبات بعد.';
+
+  @override
+  String get bookingAlreadyHandledError => 'تم التعامل مع هذا الطلب بالفعل. حدّث الصفحة وحاول مرة أخرى.';
+
+  @override
+  String get guestCountInvalidError => 'أدخل عدد ضيوف بين 1 و10000.';
+
+  @override
   String get emptyDefault => 'لا يوجد شيء هنا بعد';
 
   @override
