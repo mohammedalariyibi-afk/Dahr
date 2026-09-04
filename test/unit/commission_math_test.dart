@@ -24,5 +24,14 @@ void main() {
       expect(CommissionMath.parseQuotedAmount(''), isNull);
       expect(CommissionMath.parseQuotedAmount('nope'), isNull);
     });
+
+    test('parseLyd accepts numbers, quoted NUMERIC, and null', () {
+      expect(CommissionMath.parseLyd(4.5), 4.5);
+      expect(CommissionMath.parseLyd(5), 5);
+      expect(CommissionMath.parseLyd('4.5'), 4.5);
+      expect(CommissionMath.parseLyd('5'), 5);
+      expect(CommissionMath.parseLyd(null), isNull);
+      expect(CommissionMath.parseLyd('nope'), isNull);
+    });
   });
 }

@@ -162,27 +162,38 @@ Future<List<VendorProfile>> attachVendorRatings(
       .select('vendor_id, rating')
       .eq('is_hidden', false)
       .inFilter('vendor_id', ids);
+  return applyVendorRatingRows(vendors, rows as List);
+}
 
+/// Pure roll-up so Discover / Favorites survive quoted NUMERIC `rating`
+/// (and null / junk) the same way vendor money fields use [CommissionMath.parseLyd].
+List<VendorProfile> applyVendorRatingRows(
+  List<VendorProfile> vendors,
+  Iterable<dynamic> rows,
+) {
   final sums = <String, double>{};
   final counts = <String, int>{};
-  for (final raw in rows as List) {
-    final row = Map<String, dynamic>.from(raw as Map);
-    final id = row['vendor_id'] as String;
-    final rating = (row['rating'] as num).toDouble();
+  for (final raw in rows) {
+    if (raw is! Map) continue;
+    final row = Map<String, dynamic>.from(raw);
+    final id = row['vendor_id'] as String?;
+    if (id == null || id.isEmpty) continue;
+    final rating = CommissionMath.parseLyd(row['rating']);
+    if (rating == null) continue;
     sums[id] = (sums[id] ?? 0) + rating;
     counts[id] = (counts[id] ?? 0) + 1;
   }
 
-  return vendors
-      .map((v) {
-        final count = counts[v.id] ?? 0;
-        if (count == 0) return v;
-        return v.copyWith(
-          avgRating: sums[v.id]! / count,
-          reviewCount: count,
-        );
-      })
-      .toList();
+  return [
+    for (final v in vendors)
+      if ((counts[v.id] ?? 0) == 0)
+        v
+      else
+        v.copyWith(
+          avgRating: sums[v.id]! / counts[v.id]!,
+          reviewCount: counts[v.id],
+        ),
+  ];
 }
 
 final vendorDetailProvider =

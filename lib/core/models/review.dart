@@ -1,4 +1,5 @@
 import '../security/review_write.dart';
+import 'commission.dart';
 import 'enums.dart';
 
 class Review {
@@ -36,7 +37,7 @@ class Review {
       vendorId: json['vendor_id'] as String,
       consumerId: json['consumer_id'] as String,
       bookingRequestId: json['booking_request_id'] as String,
-      rating: (json['rating'] as num).toInt(),
+      rating: CommissionMath.parseLyd(json['rating'])?.toInt() ?? 0,
       comment: (json['comment'] as String?) ?? '',
       isHidden: json['is_hidden'] as bool? ?? false,
       createdAt: json['created_at'] != null

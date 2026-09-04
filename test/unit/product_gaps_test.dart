@@ -78,6 +78,12 @@ void main() {
       final fav = File('lib/features/favorites/providers/favorites_provider.dart')
           .readAsStringSync();
       expect(fav, contains('attachVendorRatings'));
+      final rollup = File(
+        'lib/features/discovery/providers/vendors_provider.dart',
+      ).readAsStringSync();
+      expect(rollup, contains('applyVendorRatingRows'));
+      expect(rollup, contains('CommissionMath.parseLyd'));
+      expect(rollup, isNot(contains("as num).toDouble()"));
     });
 
     test('vendor inbox loads booking_party_contact', () {
@@ -86,6 +92,8 @@ void main() {
       ).readAsStringSync();
       expect(inbox, contains('attachBookingPartyContacts'));
       expect(inbox, contains(BookingSelect.partyContactTable));
+      expect(inbox, contains('try {'));
+      expect(inbox, contains('applyBookingPartyContactRows'));
       expect(
         File('lib/features/vendor_profile/screens/vendor_inbox_screen.dart')
             .readAsStringSync(),
