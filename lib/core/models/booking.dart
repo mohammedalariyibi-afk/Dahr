@@ -18,6 +18,8 @@ class BookingRequest {
     this.commissionPaidAt,
     this.createdAt,
     this.vendor,
+    this.consumerName,
+    this.hasReview = false,
   });
 
   final String id;
@@ -34,6 +36,8 @@ class BookingRequest {
   final DateTime? commissionPaidAt;
   final DateTime? createdAt;
   final VendorProfile? vendor;
+  final String? consumerName;
+  final bool hasReview;
 
   bool get hasQuote => quotedAmountLyd != null;
   bool get isCommissionUnpaid =>
@@ -42,8 +46,23 @@ class BookingRequest {
   factory BookingRequest.fromJson(Map<String, dynamic> json) {
     VendorProfile? vendor;
     final vendorRaw = json['vendor_profiles'] ?? json['vendor'];
-    if (vendorRaw is Map<String, dynamic>) {
-      vendor = VendorProfile.fromJson(vendorRaw);
+    final vendorMap = _asStringMap(vendorRaw);
+    if (vendorMap != null) {
+      vendor = VendorProfile.fromJson(vendorMap);
+    }
+
+    String? consumerName = json['consumer_name'] as String?;
+    final profileRaw =
+        json['profile_public'] ?? json['profiles'] ?? json['consumer'];
+    final profileMap = _asStringMap(profileRaw);
+    if (consumerName == null || consumerName.isEmpty) {
+      consumerName = profileMap?['full_name'] as String?;
+    }
+
+    var hasReview = json['has_review'] as bool? ?? false;
+    final reviewsRaw = json['reviews'];
+    if (reviewsRaw is List) {
+      hasReview = reviewsRaw.isNotEmpty;
     }
 
     return BookingRequest(
@@ -69,6 +88,8 @@ class BookingRequest {
           ? DateTime.tryParse(json['created_at'] as String)
           : null,
       vendor: vendor,
+      consumerName: consumerName,
+      hasReview: hasReview,
     );
   }
 
@@ -87,6 +108,8 @@ class BookingRequest {
     double? commissionAmountLyd,
     CommissionStatus? commissionStatus,
     VendorProfile? vendor,
+    String? consumerName,
+    bool? hasReview,
   }) {
     return BookingRequest(
       id: id,
@@ -103,8 +126,16 @@ class BookingRequest {
       commissionPaidAt: commissionPaidAt,
       createdAt: createdAt,
       vendor: vendor ?? this.vendor,
+      consumerName: consumerName ?? this.consumerName,
+      hasReview: hasReview ?? this.hasReview,
     );
   }
+}
+
+Map<String, dynamic>? _asStringMap(dynamic raw) {
+  if (raw is Map<String, dynamic>) return raw;
+  if (raw is Map) return Map<String, dynamic>.from(raw);
+  return null;
 }
 
 /// Payload used when creating a booking request (validated before insert).

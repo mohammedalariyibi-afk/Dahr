@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/supabase/supabase_client.dart';
+import '../../../core/supabase/vendor_queries.dart';
 
 class VendorFilters {
   const VendorFilters({
@@ -95,7 +96,7 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
     final filters = ref.read(vendorFiltersProvider);
     var query = DahrSupabase.client
         .from('vendor_profiles')
-        .select('*, vendor_photos(*)')
+        .select(kVendorPublicSelect)
         .eq('is_approved', true);
 
     if (filters.category != null) {
@@ -115,9 +116,10 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
     }
 
     final rows = await query.order('created_at', ascending: false);
-    return (rows as List)
+    final vendors = (rows as List)
         .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
+    return attachVendorContact(vendors);
   }
 
   Future<void> refresh() async {
@@ -126,32 +128,100 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
   }
 }
 
-final vendorDetailProvider =
+final homeVendorsProvider = FutureProvider<List<VendorProfile>>((ref) async {
+  final city = ref.watch(vendorFiltersProvider.select((f) => f.city));
+  var query = DahrSupabase.client
+      .from('vendor_profiles')
+      .select(kVendorPublicSelect)
+      .eq('is_approved', true);
+  if (city != null) {
+    query = query.eq('city', city.name);
+  }
+  final rows = await query.order('created_at', ascending: false);
+  final vendors = (rows as List)
+      .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
+      .toList();
+  return attachVendorContact(vendors);
+});
+
+final vendorByIdProvider =
     FutureProvider.family<VendorProfile, String>((ref, id) async {
   final row = await DahrSupabase.client
       .from('vendor_profiles')
-      .select('*, vendor_photos(*)')
+      .select(kVendorPublicSelect)
       .eq('id', id)
       .maybeSingle();
   if (row == null) throw StateError('Vendor not found');
+  final vendors = await attachVendorContact([
+    VendorProfile.fromJson(Map<String, dynamic>.from(row)),
+  ]);
+  return vendors.single;
+});
+
+final vendorDetailProvider =
+    FutureProvider.family<VendorProfile, String>((ref, id) async {
+  final vendor = await ref.watch(vendorByIdProvider(id).future);
 
   // Fire-and-forget view increment
   DahrSupabase.client.rpc('increment_vendor_views', params: {
     'p_vendor_id': id,
   });
 
-  return VendorProfile.fromJson(Map<String, dynamic>.from(row));
+  return vendor;
 });
 
 final vendorReviewsProvider =
     FutureProvider.family<List<Review>, String>((ref, vendorId) async {
   final rows = await DahrSupabase.client
       .from('reviews')
-      .select('*, profiles(full_name)')
+      .select()
       .eq('vendor_id', vendorId)
       .eq('is_hidden', false)
       .order('created_at', ascending: false);
-  return (rows as List)
+  var reviews = (rows as List)
       .map((e) => Review.fromJson(Map<String, dynamic>.from(e as Map)))
       .toList();
+  reviews = await _attachReviewerNames(reviews);
+  return reviews;
 });
+
+Future<List<Review>> _attachReviewerNames(List<Review> reviews) async {
+  final missing = reviews
+      .where((r) => r.consumerName == null || r.consumerName!.trim().isEmpty)
+      .map((r) => r.consumerId)
+      .toSet()
+      .toList();
+  if (missing.isEmpty) return reviews;
+  try {
+    final rows = await DahrSupabase.client
+        .from('profile_public')
+        .select('id, full_name')
+        .inFilter('id', missing);
+    final names = <String, String>{};
+    for (final row in rows as List) {
+      final map = Map<String, dynamic>.from(row as Map);
+      final id = map['id'] as String?;
+      final name = map['full_name'] as String?;
+      if (id != null && name != null && name.trim().isNotEmpty) {
+        names[id] = name.trim();
+      }
+    }
+    return reviews
+        .map(
+          (r) => Review(
+            id: r.id,
+            vendorId: r.vendorId,
+            consumerId: r.consumerId,
+            bookingRequestId: r.bookingRequestId,
+            rating: r.rating,
+            comment: r.comment,
+            isHidden: r.isHidden,
+            createdAt: r.createdAt,
+            consumerName: names[r.consumerId] ?? r.consumerName,
+          ),
+        )
+        .toList();
+  } catch (_) {
+    return reviews;
+  }
+}

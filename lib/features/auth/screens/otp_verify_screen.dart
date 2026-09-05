@@ -69,7 +69,7 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
       } else if (status == AuthFlowStatus.needsProfile) {
         context.go('/auth/profile-setup');
       } else {
-        context.go('/discover');
+        context.go('/home');
       }
     } catch (e) {
       setState(() => _error = e.toString());

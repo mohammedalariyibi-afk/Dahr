@@ -91,7 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         title: Text(l10n.loginTitle),
         actions: [
           TextButton(
-            onPressed: () => context.go('/discover'),
+            onPressed: () => context.go('/home'),
             child: Text(l10n.guestBrowse),
           ),
         ],

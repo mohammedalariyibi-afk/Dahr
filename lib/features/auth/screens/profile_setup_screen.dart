@@ -61,7 +61,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           );
       if (!mounted) return;
       final isVendor = ref.read(authProvider).isVendor;
-      context.go(isVendor ? '/vendor-tools/onboarding' : '/discover');
+      context.go(isVendor ? '/vendor-tools/onboarding' : '/home');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

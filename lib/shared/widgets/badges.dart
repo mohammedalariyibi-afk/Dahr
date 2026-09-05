@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/generated/app_localizations.dart';
 
 class RatingStars extends StatelessWidget {
   const RatingStars({
@@ -73,9 +74,9 @@ class VerifiedBadge extends StatelessWidget {
         vertical: compact ? 2 : 4,
       ),
       decoration: BoxDecoration(
-        color: AppColors.gold.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.gold),
+        color: AppColors.background.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -83,16 +84,16 @@ class VerifiedBadge extends StatelessWidget {
           Icon(
             Icons.verified_rounded,
             size: compact ? 14 : 16,
-            color: AppColors.goldDark,
+            color: AppColors.glacier,
           ),
           if (!compact) ...[
             const SizedBox(width: 4),
-            const Text(
-              'Verified',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).verified,
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.goldDark,
+                color: AppColors.glacier,
               ),
             ),
           ],
@@ -115,14 +116,15 @@ class PriceRangeBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.creamDark,
+        color: AppColors.glacier.withOpacity(0.12),
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border),
       ),
       child: Text(
         label,
         style: const TextStyle(
           fontWeight: FontWeight.w600,
-          color: AppColors.burgundy,
+          color: AppColors.glacier,
           fontSize: 13,
         ),
       ),

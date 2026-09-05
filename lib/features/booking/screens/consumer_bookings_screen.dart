@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/models.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
@@ -34,7 +35,7 @@ class ConsumerBookingsScreen extends ConsumerWidget {
       case BookingStatus.declined:
         return AppColors.error;
       case BookingStatus.completed:
-        return AppColors.burgundy;
+        return AppColors.inkMuted;
     }
   }
 
@@ -54,59 +55,68 @@ class ConsumerBookingsScreen extends ConsumerWidget {
           icon: Icons.event_busy_outlined,
         ),
         builder: (context, bookings) {
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: bookings.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (context, i) {
-              final b = bookings[i];
-              return Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              b.vendor?.businessName ?? b.vendorId,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+          return RefreshIndicator(
+            onRefresh: () =>
+                ref.read(consumerBookingsProvider.notifier).refresh(),
+            child: ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: bookings.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, i) {
+                final b = bookings[i];
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                b.vendor?.businessName ?? b.vendorId,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                          ),
-                          Icon(
-                            Icons.circle,
-                            size: 10,
-                            color: _statusColor(b.status),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(b.eventDate.toIso8601String().split('T').first),
-                      Text(_statusLabel(l10n, b.status)),
-                      if (b.quotedAmountLyd != null)
-                        Text(
-                          '${l10n.quotedAmountDisplay}: '
-                          '${AppConstants.formatPrice(b.quotedAmountLyd)}',
-                        ),
-                      if (b.status == BookingStatus.completed)
-                        Align(
-                          alignment: AlignmentDirectional.centerEnd,
-                          child: TextButton(
-                            onPressed: () => context.push(
-                              '/review/${b.id}',
-                              extra: {'vendorId': b.vendorId},
+                            StatusPill(
+                              label: _statusLabel(l10n, b.status),
+                              color: _statusColor(b.status),
                             ),
-                            child: Text(l10n.leaveReview),
-                          ),
+                          ],
                         ),
-                    ],
+                        const SizedBox(height: 4),
+                        Text(formatDay(b.eventDate)),
+                        if (b.quotedAmountLyd != null)
+                          Text(
+                            '${l10n.quotedAmountDisplay}: '
+                            '${AppConstants.formatPrice(b.quotedAmountLyd)}',
+                          ),
+                        if (b.status == BookingStatus.completed)
+                          Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: b.hasReview
+                                ? Text(
+                                    l10n.reviewedBadge,
+                                    style: const TextStyle(
+                                      color: AppColors.success,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  )
+                                : TextButton(
+                                    onPressed: () => context.push(
+                                      '/review/${b.id}',
+                                    ),
+                                    child: Text(l10n.leaveReview),
+                                  ),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           );
         },
       ),

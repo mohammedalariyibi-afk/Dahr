@@ -1,3 +1,5 @@
+import 'enums.dart';
+
 class Review {
   const Review({
     required this.id,
@@ -23,10 +25,12 @@ class Review {
 
   factory Review.fromJson(Map<String, dynamic> json) {
     String? name;
-    final profile = json['profiles'];
-    if (profile is Map<String, dynamic>) {
-      name = profile['full_name'] as String?;
+    final profile = json['profiles'] ?? json['profile_public'];
+    if (profile is Map) {
+      final map = Map<String, dynamic>.from(profile);
+      name = map['full_name'] as String?;
     }
+    name ??= json['consumer_name'] as String?;
 
     return Review(
       id: json['id'] as String,
@@ -50,6 +54,40 @@ class Review {
         'rating': rating,
         'comment': comment,
       };
+}
+
+class ReviewPayload {
+  const ReviewPayload({
+    required this.vendorId,
+    required this.consumerId,
+    required this.bookingRequestId,
+    required this.rating,
+    this.comment = '',
+  });
+
+  final String vendorId;
+  final String consumerId;
+  final String bookingRequestId;
+  final int rating;
+  final String comment;
+
+  Map<String, dynamic> toJson() => {
+        'vendor_id': vendorId,
+        'consumer_id': consumerId,
+        'booking_request_id': bookingRequestId,
+        'rating': rating,
+        'comment': comment,
+      };
+
+  /// Returns null if valid, otherwise an error key.
+  String? validate() {
+    if (vendorId.isEmpty) return 'vendor_required';
+    if (consumerId.isEmpty) return 'consumer_required';
+    if (bookingRequestId.isEmpty) return 'booking_required';
+    if (rating < 1 || rating > 5) return 'rating_invalid';
+    if (comment.length > 2000) return 'comment_too_long';
+    return null;
+  }
 }
 
 class Favorite {
@@ -89,6 +127,23 @@ class AvailabilitySlot {
   final String vendorId;
   final DateTime date;
   final String status; // available | booked — use AvailabilityStatus in UI
+
+  bool get isBooked =>
+      AvailabilityStatus.fromString(status) == AvailabilityStatus.booked;
+
+  DateTime get day => DateTime(date.year, date.month, date.day);
+
+  static DateTime dateOnly(DateTime value) =>
+      DateTime(value.year, value.month, value.day);
+
+  static bool isDateBooked(Iterable<AvailabilitySlot> slots, DateTime date) {
+    final day = dateOnly(date);
+    return slots.any((s) => s.isBooked && s.day == day);
+  }
+
+  static Set<DateTime> bookedDays(Iterable<AvailabilitySlot> slots) {
+    return slots.where((s) => s.isBooked).map((s) => s.day).toSet();
+  }
 
   factory AvailabilitySlot.fromJson(Map<String, dynamic> json) {
     return AvailabilitySlot(

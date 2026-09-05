@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -123,6 +121,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tabDiscover => 'اكتشف';
 
   @override
+  String get tabHome => 'الرئيسية';
+
+  @override
+  String get tabSearch => 'البحث';
+
+  @override
   String get tabFavorites => 'المفضلة';
 
   @override
@@ -136,6 +140,46 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get searchHint => 'ابحث عن مورّدين…';
+
+  @override
+  String get homeHeadline => 'ابدئي رحلة زفافكِ المثالية';
+
+  @override
+  String get homeSearchHint => 'ابحث عن مصور، صالة، أو خبيرة تجميل...';
+
+  @override
+  String get featuredVendors => 'الموردون المميزون';
+
+  @override
+  String get recentlyAdded => 'أضيف مؤخراً';
+
+  @override
+  String startsFrom(String price) {
+    return 'يبدأ من $price';
+  }
+
+  @override
+  String get priceOnRequest => 'الأسعار عند الطلب';
+
+  @override
+  String get bookingSubtitle => 'الرجاء إدخال تفاصيل الحدث الخاص بك.';
+
+  @override
+  String get confirmRequest => 'تأكيد الطلب';
+
+  @override
+  String get inboxSubtitle => 'إدارة طلبات الحجز الخاصة بك';
+
+  @override
+  String welcomeVendor(String name) {
+    return 'مرحباً، $name';
+  }
+
+  @override
+  String get totalBookings => 'إجمالي الحجوزات';
+
+  @override
+  String get notifications => 'الإشعارات';
 
   @override
   String get filters => 'تصفية';
@@ -468,12 +512,71 @@ class AppLocalizationsAr extends AppLocalizations {
   String get quotedAmountDisplay => 'عرض السعر';
 
   @override
-  String get commissionNoteVendor =>
-      'تدفع 10٪ من هذا المبلغ لدهر، ويُحصَّل خارج التطبيق.';
+  String get commissionNoteVendor => 'تدفع 10٪ من هذا المبلغ لدهر، ويُحصَّل خارج التطبيق.';
 
   @override
   String get invalidQuotedAmount => 'أدخل مبلغاً صالحاً بالدينار الليبي';
 
   @override
   String get commissionStatusLabel => 'حالة العمولة';
+
+  @override
+  String get dateUnavailable => 'هذا التاريخ محجوز مسبقاً';
+
+  @override
+  String get eventDatePast => 'اختر تاريخاً قادماً';
+
+  @override
+  String get invalidGuestCount => 'يجب أن يكون عدد الضيوف 1 على الأقل';
+
+  @override
+  String get alreadyReviewed => 'لقد قيّمت هذا الحجز مسبقاً';
+
+  @override
+  String get reviewOnlyCompleted => 'يمكنك التقييم بعد أن يعلّم المورّد الحجز مكتملاً';
+
+  @override
+  String get confirmCompleteTitle => 'تعليم كمكتمل؟';
+
+  @override
+  String get confirmCompleteBody => 'سيتمكن الزوجان من ترك تقييم.';
+
+  @override
+  String get confirmDeclineTitle => 'رفض هذا الطلب؟';
+
+  @override
+  String get completedRequests => 'مكتملة';
+
+  @override
+  String get coupleName => 'الزوجان';
+
+  @override
+  String get availabilityHint => 'اضغط على يوم لتعليمه محجوزاً أو متاحاً.';
+
+  @override
+  String get legendBooked => 'محجوز';
+
+  @override
+  String get legendAvailable => 'متاح';
+
+  @override
+  String get bookingVendorLabel => 'المورّد';
+
+  @override
+  String get cannotBookOwnListing => 'لا يمكنك حجز عرضك الخاص';
+
+  @override
+  String get reviewedBadge => 'تم التقييم';
+
+  @override
+  String get inboxGuestFallback => 'طلب حجز';
+
+  @override
+  String get onboardingPhotosHint => 'أضف صوراً لأعمالك (اختياري)';
+
+  @override
+  String get reviewMissingBooking => 'الحجز غير موجود';
+
+  @override
+  String get noBookedDates => 'لا توجد تواريخ محجوزة بعد. اضغط يوماً في التقويم.';
 }

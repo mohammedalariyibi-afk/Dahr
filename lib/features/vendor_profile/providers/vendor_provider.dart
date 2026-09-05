@@ -27,6 +27,7 @@ class VendorDashboardStats {
     required this.views,
     required this.pending,
     required this.accepted,
+    required this.completed,
     required this.unpaidCommissionLyd,
     required this.unpaidBookings,
   });
@@ -34,6 +35,7 @@ class VendorDashboardStats {
   final int views;
   final int pending;
   final int accepted;
+  final int completed;
   final double unpaidCommissionLyd;
   final List<BookingRequest> unpaidBookings;
 }
@@ -46,6 +48,7 @@ final vendorDashboardStatsProvider =
       views: 0,
       pending: 0,
       accepted: 0,
+      completed: 0,
       unpaidCommissionLyd: 0,
       unpaidBookings: [],
     );
@@ -60,11 +63,13 @@ final vendorDashboardStatsProvider =
       .toList();
   var pending = 0;
   var accepted = 0;
+  var completed = 0;
   final unpaid = <BookingRequest>[];
   var unpaidTotal = 0.0;
   for (final b in bookings) {
     if (b.status == BookingStatus.pending) pending++;
     if (b.status == BookingStatus.accepted) accepted++;
+    if (b.status == BookingStatus.completed) completed++;
     if (b.isCommissionUnpaid) {
       unpaid.add(b);
       unpaidTotal += b.commissionAmountLyd ?? 0;
@@ -74,6 +79,7 @@ final vendorDashboardStatsProvider =
     views: vendor.viewCount,
     pending: pending,
     accepted: accepted,
+    completed: completed,
     unpaidCommissionLyd: unpaidTotal,
     unpaidBookings: unpaid,
   );
@@ -113,6 +119,7 @@ class VendorAvailabilityNotifier
       'status': status.name,
     }, onConflict: 'vendor_id,date');
     ref.invalidateSelf();
+    ref.invalidate(vendorBookedDatesProvider(vendor.id));
   }
 
   Future<void> refresh() async {
@@ -120,6 +127,19 @@ class VendorAvailabilityNotifier
     state = await AsyncValue.guard(_fetch);
   }
 }
+
+/// Booked event days for any vendor (used by the booking date picker).
+final vendorBookedDatesProvider =
+    FutureProvider.family<Set<DateTime>, String>((ref, vendorId) async {
+  final rows = await DahrSupabase.client
+      .from('availability')
+      .select()
+      .eq('vendor_id', vendorId)
+      .eq('status', AvailabilityStatus.booked.name);
+  final slots = (rows as List)
+      .map((e) => AvailabilitySlot.fromJson(Map<String, dynamic>.from(e as Map)));
+  return AvailabilitySlot.bookedDays(slots);
+});
 
 /// Uploads a vendor photo to Storage (`vendor-photos/{userId}/{uuid}.jpg`)
 /// and inserts a `vendor_photos` row.
@@ -152,4 +172,19 @@ Future<VendorPhoto> uploadVendorPhoto({
 
 Future<void> deleteVendorPhoto(VendorPhoto photo) async {
   await DahrSupabase.client.from('vendor_photos').delete().eq('id', photo.id);
+  final path = storagePathFromPublicUrl(photo.storageUrl);
+  if (path != null) {
+    try {
+      await DahrSupabase.client.storage.from('vendor-photos').remove([path]);
+    } catch (_) {
+      // Row is already gone; storage cleanup is best-effort.
+    }
+  }
+}
+
+String? storagePathFromPublicUrl(String url) {
+  const marker = '/object/public/vendor-photos/';
+  final index = url.indexOf(marker);
+  if (index < 0) return null;
+  return Uri.decodeFull(url.substring(index + marker.length));
 }

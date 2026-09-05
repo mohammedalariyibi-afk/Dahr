@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -33,8 +31,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginTitle => 'Sign in';
 
   @override
-  String get loginSubtitle =>
-      'Enter your Libyan phone number to receive a code';
+  String get loginSubtitle => 'Enter your Libyan phone number to receive a code';
 
   @override
   String get phoneLabel => 'Phone number';
@@ -124,6 +121,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tabDiscover => 'Discover';
 
   @override
+  String get tabHome => 'Home';
+
+  @override
+  String get tabSearch => 'Search';
+
+  @override
   String get tabFavorites => 'Favorites';
 
   @override
@@ -137,6 +140,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchHint => 'Search vendors…';
+
+  @override
+  String get homeHeadline => 'Start your perfect wedding journey';
+
+  @override
+  String get homeSearchHint => 'Search a photographer, hall, or beauty artist…';
+
+  @override
+  String get featuredVendors => 'Featured vendors';
+
+  @override
+  String get recentlyAdded => 'Recently added';
+
+  @override
+  String startsFrom(String price) {
+    return 'From $price';
+  }
+
+  @override
+  String get priceOnRequest => 'Price on request';
+
+  @override
+  String get bookingSubtitle => 'Enter your event details.';
+
+  @override
+  String get confirmRequest => 'Confirm request';
+
+  @override
+  String get inboxSubtitle => 'Manage your booking requests';
+
+  @override
+  String welcomeVendor(String name) {
+    return 'Welcome, $name';
+  }
+
+  @override
+  String get totalBookings => 'Total bookings';
+
+  @override
+  String get notifications => 'Notifications';
 
   @override
   String get filters => 'Filters';
@@ -469,12 +512,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quotedAmountDisplay => 'Quote';
 
   @override
-  String get commissionNoteVendor =>
-      'You pay 10% of this quote to Dahr (collected offline).';
+  String get commissionNoteVendor => 'You pay 10% of this quote to Dahr (collected offline).';
 
   @override
   String get invalidQuotedAmount => 'Enter a valid amount in LYD';
 
   @override
   String get commissionStatusLabel => 'Commission status';
+
+  @override
+  String get dateUnavailable => 'This date is already booked';
+
+  @override
+  String get eventDatePast => 'Pick a future date';
+
+  @override
+  String get invalidGuestCount => 'Guest count must be at least 1';
+
+  @override
+  String get alreadyReviewed => 'You already reviewed this booking';
+
+  @override
+  String get reviewOnlyCompleted => 'You can review after the vendor marks the booking complete';
+
+  @override
+  String get confirmCompleteTitle => 'Mark as complete?';
+
+  @override
+  String get confirmCompleteBody => 'The couple will be able to leave a review.';
+
+  @override
+  String get confirmDeclineTitle => 'Decline this request?';
+
+  @override
+  String get completedRequests => 'Completed';
+
+  @override
+  String get coupleName => 'Couple';
+
+  @override
+  String get availabilityHint => 'Tap a date to mark it booked or available.';
+
+  @override
+  String get legendBooked => 'Booked';
+
+  @override
+  String get legendAvailable => 'Available';
+
+  @override
+  String get bookingVendorLabel => 'Vendor';
+
+  @override
+  String get cannotBookOwnListing => 'You cannot book your own listing';
+
+  @override
+  String get reviewedBadge => 'Reviewed';
+
+  @override
+  String get inboxGuestFallback => 'Booking request';
+
+  @override
+  String get onboardingPhotosHint => 'Add photos of your work (optional)';
+
+  @override
+  String get reviewMissingBooking => 'Booking not found';
+
+  @override
+  String get noBookedDates => 'No booked dates yet. Tap a day on the calendar.';
 }

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/whatsapp.dart';
+import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/supabase/supabase_client.dart';
 import '../../../core/theme/app_colors.dart';
@@ -136,13 +137,45 @@ class VendorDetailScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      PriceRangeBadge(
-                        label: AppConstants.formatPriceRange(
-                          vendor.priceMin,
-                          vendor.priceMax,
+                      if (vendor.avgRating != null)
+                        RatingStars(
+                          rating: vendor.avgRating!,
+                          size: 16,
+                          showValue: true,
+                          count: vendor.reviewCount,
                         ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 16,
+                            color: AppColors.glacier,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            vendor.city == CityCode.benghazi
+                                ? l10n.cityBenghazi
+                                : l10n.cityTripoli,
+                            style: const TextStyle(color: AppColors.inkMuted),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
+                      Text(
+                        vendor.priceMin == null && vendor.priceMax == null
+                            ? l10n.priceOnRequest
+                            : AppConstants.formatPriceRange(
+                                vendor.priceMin,
+                                vendor.priceMax,
+                              ),
+                        style: const TextStyle(
+                          color: AppColors.glacier,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       Text(
                         l10n.description,
                         style: Theme.of(context).textTheme.titleMedium,
@@ -158,12 +191,24 @@ class VendorDetailScreen extends ConsumerWidget {
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                         const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: vendor.services
-                              .map((s) => Chip(label: Text(s)))
-                              .toList(),
+                        ...vendor.services.map(
+                          (s) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: GlassPanel(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle_outline,
+                                    color: AppColors.glacier,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(child: Text(s)),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                       const SizedBox(height: 20),
@@ -182,14 +227,23 @@ class VendorDetailScreen extends ConsumerWidget {
                           return Column(
                             children: reviews
                                 .map(
-                                  (r) => ListTile(
-                                    contentPadding: EdgeInsets.zero,
-                                    title: RatingStars(
-                                      rating: r.rating.toDouble(),
-                                      size: 16,
-                                    ),
-                                    subtitle: Text(
-                                      '${r.consumerName ?? ''} — ${r.comment}',
+                                  (r) => GlassPanel(
+                                    padding: const EdgeInsets.all(12),
+                                    child: ListTile(
+                                      contentPadding: EdgeInsets.zero,
+                                      title: RatingStars(
+                                        rating: r.rating.toDouble(),
+                                        size: 16,
+                                      ),
+                                      subtitle: Text(
+                                        [
+                                          if (r.consumerName != null &&
+                                              r.consumerName!.trim().isNotEmpty)
+                                            r.consumerName!.trim(),
+                                          if (r.comment.trim().isNotEmpty)
+                                            r.comment.trim(),
+                                        ].join(' — '),
+                                      ),
                                     ),
                                   ),
                                 )
@@ -217,6 +271,11 @@ class VendorDetailScreen extends ConsumerWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _openWhatsApp(vendor.whatsappNumber!),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.ink,
+                        backgroundColor: AppColors.whatsapp,
+                        side: BorderSide.none,
+                      ),
                       icon: const Icon(Icons.chat),
                       label: Text(l10n.whatsapp),
                     ),
@@ -225,7 +284,7 @@ class VendorDetailScreen extends ConsumerWidget {
                     vendor.whatsappNumber!.isNotEmpty)
                   const SizedBox(width: 12),
                 Expanded(
-                  child: FilledButton(
+                  child: FilledButton.icon(
                     onPressed: () {
                       final auth = ref.read(authProvider);
                       if (!auth.isLoggedIn) {
@@ -236,7 +295,8 @@ class VendorDetailScreen extends ConsumerWidget {
                       }
                       context.push('/booking/$vendorId');
                     },
-                    child: Text(l10n.bookNow),
+                    icon: const Icon(Icons.calendar_month_outlined),
+                    label: Text(l10n.bookNow),
                   ),
                 ),
               ],

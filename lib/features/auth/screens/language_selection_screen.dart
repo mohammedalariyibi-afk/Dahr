@@ -6,6 +6,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/providers/locale_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../shared/widgets/widgets.dart';
 
 class LanguageSelectionScreen extends ConsumerWidget {
   const LanguageSelectionScreen({super.key});
@@ -23,11 +24,13 @@ class LanguageSelectionScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Spacer(),
+            const DahrLogo(height: 88),
+              const SizedBox(height: 16),
               Text(
                 l10n.appName,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: AppColors.burgundy,
+                      color: AppColors.glacier,
                       fontWeight: FontWeight.w800,
                     ),
               ),
@@ -62,7 +65,7 @@ class LanguageSelectionScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               TextButton(
-                onPressed: () => context.go('/discover'),
+                onPressed: () => context.go('/home'),
                 child: Text(l10n.skipAsGuest),
               ),
             ],
@@ -87,7 +90,7 @@ class _LangTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.burgundy : AppColors.surface,
+      color: selected ? AppColors.glacier : AppColors.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -97,7 +100,7 @@ class _LangTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? AppColors.burgundy : AppColors.border,
+              color: selected ? AppColors.glacier : AppColors.border,
             ),
           ),
           child: Row(

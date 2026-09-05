@@ -143,17 +143,16 @@ class AuthController extends StateNotifier<AppAuthState> {
       'id': uid,
       'role': role.name,
     });
-    final session = DahrSupabase.auth.currentSession;
-    final profile = await fetchProfile(uid);
-    state = AppAuthState(
-      status: AuthFlowStatus.needsProfile,
-      session: session,
-      profile: profile?.copyWith(role: role) ??
-          Profile(
-            id: uid,
-            role: role,
-          ),
-    );
+    await refreshProfile();
+    // New users still need profile setup; keep them off the role screen.
+    if (state.status == AuthFlowStatus.needsRole) {
+      state = AppAuthState(
+        status: AuthFlowStatus.needsProfile,
+        session: DahrSupabase.auth.currentSession,
+        profile: state.profile?.copyWith(role: role) ??
+            Profile(id: uid, role: role),
+      );
+    }
   }
 
   Future<void> completeProfile({

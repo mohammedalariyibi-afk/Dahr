@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../shared/widgets/widgets.dart';
+import '../../discovery/providers/vendors_provider.dart';
+import '../../vendor_profile/providers/vendor_provider.dart';
 import '../providers/booking_provider.dart';
 
 class BookingRequestScreen extends ConsumerStatefulWidget {
@@ -30,13 +35,28 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
     super.dispose();
   }
 
-  Future<void> _pickDate() async {
+  String _snack(Object e, AppLocalizations l10n) {
+    if (e is StateError) return localizeErrorKey(l10n, e.message);
+    return localizeErrorKey(l10n, e.toString());
+  }
+
+  Future<void> _pickDate(Set<DateTime> booked) async {
     final now = DateTime.now();
+    final first = DateTime(now.year, now.month, now.day);
+    var initial = _eventDate ?? now.add(const Duration(days: 30));
+    if (initial.isBefore(first)) initial = first;
+    while (booked.contains(AvailabilitySlot.dateOnly(initial)) &&
+        initial.isBefore(now.add(const Duration(days: 365 * 3)))) {
+      initial = initial.add(const Duration(days: 1));
+    }
     final picked = await showDatePicker(
       context: context,
-      initialDate: now.add(const Duration(days: 30)),
-      firstDate: now,
+      initialDate: initial,
+      firstDate: first,
       lastDate: now.add(const Duration(days: 365 * 3)),
+      selectableDayPredicate: (day) {
+        return !booked.contains(AvailabilitySlot.dateOnly(day));
+      },
     );
     if (picked != null) setState(() => _eventDate = picked);
   }
@@ -73,7 +93,7 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
+          SnackBar(content: Text(_snack(e, l10n))),
         );
       }
     } finally {
@@ -84,47 +104,97 @@ class _BookingRequestScreenState extends ConsumerState<BookingRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final vendorAsync = ref.watch(vendorByIdProvider(widget.vendorId));
+    final bookedAsync = ref.watch(vendorBookedDatesProvider(widget.vendorId));
+    final booked = bookedAsync.valueOrNull ?? {};
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bookingTitle)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.eventDateLabel),
-              subtitle: Text(
-                _eventDate == null
-                    ? l10n.pickDate
-                    : _eventDate!.toIso8601String().split('T').first,
-              ),
-              trailing: const Icon(Icons.calendar_today),
-              onTap: _pickDate,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _guestsCtrl,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: l10n.guestCountLabel),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _messageCtrl,
-              maxLines: 4,
-              decoration: InputDecoration(
-                labelText: l10n.messageLabel,
-                hintText: l10n.messageHint,
-              ),
-            ),
-            const SizedBox(height: 28),
-            FilledButton(
-              onPressed: _loading ? null : _submit,
-              child: Text(l10n.submitBooking),
-            ),
-          ],
+      body: vendorAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => ErrorState(
+          message: e.toString(),
+          onRetry: () =>
+              ref.invalidate(vendorByIdProvider(widget.vendorId)),
         ),
+        data: (vendor) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: GlassPanel(
+              padding: const EdgeInsets.all(20),
+              radius: 20,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.bookingTitle,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          color: AppColors.glacier,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    l10n.bookingSubtitle,
+                    style: const TextStyle(color: AppColors.inkMuted),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    l10n.bookingVendorLabel,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    vendor.businessName,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                  const SizedBox(height: 20),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(
+                      Icons.calendar_today,
+                      color: AppColors.glacier,
+                    ),
+                    title: Text(l10n.eventDateLabel),
+                    subtitle: Text(
+                      _eventDate == null
+                          ? l10n.pickDate
+                          : formatDay(_eventDate!),
+                    ),
+                    onTap: () => _pickDate(booked),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _guestsCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: l10n.guestCountLabel,
+                      prefixIcon: const Icon(Icons.group_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _messageCtrl,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      labelText: l10n.messageLabel,
+                      hintText: l10n.messageHint,
+                      prefixIcon: const Icon(Icons.notes_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  OutlinedButton.icon(
+                    onPressed: _loading ? null : _submit,
+                    icon: const Icon(Icons.arrow_back),
+                    label: Text(l10n.confirmRequest),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -38,11 +38,35 @@
   "weddingDateLabel": "Wedding date (optional)",
   "saveProfile": "Save",
   "tabDiscover": "Discover",
+  "tabHome": "Home",
+  "tabSearch": "Search",
   "tabFavorites": "Favorites",
   "tabBookings": "Bookings",
   "tabInbox": "Inbox",
   "tabProfile": "Profile",
   "searchHint": "Search vendors…",
+  "homeHeadline": "Start your perfect wedding journey",
+  "homeSearchHint": "Search a photographer, hall, or beauty artist…",
+  "featuredVendors": "Featured vendors",
+  "recentlyAdded": "Recently added",
+  "startsFrom": "From {price}",
+  "@startsFrom": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "priceOnRequest": "Price on request",
+  "bookingSubtitle": "Enter your event details.",
+  "confirmRequest": "Confirm request",
+  "inboxSubtitle": "Manage your booking requests",
+  "welcomeVendor": "Welcome, {name}",
+  "@welcomeVendor": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "totalBookings": "Total bookings",
+  "notifications": "Notifications",
   "filters": "Filters",
   "allCategories": "All",
   "priceMin": "Min price",
@@ -155,5 +179,25 @@
   "quotedAmountDisplay": "Quote",
   "commissionNoteVendor": "You pay 10% of this quote to Dahr (collected offline).",
   "invalidQuotedAmount": "Enter a valid amount in LYD",
-  "commissionStatusLabel": "Commission status"
+  "commissionStatusLabel": "Commission status",
+  "dateUnavailable": "This date is already booked",
+  "eventDatePast": "Pick a future date",
+  "invalidGuestCount": "Guest count must be at least 1",
+  "alreadyReviewed": "You already reviewed this booking",
+  "reviewOnlyCompleted": "You can review after the vendor marks the booking complete",
+  "confirmCompleteTitle": "Mark as complete?",
+  "confirmCompleteBody": "The couple will be able to leave a review.",
+  "confirmDeclineTitle": "Decline this request?",
+  "completedRequests": "Completed",
+  "coupleName": "Couple",
+  "availabilityHint": "Tap a date to mark it booked or available.",
+  "legendBooked": "Booked",
+  "legendAvailable": "Available",
+  "bookingVendorLabel": "Vendor",
+  "cannotBookOwnListing": "You cannot book your own listing",
+  "reviewedBadge": "Reviewed",
+  "inboxGuestFallback": "Booking request",
+  "onboardingPhotosHint": "Add photos of your work (optional)",
+  "reviewMissingBooking": "Booking not found",
+  "noBookedDates": "No booked dates yet. Tap a day on the calendar."
 }

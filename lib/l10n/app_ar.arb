@@ -38,11 +38,35 @@
   "weddingDateLabel": "تاريخ الزفاف (اختياري)",
   "saveProfile": "حفظ",
   "tabDiscover": "اكتشف",
+  "tabHome": "الرئيسية",
+  "tabSearch": "البحث",
   "tabFavorites": "المفضلة",
   "tabBookings": "حجوزاتي",
   "tabInbox": "الوارد",
   "tabProfile": "حسابي",
   "searchHint": "ابحث عن مورّدين…",
+  "homeHeadline": "ابدئي رحلة زفافكِ المثالية",
+  "homeSearchHint": "ابحث عن مصور، صالة، أو خبيرة تجميل...",
+  "featuredVendors": "الموردون المميزون",
+  "recentlyAdded": "أضيف مؤخراً",
+  "startsFrom": "يبدأ من {price}",
+  "@startsFrom": {
+    "placeholders": {
+      "price": { "type": "String" }
+    }
+  },
+  "priceOnRequest": "الأسعار عند الطلب",
+  "bookingSubtitle": "الرجاء إدخال تفاصيل الحدث الخاص بك.",
+  "confirmRequest": "تأكيد الطلب",
+  "inboxSubtitle": "إدارة طلبات الحجز الخاصة بك",
+  "welcomeVendor": "مرحباً، {name}",
+  "@welcomeVendor": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "totalBookings": "إجمالي الحجوزات",
+  "notifications": "الإشعارات",
   "filters": "تصفية",
   "allCategories": "الكل",
   "priceMin": "أقل سعر",
@@ -155,5 +179,25 @@
   "quotedAmountDisplay": "عرض السعر",
   "commissionNoteVendor": "تدفع 10٪ من هذا المبلغ لدهر، ويُحصَّل خارج التطبيق.",
   "invalidQuotedAmount": "أدخل مبلغاً صالحاً بالدينار الليبي",
-  "commissionStatusLabel": "حالة العمولة"
+  "commissionStatusLabel": "حالة العمولة",
+  "dateUnavailable": "هذا التاريخ محجوز مسبقاً",
+  "eventDatePast": "اختر تاريخاً قادماً",
+  "invalidGuestCount": "يجب أن يكون عدد الضيوف 1 على الأقل",
+  "alreadyReviewed": "لقد قيّمت هذا الحجز مسبقاً",
+  "reviewOnlyCompleted": "يمكنك التقييم بعد أن يعلّم المورّد الحجز مكتملاً",
+  "confirmCompleteTitle": "تعليم كمكتمل؟",
+  "confirmCompleteBody": "سيتمكن الزوجان من ترك تقييم.",
+  "confirmDeclineTitle": "رفض هذا الطلب؟",
+  "completedRequests": "مكتملة",
+  "coupleName": "الزوجان",
+  "availabilityHint": "اضغط على يوم لتعليمه محجوزاً أو متاحاً.",
+  "legendBooked": "محجوز",
+  "legendAvailable": "متاح",
+  "bookingVendorLabel": "المورّد",
+  "cannotBookOwnListing": "لا يمكنك حجز عرضك الخاص",
+  "reviewedBadge": "تم التقييم",
+  "inboxGuestFallback": "طلب حجز",
+  "onboardingPhotosHint": "أضف صوراً لأعمالك (اختياري)",
+  "reviewMissingBooking": "الحجز غير موجود",
+  "noBookedDates": "لا توجد تواريخ محجوزة بعد. اضغط يوماً في التقويم."
 }

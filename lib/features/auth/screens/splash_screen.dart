@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
+import '../../../shared/widgets/widgets.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -35,7 +36,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       case AuthFlowStatus.needsProfile:
         context.go('/auth/profile-setup');
       case AuthFlowStatus.authenticated:
-        context.go('/discover');
+        context.go('/home');
       case AuthFlowStatus.unknown:
         break;
     }
@@ -47,24 +48,26 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     ref.listen(authProvider, (_, __) => _route());
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [AppColors.cream, AppColors.creamDark],
+          gradient: RadialGradient(
+            center: Alignment.center,
+            radius: 0.85,
+            colors: [Color(0xFF152033), AppColors.background],
           ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const DahrLogo(height: 120),
+            const SizedBox(height: 24),
             Text(
               l10n.appName,
-              style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                    color: AppColors.burgundy,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1.2,
+              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    color: AppColors.ink,
+                    fontWeight: FontWeight.w700,
                   ),
             ),
             const SizedBox(height: 12),

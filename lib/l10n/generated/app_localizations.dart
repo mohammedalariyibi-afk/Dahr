@@ -62,8 +62,7 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,8 +82,7 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -326,6 +323,18 @@ abstract class AppLocalizations {
   /// **'اكتشف'**
   String get tabDiscover;
 
+  /// No description provided for @tabHome.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرئيسية'**
+  String get tabHome;
+
+  /// No description provided for @tabSearch.
+  ///
+  /// In ar, this message translates to:
+  /// **'البحث'**
+  String get tabSearch;
+
   /// No description provided for @tabFavorites.
   ///
   /// In ar, this message translates to:
@@ -355,6 +364,78 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'ابحث عن مورّدين…'**
   String get searchHint;
+
+  /// No description provided for @homeHeadline.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابدئي رحلة زفافكِ المثالية'**
+  String get homeHeadline;
+
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'ابحث عن مصور، صالة، أو خبيرة تجميل...'**
+  String get homeSearchHint;
+
+  /// No description provided for @featuredVendors.
+  ///
+  /// In ar, this message translates to:
+  /// **'الموردون المميزون'**
+  String get featuredVendors;
+
+  /// No description provided for @recentlyAdded.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضيف مؤخراً'**
+  String get recentlyAdded;
+
+  /// No description provided for @startsFrom.
+  ///
+  /// In ar, this message translates to:
+  /// **'يبدأ من {price}'**
+  String startsFrom(String price);
+
+  /// No description provided for @priceOnRequest.
+  ///
+  /// In ar, this message translates to:
+  /// **'الأسعار عند الطلب'**
+  String get priceOnRequest;
+
+  /// No description provided for @bookingSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'الرجاء إدخال تفاصيل الحدث الخاص بك.'**
+  String get bookingSubtitle;
+
+  /// No description provided for @confirmRequest.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد الطلب'**
+  String get confirmRequest;
+
+  /// No description provided for @inboxSubtitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'إدارة طلبات الحجز الخاصة بك'**
+  String get inboxSubtitle;
+
+  /// No description provided for @welcomeVendor.
+  ///
+  /// In ar, this message translates to:
+  /// **'مرحباً، {name}'**
+  String welcomeVendor(String name);
+
+  /// No description provided for @totalBookings.
+  ///
+  /// In ar, this message translates to:
+  /// **'إجمالي الحجوزات'**
+  String get totalBookings;
+
+  /// No description provided for @notifications.
+  ///
+  /// In ar, this message translates to:
+  /// **'الإشعارات'**
+  String get notifications;
 
   /// No description provided for @filters.
   ///
@@ -1033,10 +1114,129 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'حالة العمولة'**
   String get commissionStatusLabel;
+
+  /// No description provided for @dateUnavailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'هذا التاريخ محجوز مسبقاً'**
+  String get dateUnavailable;
+
+  /// No description provided for @eventDatePast.
+  ///
+  /// In ar, this message translates to:
+  /// **'اختر تاريخاً قادماً'**
+  String get eventDatePast;
+
+  /// No description provided for @invalidGuestCount.
+  ///
+  /// In ar, this message translates to:
+  /// **'يجب أن يكون عدد الضيوف 1 على الأقل'**
+  String get invalidGuestCount;
+
+  /// No description provided for @alreadyReviewed.
+  ///
+  /// In ar, this message translates to:
+  /// **'لقد قيّمت هذا الحجز مسبقاً'**
+  String get alreadyReviewed;
+
+  /// No description provided for @reviewOnlyCompleted.
+  ///
+  /// In ar, this message translates to:
+  /// **'يمكنك التقييم بعد أن يعلّم المورّد الحجز مكتملاً'**
+  String get reviewOnlyCompleted;
+
+  /// No description provided for @confirmCompleteTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'تعليم كمكتمل؟'**
+  String get confirmCompleteTitle;
+
+  /// No description provided for @confirmCompleteBody.
+  ///
+  /// In ar, this message translates to:
+  /// **'سيتمكن الزوجان من ترك تقييم.'**
+  String get confirmCompleteBody;
+
+  /// No description provided for @confirmDeclineTitle.
+  ///
+  /// In ar, this message translates to:
+  /// **'رفض هذا الطلب؟'**
+  String get confirmDeclineTitle;
+
+  /// No description provided for @completedRequests.
+  ///
+  /// In ar, this message translates to:
+  /// **'مكتملة'**
+  String get completedRequests;
+
+  /// No description provided for @coupleName.
+  ///
+  /// In ar, this message translates to:
+  /// **'الزوجان'**
+  String get coupleName;
+
+  /// No description provided for @availabilityHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'اضغط على يوم لتعليمه محجوزاً أو متاحاً.'**
+  String get availabilityHint;
+
+  /// No description provided for @legendBooked.
+  ///
+  /// In ar, this message translates to:
+  /// **'محجوز'**
+  String get legendBooked;
+
+  /// No description provided for @legendAvailable.
+  ///
+  /// In ar, this message translates to:
+  /// **'متاح'**
+  String get legendAvailable;
+
+  /// No description provided for @bookingVendorLabel.
+  ///
+  /// In ar, this message translates to:
+  /// **'المورّد'**
+  String get bookingVendorLabel;
+
+  /// No description provided for @cannotBookOwnListing.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا يمكنك حجز عرضك الخاص'**
+  String get cannotBookOwnListing;
+
+  /// No description provided for @reviewedBadge.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم التقييم'**
+  String get reviewedBadge;
+
+  /// No description provided for @inboxGuestFallback.
+  ///
+  /// In ar, this message translates to:
+  /// **'طلب حجز'**
+  String get inboxGuestFallback;
+
+  /// No description provided for @onboardingPhotosHint.
+  ///
+  /// In ar, this message translates to:
+  /// **'أضف صوراً لأعمالك (اختياري)'**
+  String get onboardingPhotosHint;
+
+  /// No description provided for @reviewMissingBooking.
+  ///
+  /// In ar, this message translates to:
+  /// **'الحجز غير موجود'**
+  String get reviewMissingBooking;
+
+  /// No description provided for @noBookedDates.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا توجد تواريخ محجوزة بعد. اضغط يوماً في التقويم.'**
+  String get noBookedDates;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -1045,25 +1245,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'ar':
-      return AppLocalizationsAr();
-    case 'en':
-      return AppLocalizationsEn();
+    case 'ar': return AppLocalizationsAr();
+    case 'en': return AppLocalizationsEn();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }

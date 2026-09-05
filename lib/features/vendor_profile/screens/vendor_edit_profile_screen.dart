@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/supabase/supabase_client.dart';
@@ -165,7 +166,12 @@ class _VendorEditProfileScreenState
               onAction: () => context.push('/vendor-tools/onboarding'),
             );
           }
-          _hydrate(vendor);
+          if (!_loaded) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted && !_loaded) setState(() => _hydrate(vendor));
+            });
+            return const Center(child: CircularProgressIndicator());
+          }
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -250,8 +256,10 @@ class _VendorEditProfileScreenState
                   decoration: InputDecoration(labelText: l10n.categoryLabel),
                   items: VendorCategory.values
                       .map(
-                        (c) =>
-                            DropdownMenuItem(value: c, child: Text(c.name)),
+                        (c) => DropdownMenuItem(
+                          value: c,
+                          child: Text(localizedCategory(l10n, c)),
+                        ),
                       )
                       .toList(),
                   onChanged: (v) {

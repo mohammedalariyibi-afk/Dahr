@@ -1,10 +1,15 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../../core/l10n/category_labels.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/supabase/supabase_client.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../providers/vendor_provider.dart';
 
@@ -27,6 +32,8 @@ class _VendorOnboardingScreenState
   VendorCategory _category = VendorCategory.other;
   CityCode _city = CityCode.tripoli;
   bool _loading = false;
+  bool _hydrated = false;
+  final _pendingPhotos = <Uint8List>[];
 
   @override
   void dispose() {
@@ -37,6 +44,37 @@ class _VendorOnboardingScreenState
     _maxCtrl.dispose();
     _servicesCtrl.dispose();
     super.dispose();
+  }
+
+  void _hydrateIfNeeded(VendorProfile? existing) {
+    if (_hydrated || existing == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _hydrated) return;
+      setState(() {
+        _nameCtrl.text = existing.businessName;
+        _descCtrl.text = existing.description;
+        _waCtrl.text = existing.whatsappNumber ?? '';
+        _minCtrl.text = existing.priceMin?.toString() ?? '';
+        _maxCtrl.text = existing.priceMax?.toString() ?? '';
+        _servicesCtrl.text = existing.services.join(', ');
+        _category = existing.category;
+        _city = existing.city;
+        _hydrated = true;
+      });
+    });
+  }
+
+  Future<void> _queuePhoto() async {
+    final picker = ImagePicker();
+    final file = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1600,
+      imageQuality: 75,
+    );
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
+    if (!mounted) return;
+    setState(() => _pendingPhotos.add(bytes));
   }
 
   Future<void> _submit() async {
@@ -54,14 +92,13 @@ class _VendorOnboardingScreenState
     }
     setState(() => _loading = true);
     try {
-      // Ensure role is vendor
       await ref.read(authProvider.notifier).setRole(UserRole.vendor);
       final services = _servicesCtrl.text
           .split(',')
           .map((s) => s.trim())
           .where((s) => s.isNotEmpty)
           .toList();
-      await DahrSupabase.client.from('vendor_profiles').upsert({
+      final row = await DahrSupabase.client.from('vendor_profiles').upsert({
         'profile_id': auth.session!.user.id,
         'business_name': _nameCtrl.text.trim(),
         'category': _category.name,
@@ -73,7 +110,16 @@ class _VendorOnboardingScreenState
             ? null
             : _waCtrl.text.trim(),
         'services': services,
-      }, onConflict: 'profile_id');
+      }, onConflict: 'profile_id').select().single();
+      final vendorId = row['id'] as String;
+      for (var i = 0; i < _pendingPhotos.length; i++) {
+        await uploadVendorPhoto(
+          vendorId: vendorId,
+          userId: auth.session!.user.id,
+          bytes: _pendingPhotos[i],
+          sortOrder: i,
+        );
+      }
       ref.invalidate(myVendorProfileProvider);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,6 +140,8 @@ class _VendorOnboardingScreenState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final existing = ref.watch(myVendorProfileProvider).valueOrNull;
+    _hydrateIfNeeded(existing);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vendorOnboardingTitle)),
@@ -111,7 +159,12 @@ class _VendorOnboardingScreenState
               value: _category,
               decoration: InputDecoration(labelText: l10n.categoryLabel),
               items: VendorCategory.values
-                  .map((c) => DropdownMenuItem(value: c, child: Text(c.name)))
+                  .map(
+                    (c) => DropdownMenuItem(
+                      value: c,
+                      child: Text(localizedCategory(l10n, c)),
+                    ),
+                  )
                   .toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _category = v);
@@ -162,6 +215,62 @@ class _VendorOnboardingScreenState
             TextFormField(
               controller: _servicesCtrl,
               decoration: InputDecoration(labelText: l10n.servicesLabel),
+            ),
+            const SizedBox(height: 20),
+            Text(l10n.onboardingPhotosHint),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ..._pendingPhotos.asMap().entries.map(
+                  (e) => Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.memory(
+                          e.value,
+                          width: 88,
+                          height: 88,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        top: 2,
+                        right: 2,
+                        child: IconButton(
+                          iconSize: 16,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black54,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.all(4),
+                            minimumSize: const Size(24, 24),
+                          ),
+                          onPressed: () => setState(
+                            () => _pendingPhotos.removeAt(e.key),
+                          ),
+                          icon: const Icon(Icons.close),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                OutlinedButton(
+                  onPressed: _loading ? null : _queuePhoto,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(88, 88),
+                    foregroundColor: AppColors.burgundy,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.add_a_photo_outlined),
+                      const SizedBox(height: 4),
+                      Text(l10n.addPhoto, textAlign: TextAlign.center),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 28),
             FilledButton(

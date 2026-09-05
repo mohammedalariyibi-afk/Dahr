@@ -10,6 +10,7 @@ import '../../features/auth/screens/role_select_screen.dart';
 import '../../features/auth/screens/profile_setup_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../../features/discovery/screens/discover_home_screen.dart';
+import '../../features/discovery/screens/home_feed_screen.dart';
 import '../../features/discovery/screens/home_shell.dart';
 import '../../features/favorites/screens/favorites_screen.dart';
 import '../../features/booking/screens/booking_request_screen.dart';
@@ -65,7 +66,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         // Leave /auth/otp alone so the screen can honor returnTo after verify.
         if (onSplash || onLanguage || onLogin) {
           return _safeReturnTo(state.uri.queryParameters['from']) ??
-              '/discover';
+              '/home';
         }
       }
 
@@ -126,10 +127,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) => HomeShell(child: child),
         routes: [
           GoRoute(
-            path: '/discover',
+            path: '/home',
+            pageBuilder: (_, __) => const NoTransitionPage(
+              child: HomeFeedScreen(),
+            ),
+          ),
+          GoRoute(
+            path: '/search',
             pageBuilder: (_, __) => const NoTransitionPage(
               child: DiscoverHomeScreen(),
             ),
+          ),
+          GoRoute(
+            path: '/discover',
+            redirect: (_, __) => '/home',
           ),
           GoRoute(
             path: '/favorites',

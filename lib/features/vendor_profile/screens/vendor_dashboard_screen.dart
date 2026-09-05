@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/providers/auth_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import '../../../shared/widgets/widgets.dart';
@@ -16,6 +17,7 @@ class VendorDashboardScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final statsAsync = ref.watch(vendorDashboardStatsProvider);
     final vendorAsync = ref.watch(myVendorProfileProvider);
+    final profileName = ref.watch(authProvider).profile?.fullName;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vendorDashboard)),
@@ -26,18 +28,25 @@ class VendorDashboardScreen extends ConsumerWidget {
           onRetry: () => ref.invalidate(vendorDashboardStatsProvider),
         ),
         data: (stats) {
+          final name = vendorAsync.valueOrNull?.businessName ??
+              profileName ??
+              l10n.appName;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              Text(
+                l10n.welcomeVendor(name),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: AppColors.glacier,
+                    ),
+              ),
+              const SizedBox(height: 12),
               vendorAsync.maybeWhen(
                 data: (v) {
                   if (v != null && !v.isApproved) {
-                    return Card(
-                      color: AppColors.creamDark,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text(l10n.onboardingPending),
-                      ),
+                    return GlassPanel(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(l10n.onboardingPending),
                     );
                   }
                   return const SizedBox.shrink();
@@ -56,9 +65,19 @@ class VendorDashboardScreen extends ConsumerWidget {
                 icon: Icons.hourglass_empty,
               ),
               _StatTile(
+                label: l10n.totalBookings,
+                value: '${stats.accepted + stats.completed}',
+                icon: Icons.event_available_outlined,
+              ),
+              _StatTile(
                 label: l10n.acceptedRequests,
                 value: '${stats.accepted}',
                 icon: Icons.check_circle_outline,
+              ),
+              _StatTile(
+                label: l10n.completedRequests,
+                value: '${stats.completed}',
+                icon: Icons.task_alt_outlined,
               ),
               _StatTile(
                 label: l10n.unpaidCommissionOwed,
@@ -143,14 +162,14 @@ class _StatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: Icon(icon, color: AppColors.burgundy),
+        leading: Icon(icon, color: AppColors.glacier),
         title: Text(label),
         trailing: FittedBox(
           fit: BoxFit.scaleDown,
           child: Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: AppColors.burgundy,
+                  color: AppColors.glacier,
                   fontWeight: FontWeight.w800,
                 ),
           ),
