@@ -5,10 +5,20 @@ import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/", label: "Dashboard" },
-  { href: "/vendors", label: "Vendors", badge: "pendingVendors" as const },
+  {
+    href: "/vendors",
+    label: "Vendors",
+    badge: "pendingVendors" as const,
+    badgeLabel: "pending",
+  },
   { href: "/commissions", label: "Commissions" },
   { href: "/settings", label: "Settings" },
-  { href: "/reports", label: "Reports", badge: "openReports" as const },
+  {
+    href: "/reports",
+    label: "Reports",
+    badge: "openReports" as const,
+    badgeLabel: "open",
+  },
 ];
 
 export function AdminNav({
@@ -22,7 +32,7 @@ export function AdminNav({
   const badges = { pendingVendors, openReports };
 
   return (
-    <nav className="flex items-center gap-1">
+    <nav aria-label="Main navigation" className="flex items-center gap-1">
       {links.map((link) => {
         const active =
           link.href === "/"
@@ -33,6 +43,7 @@ export function AdminNav({
           <Link
             key={link.href}
             href={link.href}
+            aria-current={active ? "page" : undefined}
             className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition ${
               active
                 ? "bg-[var(--burgundy-soft)] font-medium text-[var(--burgundy)]"
@@ -42,7 +53,11 @@ export function AdminNav({
             {link.label}
             {count > 0 ? (
               <span className="rounded-full bg-[var(--burgundy)] px-1.5 py-0.5 text-[10px] font-medium leading-none text-[var(--cream)] tabular-nums">
-                {count}
+                <span className="sr-only">
+                  {" "}
+                  ({count} {link.badgeLabel})
+                </span>
+                <span aria-hidden="true">{count}</span>
               </span>
             ) : null}
           </Link>
