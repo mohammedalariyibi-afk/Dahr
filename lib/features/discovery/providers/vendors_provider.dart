@@ -173,12 +173,12 @@ List<VendorProfile> applyVendorRatingRows(
 ) {
   final sums = <String, double>{};
   final counts = <String, int>{};
+  // Bolt Optimization: Read directly from raw Map to avoid allocating intermediate Map copies per row.
   for (final raw in rows) {
     if (raw is! Map) continue;
-    final row = Map<String, dynamic>.from(raw);
-    final id = row['vendor_id'] as String?;
+    final id = raw['vendor_id'] as String?;
     if (id == null || id.isEmpty) continue;
-    final rating = CommissionMath.parseLyd(row['rating']);
+    final rating = CommissionMath.parseLyd(raw['rating']);
     if (rating == null) continue;
     sums[id] = (sums[id] ?? 0) + rating;
     counts[id] = (counts[id] ?? 0) + 1;
@@ -257,10 +257,11 @@ Future<List<Review>> _withConsumerNames(List<Review> reviews) async {
       .inFilter('id', ids);
 
   final names = <String, String>{};
+  // Bolt Optimization: Read directly from raw Map to avoid allocating intermediate Map copies per row.
   for (final raw in rows as List) {
-    final row = Map<String, dynamic>.from(raw as Map);
-    final id = row['id'] as String?;
-    final name = (row['full_name'] as String?)?.trim();
+    if (raw is! Map) continue;
+    final id = raw['id'] as String?;
+    final name = (raw['full_name'] as String?)?.trim();
     if (id != null && name != null && name.isNotEmpty) {
       names[id] = name;
     }

@@ -237,13 +237,13 @@ List<BookingRequest> applyBookingPartyContactRows(
 ) {
   final names = <String, String>{};
   final phones = <String, String>{};
+  // Bolt Optimization: Read directly from raw Map to avoid allocating intermediate Map copies per row.
   for (final raw in rows) {
     if (raw is! Map) continue;
-    final row = Map<String, dynamic>.from(raw);
-    final id = row['id'] as String?;
+    final id = raw['id'] as String?;
     if (id == null) continue;
-    final name = (row['full_name'] as String?)?.trim();
-    final phone = (row['phone'] as String?)?.trim();
+    final name = (raw['full_name'] as String?)?.trim();
+    final phone = (raw['phone'] as String?)?.trim();
     if (name != null && name.isNotEmpty) names[id] = name;
     if (phone != null && phone.isNotEmpty) phones[id] = phone;
   }
