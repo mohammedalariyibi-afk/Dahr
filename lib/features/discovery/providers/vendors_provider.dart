@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/supabase/supabase_client.dart';
+import '../../../core/supabase/vendor_queries.dart';
 
 class VendorFilters {
   const VendorFilters({
@@ -113,7 +114,7 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
     final filters = ref.read(vendorFiltersProvider);
     var query = DahrSupabase.client
         .from('vendor_profiles')
-        .select('*, vendor_photos(*)')
+        .select(kVendorPublicSelect)
         .eq('is_approved', true);
 
     if (filters.category != null) {
@@ -141,7 +142,7 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
     final vendors = (rows as List)
         .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
-    return attachVendorRatings(vendors);
+    return attachVendorContact(await attachVendorRatings(vendors));
   }
 
   Future<void> refresh() async {
@@ -200,7 +201,7 @@ final vendorDetailProvider =
     FutureProvider.family<VendorProfile, String>((ref, id) async {
   final row = await DahrSupabase.client
       .from('vendor_profiles')
-      .select('*, vendor_photos(*)')
+      .select(kVendorPublicSelect)
       .eq('id', id)
       .maybeSingle();
   if (row == null) throw StateError('Vendor not found');
@@ -209,7 +210,8 @@ final vendorDetailProvider =
 
   final vendor = VendorProfile.fromJson(Map<String, dynamic>.from(row));
   final withRatings = await attachVendorRatings([vendor]);
-  return withRatings.first;
+  final withContact = await attachVendorContact(withRatings);
+  return withContact.first;
 });
 
 /// Vendors already viewed on this run of the app.
