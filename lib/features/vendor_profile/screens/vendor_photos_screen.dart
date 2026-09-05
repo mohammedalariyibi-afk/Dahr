@@ -114,7 +114,8 @@ class VendorPhotosScreen extends ConsumerWidget {
                       // The new order is applied locally first, so a failed
                       // write would otherwise leave the cover photo looking
                       // changed while `sort_order` still says otherwise.
-                      onReorderItem: (oldIndex, newIndex) => _runWrite(
+                      // ignore: deprecated_member_use
+                      onReorder: (oldIndex, newIndex) => _runWrite(
                         context,
                         ref,
                         () => ref
