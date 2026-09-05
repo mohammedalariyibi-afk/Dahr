@@ -207,21 +207,39 @@ final transferNotesByBookingProvider = FutureProvider.family<
 /// Couple name + WhatsApp for the vendor inbox.
 ///
 /// `profiles` RLS only exposes your own row. Names and phones for a shared
-/// booking live in the authenticated-only `booking_party_contact` view.
+/// booking live in the authenticated-only `booking_party_contact` view
+/// (on live as `20260904172239`; repo file is `20260904120000`). Lookup
+/// still fails soft: a schema-cache miss or PostgREST error must not take
+/// down the inbox — bookings render without name/phone.
 Future<List<BookingRequest>> attachBookingPartyContacts(
   List<BookingRequest> bookings,
 ) async {
   if (bookings.isEmpty) return bookings;
-  final ids = {for (final b in bookings) b.consumerId}.toList();
-  final rows = await DahrSupabase.client
-      .from(BookingSelect.partyContactTable)
-      .select(BookingSelect.partyContactSelect)
-      .inFilter('id', ids);
+  try {
+    final ids = {for (final b in bookings) b.consumerId}.toList();
+    final rows = await DahrSupabase.client
+        .from(BookingSelect.partyContactTable)
+        .select(BookingSelect.partyContactSelect)
+        .inFilter('id', ids);
+    return applyBookingPartyContactRows(bookings, rows as List);
+  } catch (_) {
+    // Contact is optional enrichment. Fail soft on PostgREST/schema errors
+    // so the inbox never hard-crashes for a missing/stale schema cache.
+    return bookings;
+  }
+}
 
+/// Merge couple name/phone onto inbox rows. Empty or missing fields stay
+/// unset so the UI can show the unknown-contact fallback.
+List<BookingRequest> applyBookingPartyContactRows(
+  List<BookingRequest> bookings,
+  Iterable<dynamic> rows,
+) {
   final names = <String, String>{};
   final phones = <String, String>{};
-  for (final raw in rows as List) {
-    final row = Map<String, dynamic>.from(raw as Map);
+  for (final raw in rows) {
+    if (raw is! Map) continue;
+    final row = Map<String, dynamic>.from(raw);
     final id = row['id'] as String?;
     if (id == null) continue;
     final name = (row['full_name'] as String?)?.trim();
@@ -237,4 +255,25 @@ Future<List<BookingRequest>> attachBookingPartyContacts(
         phone: phones[booking.consumerId],
       ),
   ];
+}
+
+/// PostgREST / schema errors from `booking_party_contact` (missing view,
+/// schema-cache miss, undefined table). Network/auth failures that look
+/// like PostgREST are also fail-soft: the inbox already has the bookings.
+bool isPartyContactLookupFailure(Object error) {
+  final text = error.toString().toLowerCase();
+  const needles = [
+    'postgrest',
+    'pgrst',
+    'pgrst204',
+    'pgrst205',
+    '42p01',
+    'schema cache',
+    'undefined_table',
+    'does not exist',
+    'could not find the table',
+    'could not find the relation',
+    'booking_party_contact',
+  ];
+  return needles.any(text.contains);
 }

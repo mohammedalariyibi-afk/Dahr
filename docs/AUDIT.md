@@ -20,7 +20,7 @@ The remaining **ship-blocking** gap was **booking integrity at the database**. F
 3. Accept two couples for the same date (date guard only checked the vendor calendar, and only on INSERT).
 4. Reassign `consumer_id` / `vendor_id` / `event_date` after insert.
 
-Those four are **fixed in this change** (`20260903230000_booking_integrity_guards.sql` plus matching Flutter guards). **Apply that migration to Dahr LY** (`supabase db push`) before Saturday store submit. Do **not** re-push the already-live overnight / freeze-admin files.
+Those four are **fixed in this change** (`20260903230000_booking_integrity_guards.sql` plus matching Flutter guards). **Already on live Dahr LY** (Syber confirmed 4 September 2026; live version `20260904172502` — dashboard timestamp, not the git filename). Do **not** re-push it, and do **not** re-push the already-live overnight / freeze-admin files.
 
 Nothing in this audit found a way for a couple to become `admin`, leak the service role, or bypass admin RLS from the dashboard.
 
@@ -129,7 +129,7 @@ Severity is for a published marketplace whose API key is in the client.
 | iPad 13″ shots **or** iPhone-only target | Operator choice (`STORE.md`) |
 | Play feature graphic 1024×500 | Called out as optional/Designer |
 | Flutter CI | Analyze + test, no secrets |
-| **This integrity migration on Dahr LY** | **Required before submit** |
+| **This integrity migration on Dahr LY** | **On live** (Syber, live version `20260904172502`; git file is `20260903230000`) |
 | Signing keystore / `.p12` | Local to Mohammed — correctly not in git |
 
 Operator runbook: [`docs/store-submit-checklist.md`](store-submit-checklist.md).
@@ -138,20 +138,22 @@ Operator runbook: [`docs/store-submit-checklist.md`](store-submit-checklist.md).
 
 ## Apply on Dahr LY
 
-```bash
-supabase link --project-ref cccusktgxrizfwpixddu
-supabase db push   # applies the three 2026090[34] files that are not on live yet
-```
+SQL for every file in `supabase/migrations` is already on live, including
+`booking_integrity_guards` and `booking_party_contact` (Syber confirmed
+4 September 2026). Live `schema_migrations` versions are dashboard timestamps
+and do **not** match git filenames:
 
-The three not yet on live: `20260903230000_booking_integrity_guards`,
-`20260904000000_admin_audit_log_and_atomic_moderation`, and
-`20260904010000_guest_read_policies_without_helper_execute`. The last one is
-what makes signed-out Discover work at all (F1), so it is the one to push even
-if time runs out.
+| Repo file | Live version |
+|-----------|--------------|
+| `20260903230000_booking_integrity_guards` | `20260904172502` |
+| `20260904120000_booking_party_contact` | `20260904172239` |
 
-If `CREATE UNIQUE INDEX booking_requests_one_held_date` fails, two accepted/completed rows already share a vendor date — inspect and decline/move one, then retry.
+Do **not** `db push` those files. History still needs a one-time
+`supabase migration repair` so automatic deploys do not try to re-apply
+already-live SQL. Commands: [`docs/supabase-github.md`](supabase-github.md).
 
-Do **not** re-apply `20260903184000_overnight_security_hardening` or `20260903190000_freeze_admin_role_and_private_profile_rows`.
+Do **not** re-apply `20260903184000_overnight_security_hardening` or
+`20260903190000_freeze_admin_role_and_private_profile_rows`.
 
 ---
 
@@ -190,9 +192,14 @@ reasoned about the SQL and the Dart instead of running them.
 
 - **PostgREST caps a request at 1000 rows.** The admin dashboard derives the booking count, the category and status breakdowns, and the unpaid-commission total from unbounded `select`s, and the vendors / reports / commissions pages have no pagination (vendor search is also in-memory over that capped fetch). At launch scale — 15 vendors, 3 bookings — none of this can bite, but past 1000 rows the numbers under-report silently. Fixing it properly means SQL aggregates or a dashboard RPC plus pagination on three pages, which is not a change to make the night before a submit.
 - The vendors page tab counts are computed after the search filter, which reads oddly in isolation but is consistent: the tab links preserve `q`, so the count describes what clicking it shows.
-- The language toggle only writes `SharedPreferences`; `profiles.locale` is set at profile setup and never updated afterwards.
-- The favorites list skips the ratings roll-up, so cards there show no stars while Discover does.
 - `booking_protect_commission` and `booking_reject_if_date_booked` are both `BEFORE INSERT OR UPDATE` with no explicit order. Postgres fires them alphabetically, which happens to be the order the accept path needs; renaming either trigger would change behaviour silently.
+
+Closed in #34 (no longer open):
+
+- Language toggle now writes `profiles.locale` after `SharedPreferences` (`AuthNotifier.updateLocale` from Profile).
+- Favorites reuses Discover’s `attachVendorRatings` roll-up.
+
+Closed after #34 (this change): Discover/Favorites still crashed when review `rating` arrived as quoted NUMERIC (`as num`). Ratings now go through `CommissionMath.parseLyd`. Vendor inbox still fails soft if `booking_party_contact` lookup throws (view **is** on live as `20260904172239`; the catch is defensive).
 
 ### How this round was verified
 
@@ -212,7 +219,8 @@ equivalent of `supabase db reset`. Guards were then exercised as those roles:
 3. `storage.objects` still has a `vendor_photos_storage_admin_all` policy that calls `is_admin()`. Public photo downloads do not go through it, and the app only lists objects while signed in, so it is not F1 — but a future anonymous `storage.list` would hit the same wall.
 4. Audit-log retention / a dashboard view for it (rows are written but nothing renders them yet).
 5. Archive commissions before an account deletion cascade (I2).
-6. Write `profiles.locale` when the language toggle changes, and reuse the ratings roll-up on the favorites list.
+
+`profiles.locale` on language toggle and the favorites ratings roll-up shipped in #34.
 
 ---
 

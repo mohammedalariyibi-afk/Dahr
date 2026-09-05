@@ -36,10 +36,9 @@ Branches > `main` > Require status checks to pass**, then select
 
 ## 2. One-time: reconcile the Dahr LY migration history
 
-Every migration in this repo except `20260903230000_booking_integrity_guards`
-and `20260904120000_booking_party_contact` is already live, but the live ones
-were applied through the dashboard, so Supabase recorded different version
-numbers. Nothing in `supabase_migrations.schema_migrations` matches a filename
+Every migration in this repo is already live, but they were applied
+through the dashboard, so Supabase recorded different version numbers.
+Nothing in `supabase_migrations.schema_migrations` matches a filename
 in `supabase/migrations`:
 
 | In `supabase/migrations` | Recorded on Dahr LY |
@@ -52,11 +51,11 @@ in `supabase/migrations`:
 | `20260903184000_overnight_security_hardening` | `20260903164203_overnight_security_hardening` |
 | `20260903190000_freeze_admin_role_and_private_profile_rows` | `20260903170228_freeze_admin_role_and_close_profile_pii` + `20260903170257_move_public_profile_filter_to_private_function` |
 | `20260903210000_scope_booking_updates_and_insert_only_reviews` | `20260903211019_scope_booking_updates_and_insert_only_reviews` |
-| `20260903230000_booking_integrity_guards` | *(genuinely not applied)* |
+| `20260903230000_booking_integrity_guards` | `20260904172502_booking_integrity_guards` (SQL applied; timestamp differs) |
 | `20260904000000_admin_audit_log_and_atomic_moderation` | `20260904104425_admin_audit_log_and_atomic_moderation` |
 | `20260904005000_customer_pays_dahr_fee` | `20260904105445_customer_pays_dahr_fee` |
 | `20260904010000_guest_read_policies_without_helper_execute` | `20260904104408_guest_read_policies_without_helper_execute` |
-| `20260904120000_booking_party_contact` | *(genuinely not applied)* |
+| `20260904120000_booking_party_contact` | `20260904172239_booking_party_contact` (SQL applied; timestamp differs) |
 
 `supabase migration repair` only rewrites that history table; it runs no SQL
 and changes no schema. Point the repo's filenames at what is actually live:
@@ -70,39 +69,31 @@ supabase link --project-ref cccusktgxrizfwpixddu
 supabase migration repair --linked --status reverted \
   20260903000003 20260903111958 20260903115709 20260903124356 \
   20260903164203 20260903170228 20260903170257 20260903211019 \
-  20260904104408 20260904104425 20260904105445
+  20260904104408 20260904104425 20260904105445 \
+  20260904172239 20260904172502
 
 # Record the repo's versions as applied, since their SQL is already live.
 supabase migration repair --linked --status applied \
   20260328000001 20260903000001 20260903120000 20260903140000 \
-  20260903184000 20260903190000 20260903210000 20260904000000 \
-  20260904005000 20260904010000
+  20260903184000 20260903190000 20260903210000 20260903230000 \
+  20260904000000 20260904005000 20260904010000 20260904120000
 
 supabase migration list --linked
 ```
 
 After that last command, every row should show the same version in the Local
-and Remote columns, with `20260903230000_booking_integrity_guards` and
-`20260904120000_booking_party_contact` local-only. Do **not** mark
-`20260904120000` applied — that SQL is not on Dahr LY yet.
+and Remote columns. Live already has the SQL for `booking_integrity_guards`
+and `booking_party_contact` (Syber confirmed, 4 September 2026) under
+dashboard timestamps `20260904172502` and `20260904172239`. Repair only
+rewrites `schema_migrations`; it does not run SQL. Mark the **repo**
+filenames applied after reverting those live timestamps.
 
-### Then apply the migrations that are missing
+### Do not re-push SQL that is already live
 
-`booking_party_contact` is newer than the last applied version, so a plain
-`db push` will apply it. `booking_integrity_guards` is older, so a plain
-`db push` skips it. It needs `--include-all` (which also picks up the newer
-file if it is still pending):
-
-```bash
-supabase db push --linked --dry-run --include-all   # expect integrity guards + booking_party_contact
-supabase db push --linked --include-all
-```
-
-`booking_integrity_guards` adds the availability held-date guard
-(`protect_availability_held_dates` and its trigger) and the
-`booking_requests_one_held_date` / `idx_booking_requests_vendor_event_active`
-indexes. `booking_party_contact` adds the authenticated-only couple name/phone
-view the vendor inbox uses. None of them exist on Dahr LY today.
+There is nothing left to `db push` for those two files. A push (even
+`--include-all`) would try to re-create objects that already exist on Dahr LY
+and fail. History repair is the remaining operator step; it is not a schema
+change.
 
 ## 3. Automatic deploys: pick one
 

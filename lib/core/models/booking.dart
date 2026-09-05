@@ -83,7 +83,7 @@ class BookingRequest {
       vendorId: json['vendor_id'] as String,
       consumerId: json['consumer_id'] as String,
       eventDate: DateTime.parse(json['event_date'] as String),
-      guestCount: (json['guest_count'] as num?)?.toInt(),
+      guestCount: CommissionMath.parseLyd(json['guest_count'])?.toInt(),
       message: (json['message'] as String?) ?? '',
       status: BookingStatus.fromString(json['status'] as String?),
       quotedAmountLyd: CommissionMath.parseLyd(json['quoted_amount_lyd']),

@@ -243,6 +243,37 @@ void main() {
       expect(booking.showsCouplePlatformFee, isTrue);
     });
 
+    test('quoted guest_count parses instead of throwing', () {
+      final booking = BookingRequest.fromJson({
+        'id': 'b1',
+        'vendor_id': 'v1',
+        'consumer_id': 'c1',
+        'event_date': '2030-06-15',
+        'status': 'pending',
+        'guest_count': '120',
+      });
+      expect(booking.guestCount, 120);
+    });
+
+    test('quoted review rating on an embed does not throw', () {
+      final booking = BookingRequest.fromJson({
+        'id': 'b1',
+        'vendor_id': 'v1',
+        'consumer_id': 'c1',
+        'event_date': '2030-06-15',
+        'status': 'completed',
+        'reviews': {
+          'id': 'r1',
+          'vendor_id': 'v1',
+          'consumer_id': 'c1',
+          'booking_request_id': 'b1',
+          'rating': '5',
+        },
+      });
+      expect(booking.review?.rating, 5);
+      expect(booking.canLeaveReview, isFalse);
+    });
+
     test('pending booking has no quote or commission', () {
       final booking = BookingRequest.fromJson({
         'id': 'b1',

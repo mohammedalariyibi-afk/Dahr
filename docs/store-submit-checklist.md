@@ -6,7 +6,7 @@ Ship target: **Saturday 5 Sep 2026** (Africa/Tripoli). Screenshots and listing c
 
 1. Pull latest `main`.
 2. Confirm `.env` / `admin/.env.local` point at **Dahr LY** (`cccusktgxrizfwpixddu`) with **anon key only** (never commit; never put `service_role` in the app).
-3. **Push the pending migrations** — `supabase link --project-ref cccusktgxrizfwpixddu && supabase db push`. Three files are not on live yet (booking integrity, admin audit log, guest read policies). The guest-read one is required: without it a signed-out user gets an error instead of Discover. Do **not** re-push the already-live overnight / freeze-admin files.
+3. **Do not `db push`.** Every migration file is already on live Dahr LY, including booking integrity and `booking_party_contact` (Syber confirmed; live versions `20260904172502` / `20260904172239` — timestamps differ from git filenames). History still needs a one-time `supabase migration repair` before automatic deploys; see [`docs/supabase-github.md`](supabase-github.md). Do **not** re-push overnight / freeze-admin files.
 4. **Smoke the signed-out app** — open Discover without signing in and confirm listings, a vendor page, its photos, and its reviews (with author names) all load. This is the first screen a store reviewer sees.
 5. Preferred: one **quoted-booking smoke** (accept with amount → commission fields). Do not block the whole submit on this if time is tight — note result in the room.
 6. Privacy / terms public URLs must resolve:
@@ -65,7 +65,7 @@ Upload order suggestion: email OTP → OTP verify → Discover → vendor detail
 - Commit `.env` / service role keys
 - Commit `DEVELOPMENT_TEAM`, Apple team ids, `.p12`, or provisioning profiles (leave Team unset in the pbxproj)
 - `db push` migrations already live on Dahr LY (e.g. booking/review scope from #16)
-- Re-grant `is_admin` / `owns_vendor` to `anon` to "fix" a guest read — that is what the guest-read migration avoids. **Do** push `20260903230000_booking_integrity_guards.sql` once if it is not on Dahr LY yet.
+- Re-grant `is_admin` / `owns_vendor` to `anon` to "fix" a guest read — that is what the guest-read migration avoids. Do **not** re-push `booking_integrity_guards` or `booking_party_contact`; both are already on live (different `schema_migrations` versions).
 - Use Sidra LY or the paused older `dahr` Supabase project
 
 ## Room signal
