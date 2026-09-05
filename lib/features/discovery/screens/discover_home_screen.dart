@@ -309,6 +309,9 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
                     : null,
               ),
               builder: (context, vendors) {
+                // Bolt Optimization: Extract set outside builder loop to avoid
+                // evaluating AsyncValue pattern matching and allocating closures per card.
+                final favoriteIds = favIds.valueOrNull ?? const <String>{};
                 return RefreshIndicator(
                   onRefresh: () =>
                       ref.read(vendorsProvider.notifier).refresh(),
@@ -319,10 +322,7 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, i) {
                       final v = vendors[i];
-                      final isFav = favIds.maybeWhen(
-                        data: (ids) => ids.contains(v.id),
-                        orElse: () => false,
-                      );
+                      final isFav = favoriteIds.contains(v.id);
                       return VendorCard(
                         vendor: v,
                         isFavorite: isFav,

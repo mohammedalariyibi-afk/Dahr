@@ -1,0 +1,3 @@
+## 2026-03-30 - Map allocations in DB response rollups and Riverpod AsyncValue in list builders
+**Learning:** PostgREST rows returned in Dart as `List<dynamic>` already contain `Map<String, dynamic>` items. Calling `Map<String, dynamic>.from(raw)` inside loops creates unnecessary intermediate `Map` allocations per row. Additionally, calling `favIds.maybeWhen(...)` inside `ListView.separated` item builders re-evaluates pattern matching and allocates closure instances on every scroll frame.
+**Action:** Access keys directly on `raw` as `Map` during iterations, and hoist set extraction `favIds.valueOrNull` outside list item builders.
