@@ -157,7 +157,10 @@ class _VendorEditProfileScreenState
                   leading: const Icon(Icons.photo_library_outlined),
                   title: Text(l10n.managePhotos),
                   subtitle: Text('${vendor.photos.length}'),
-                  trailing: const Icon(Icons.chevron_right),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    matchTextDirection: true,
+                  ),
                   onTap: () => context.push('/vendor-tools/photos'),
                 ),
                 const SizedBox(height: 16),

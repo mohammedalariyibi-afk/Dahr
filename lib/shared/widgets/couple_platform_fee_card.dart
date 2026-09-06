@@ -19,6 +19,8 @@ class CouplePlatformFeeCard extends StatelessWidget {
     this.submitting = false,
     this.compact = false,
     this.loadingTransferContext = false,
+    this.transferContextError,
+    this.onRetryTransferContext,
   });
 
   final double amountLyd;
@@ -33,6 +35,11 @@ class CouplePlatformFeeCard extends StatelessWidget {
   /// True while transfer notes and/or bank details are still loading.
   /// Holds the submit form so a null note is not treated as "none yet".
   final bool loadingTransferContext;
+
+  /// Safe user-facing load error. When set, the card must not pretend bank
+  /// details are "pending from ops" or that no transfer note exists.
+  final String? transferContextError;
+  final VoidCallback? onRetryTransferContext;
 
   bool get _unpaid => status == CommissionStatus.unpaid;
 
@@ -95,6 +102,11 @@ class CouplePlatformFeeCard extends StatelessWidget {
                   child: Center(
                     child: CircularProgressIndicator(),
                   ),
+                )
+              else if (transferContextError != null)
+                _TransferContextError(
+                  message: transferContextError!,
+                  onRetry: onRetryTransferContext,
                 )
               else ...[
                 _BankDetailsBlock(bankDetails: bankDetails),
@@ -198,11 +210,60 @@ class _BankDetailsBlock extends StatelessWidget {
   }
 }
 
+class _TransferContextError extends StatelessWidget {
+  const _TransferContextError({
+    required this.message,
+    this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback? onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            message,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.error,
+            ),
+          ),
+          if (onRetry != null) ...[
+            const SizedBox(height: 12),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: OutlinedButton(
+                onPressed: onRetry,
+                child: Text(l10n.retry),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _CopyRow extends StatelessWidget {
   const _CopyRow({required this.label, required this.value});
 
   final String label;
   final String value;
+
+  Future<void> _copyValue(BuildContext context, String text) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!context.mounted) return;
+    final l10n = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.copiedToClipboard)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -219,7 +280,7 @@ class _CopyRow extends StatelessWidget {
           ),
           IconButton(
             tooltip: label,
-            onPressed: () => Clipboard.setData(ClipboardData(text: value)),
+            onPressed: () => _copyValue(context, value),
             icon: const Icon(Icons.copy_outlined, size: 18),
             visualDensity: VisualDensity.compact,
           ),

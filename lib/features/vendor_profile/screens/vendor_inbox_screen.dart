@@ -234,6 +234,16 @@ class VendorInboxScreen extends ConsumerWidget {
                                   '${l10n.commissionStatusLabel}: '
                                   '${_commissionLabel(l10n, b.commissionStatus)}',
                                 ),
+                              if (b.isCommissionUnpaid) ...[
+                                const SizedBox(height: 6),
+                                Text(
+                                  l10n.commissionNoteVendor,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(color: AppColors.inkMuted),
+                                ),
+                              ],
                             ],
                             const SizedBox(height: 8),
                             if (b.hasCoupleWhatsApp)

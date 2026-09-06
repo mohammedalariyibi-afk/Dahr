@@ -245,5 +245,6 @@
   "editProfile": "Edit profile",
   "phoneForWhatsappHint": "Vendors use this to WhatsApp you about a booking. It is not used to sign in.",
   "coupleContactUnknown": "Couple",
-  "reportReview": "Report review"
+  "reportReview": "Report review",
+  "copiedToClipboard": "Copied to clipboard"
 }

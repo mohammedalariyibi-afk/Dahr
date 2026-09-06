@@ -146,8 +146,42 @@ void main() {
       expect(detail, contains('loadingTransferContext'));
       expect(detail, contains('notesAsync.isLoading'));
       expect(detail, contains('bankAsync.isLoading'));
+      expect(detail, contains('transferContextError'));
+      expect(detail, contains('SafeUserError.of'));
       expect(detail, isNot(contains('!notesAsync.hasValue')));
       expect(detail, isNot(contains('!bankAsync.hasValue')));
+    });
+
+    test('bank and transfer-note reads do not swallow API errors', () {
+      final src = File(
+        'lib/features/booking/providers/booking_provider.dart',
+      ).readAsStringSync();
+      final bank = src.substring(
+        src.indexOf('final platformBankDetailsProvider'),
+        src.indexOf('final transferNotesByBookingProvider'),
+      );
+      final notes = src.substring(
+        src.indexOf('final transferNotesByBookingProvider'),
+        src.indexOf('/// Couple name'),
+      );
+      expect(bank, isNot(contains('catch')));
+      expect(notes, isNot(contains('catch')));
+    });
+
+    test('vendor inbox unpaid commission includes couple-pays framing', () {
+      expect(
+        File('lib/features/vendor_profile/screens/vendor_inbox_screen.dart')
+            .readAsStringSync(),
+        contains('commissionNoteVendor'),
+      );
+    });
+
+    test('edit listing photos chevron mirrors in RTL', () {
+      final edit = File(
+        'lib/features/vendor_profile/screens/vendor_edit_profile_screen.dart',
+      ).readAsStringSync();
+      expect(edit, contains('Icons.chevron_right'));
+      expect(edit, contains('matchTextDirection: true'));
     });
 
     test('vendor detail can report a review', () {

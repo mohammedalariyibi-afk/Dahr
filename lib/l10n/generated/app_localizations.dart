@@ -1489,6 +1489,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'الإبلاغ عن التقييم'**
   String get reportReview;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم النسخ إلى الحافظة'**
+  String get copiedToClipboard;
 }
 
 class _AppLocalizationsDelegate

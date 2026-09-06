@@ -724,4 +724,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get reportReview => 'الإبلاغ عن التقييم';
+
+  @override
+  String get copiedToClipboard => 'تم النسخ إلى الحافظة';
 }

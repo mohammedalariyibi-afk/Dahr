@@ -24,6 +24,7 @@ class _ConsumerBookingDetailScreenState
     extends ConsumerState<ConsumerBookingDetailScreen> {
   late final TextEditingController _noteController;
   bool _submitting = false;
+  bool _transferErrorSnackShown = false;
 
   @override
   void initState() {
@@ -48,6 +49,27 @@ class _ConsumerBookingDetailScreenState
       case BookingStatus.completed:
         return l10n.statusCompleted;
     }
+  }
+
+  void _onTransferContextError<T>(
+    AppLocalizations l10n,
+    AsyncValue<T>? prev,
+    AsyncValue<T> next,
+  ) {
+    if (!next.hasError || prev?.hasError == true) return;
+    final booking = ref.read(bookingByIdProvider(widget.bookingId)).valueOrNull;
+    if (booking == null || !booking.showsCouplePlatformFee) return;
+    if (_transferErrorSnackShown || !mounted) return;
+    _transferErrorSnackShown = true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(SafeUserError.of(l10n, next.error!))),
+    );
+  }
+
+  void _retryTransferContext() {
+    _transferErrorSnackShown = false;
+    ref.invalidate(platformBankDetailsProvider);
+    ref.invalidate(transferNotesByBookingProvider(widget.bookingId));
   }
 
   Future<void> _submitTransfer() async {
@@ -80,6 +102,14 @@ class _ConsumerBookingDetailScreenState
     final notesAsync = ref.watch(
       transferNotesByBookingProvider(widget.bookingId),
     );
+    ref.listen<AsyncValue<PlatformBankDetails>>(
+      platformBankDetailsProvider,
+      (prev, next) => _onTransferContextError(l10n, prev, next),
+    );
+    ref.listen<AsyncValue<List<CommissionTransferNote>>>(
+      transferNotesByBookingProvider(widget.bookingId),
+      (prev, next) => _onTransferContextError(l10n, prev, next),
+    );
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bookingDetailTitle)),
@@ -99,13 +129,20 @@ class _ConsumerBookingDetailScreenState
               onAction: () => context.go('/bookings'),
             );
           }
-          // Only in-flight loads hold the form. AsyncError falls through to
-          // valueOrNull (unset bank / null note) so the couple is not stuck
-          // on a spinner — same soft-fail as before this gate.
-          final transferContextLoading =
-              notesAsync.isLoading || bankAsync.isLoading;
+          // In-flight loads hold the form. Real read failures surface via
+          // SafeUserError instead of looking like "ops pending" / no note.
+          final transferContextHasError =
+              bankAsync.hasError || notesAsync.hasError;
+          final transferContextLoading = !transferContextHasError &&
+              (notesAsync.isLoading || bankAsync.isLoading);
+          final transferContextError = transferContextHasError
+              ? SafeUserError.of(
+                  l10n,
+                  bankAsync.error ?? notesAsync.error!,
+                )
+              : null;
           final bank = bankAsync.valueOrNull ?? PlatformBankDetails.unset;
-          final notes = notesAsync.valueOrNull;
+          final notes = notesAsync.hasError ? null : notesAsync.valueOrNull;
           final latestNote =
               notes == null || notes.isEmpty ? null : notes.first;
           return ListView(
@@ -145,6 +182,8 @@ class _ConsumerBookingDetailScreenState
                   onSubmitTransfer: _submitTransfer,
                   submitting: _submitting,
                   loadingTransferContext: transferContextLoading,
+                  transferContextError: transferContextError,
+                  onRetryTransferContext: _retryTransferContext,
                 ),
               ],
               if (booking.canLeaveReview) ...[
