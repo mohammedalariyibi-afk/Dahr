@@ -101,7 +101,10 @@ class ErrorState extends StatelessWidget {
   }
 }
 
-class SkeletonList extends StatelessWidget {
+// Bolt Optimization: Share a single AnimationController across all skeleton items in
+// SkeletonList instead of instantiating N controllers and tickers. Reduces ticker memory
+// allocations and syncs shimmer animations perfectly across all cards.
+class SkeletonList extends StatefulWidget {
   const SkeletonList({
     super.key,
     this.itemCount = 6,
@@ -112,26 +115,10 @@ class SkeletonList extends StatelessWidget {
   final double itemHeight;
 
   @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: itemCount,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (_, __) => _SkeletonBox(height: itemHeight),
-    );
-  }
+  State<SkeletonList> createState() => _SkeletonListState();
 }
 
-class _SkeletonBox extends StatefulWidget {
-  const _SkeletonBox({required this.height});
-
-  final double height;
-
-  @override
-  State<_SkeletonBox> createState() => _SkeletonBoxState();
-}
-
-class _SkeletonBoxState extends State<_SkeletonBox>
+class _SkeletonListState extends State<SkeletonList>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
@@ -152,17 +139,40 @@ class _SkeletonBoxState extends State<_SkeletonBox>
 
   @override
   Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: widget.itemCount,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (_, __) => _SkeletonBox(
+        height: widget.itemHeight,
+        animation: _controller,
+      ),
+    );
+  }
+}
+
+class _SkeletonBox extends StatelessWidget {
+  const _SkeletonBox({
+    required this.height,
+    required this.animation,
+  });
+
+  final double height;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: _controller,
+      animation: animation,
       builder: (context, child) {
         return Container(
-          height: widget.height,
+          height: height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             color: Color.lerp(
               AppColors.skeletonBase,
               AppColors.skeletonHighlight,
-              _controller.value,
+              animation.value,
             ),
           ),
         );
