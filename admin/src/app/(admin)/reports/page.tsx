@@ -2,7 +2,14 @@ import { hideReview, updateReportStatus } from "@/app/(admin)/actions";
 import { ActionError } from "@/components/action-error";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { FilterTabs } from "@/components/filter-tabs";
+import { PageNav } from "@/components/page-nav";
 import { firstEmbed } from "@/lib/admin";
+import {
+  clampPage,
+  pageHrefs,
+  pageRange,
+  parsePage,
+} from "@/lib/admin-page";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -23,7 +30,7 @@ type ReportRow = {
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; error?: string }>;
+  searchParams: Promise<{ status?: string; page?: string; error?: string }>;
 }) {
   const params = await searchParams;
   const filter: ReportFilter =
@@ -32,29 +39,9 @@ export default async function ReportsPage({
     params.status === "all"
       ? params.status
       : "open";
+  const requestedPage = parsePage(params.page);
 
   const supabase = await createClient();
-  let query = supabase
-    .from("reports")
-    .select(
-      "id, target_type, target_id, reason, status, created_at, profiles!reports_reported_by_fkey(full_name, phone)",
-    )
-    .order("created_at", { ascending: false });
-
-  if (filter !== "all") {
-    query = query.eq("status", filter);
-  }
-
-  const { data: reports, error } = await query;
-
-  if (error) {
-    return (
-      <p className="text-sm text-red-700">Could not load reports. Try again.</p>
-    );
-  }
-
-  const rows = (reports ?? []) as ReportRow[];
-
   const [{ count: openCount }, { count: actionedCount }, { count: dismissedCount }] =
     await Promise.all([
       supabase
@@ -70,6 +57,47 @@ export default async function ReportsPage({
         .select("*", { count: "exact", head: true })
         .eq("status", "dismissed"),
     ]);
+
+  const tabTotal =
+    filter === "open"
+      ? (openCount ?? 0)
+      : filter === "actioned"
+        ? (actionedCount ?? 0)
+        : filter === "dismissed"
+          ? (dismissedCount ?? 0)
+          : (openCount ?? 0) + (actionedCount ?? 0) + (dismissedCount ?? 0);
+  const page = clampPage(requestedPage, tabTotal);
+  const { from, to } = pageRange(page);
+
+  let query = supabase
+    .from("reports")
+    .select(
+      "id, target_type, target_id, reason, status, created_at, profiles!reports_reported_by_fkey(full_name, phone)",
+      { count: "exact" },
+    )
+    .order("created_at", { ascending: false });
+
+  if (filter !== "all") {
+    query = query.eq("status", filter);
+  }
+
+  const { data: reports, error } = await query.range(from, to);
+
+  if (error) {
+    return (
+      <p className="text-sm text-red-700">Could not load reports. Try again.</p>
+    );
+  }
+
+  const rows = (reports ?? []) as ReportRow[];
+  const listParams = new URLSearchParams();
+  if (filter !== "open") listParams.set("status", filter);
+  const { prevHref, nextHref } = pageHrefs(
+    "/reports",
+    listParams,
+    page,
+    tabTotal,
+  );
 
   const reviewIds = rows
     .filter((r) => r.target_type === "review")
@@ -307,6 +335,14 @@ export default async function ReportsPage({
           </ul>
         )}
       </div>
+
+      <PageNav
+        page={page}
+        total={tabTotal}
+        prevHref={prevHref}
+        nextHref={nextHref}
+        noun={tabTotal === 1 ? "report" : "reports"}
+      />
     </div>
   );
 }

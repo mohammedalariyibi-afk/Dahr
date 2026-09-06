@@ -190,7 +190,7 @@ reasoned about the SQL and the Dart instead of running them.
 
 ### Known and deliberately not fixed before submit
 
-- **PostgREST caps a request at 1000 rows.** The admin dashboard derives the booking count, the category and status breakdowns, and the unpaid-commission total from unbounded `select`s, and the vendors / reports / commissions pages have no pagination (vendor search is also in-memory over that capped fetch). At launch scale — 15 vendors, 3 bookings — none of this can bite, but past 1000 rows the numbers under-report silently. Fixing it properly means SQL aggregates or a dashboard RPC plus pagination on three pages, which is not a change to make the night before a submit.
+- **PostgREST 1000-row cap — addressed after submit** (admin data layer). Dashboard booking totals, status/category breakdowns, and the unpaid-commission sum no longer count rows in memory. Lists on vendors / reports / commissions paginate (50 per page) and show “Showing X–Y of Z”. Vendor search is SQL-side (`ilike` / enum `eq` / `profile_id.in` for owner name or phone), not an in-memory haystack. Remaining honest limits: list payloads still cannot exceed PostgREST `max_rows` (pages stay at 50); unpaid `sum()` uses a PostgREST aggregate when the project has aggregates enabled, otherwise it pages `commission_amount_lyd` only until exhausted (correct, not silent); owner-name search includes at most 200 matching profiles in the `in()` clause (business/city/WhatsApp matches are uncapped).
 - The vendors page tab counts are computed after the search filter, which reads oddly in isolation but is consistent: the tab links preserve `q`, so the count describes what clicking it shows.
 - `booking_protect_commission` and `booking_reject_if_date_booked` are both `BEFORE INSERT OR UPDATE` with no explicit order. Postgres fires them alphabetically, which happens to be the order the accept path needs; renaming either trigger would change behaviour silently.
 
@@ -214,7 +214,7 @@ equivalent of `supabase db reset`. Guards were then exercised as those roles:
 
 ## Suggested next work (after submit)
 
-1. Admin data layer: SQL aggregates (or a dashboard RPC) for the counts and the unpaid-commission sum, pagination on vendors / reports / commissions, and SQL-side vendor search. See “deliberately not fixed” above — correctness degrades silently past 1000 rows.
+1. ~~Admin data layer: SQL aggregates / exact counts for dashboard totals and unpaid commission, pagination on vendors / reports / commissions, SQL-side vendor search.~~ **Done** — see “PostgREST 1000-row cap — addressed after submit”.
 2. Share the OTP throttle across instances (Redis or a Postgres table) if the admin runs on more than one serverless instance; today the window is per instance.
 3. `storage.objects` still has a `vendor_photos_storage_admin_all` policy that calls `is_admin()`. Public photo downloads do not go through it, and the app only lists objects while signed in, so it is not F1 — but a future anonymous `storage.list` would hit the same wall.
 4. Audit-log retention / a dashboard view for it (rows are written but nothing renders them yet).

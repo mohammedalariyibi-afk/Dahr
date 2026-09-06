@@ -1,5 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
-import { CATEGORY_LABELS, firstEmbed, formatLyd } from "@/lib/admin";
+import { CATEGORY_LABELS, formatLyd } from "@/lib/admin";
+import {
+  bookingsByCategoryQuery,
+  sumUnpaidCommission,
+} from "@/lib/admin-aggregates";
 import { PUBLIC_ERROR, publicErrorMessage } from "@/lib/public-error";
 import Link from "next/link";
 
@@ -7,13 +11,16 @@ const BOOKING_STATUSES = ["pending", "accepted", "declined", "completed"] as con
 
 export default async function DashboardPage() {
   const supabase = await createClient();
+  const categoryKeys = Object.keys(CATEGORY_LABELS);
 
   const [
     vendorsTotal,
     vendorsPending,
     usersTotal,
-    bookingsResult,
-    commissionResult,
+    bookingsTotal,
+    statusCounts,
+    categoryCounts,
+    unpaid,
     reportsOpen,
   ] = await Promise.all([
     supabase.from("vendor_profiles").select("*", { count: "exact", head: true }),
@@ -22,13 +29,31 @@ export default async function DashboardPage() {
       .select("*", { count: "exact", head: true })
       .eq("is_approved", false),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase
-      .from("booking_requests")
-      .select("id, status, vendor_profiles(category)"),
-    supabase
-      .from("booking_requests")
-      .select("commission_status, commission_amount_lyd")
-      .eq("commission_status", "unpaid"),
+    supabase.from("booking_requests").select("*", { count: "exact", head: true }),
+    Promise.all(
+      BOOKING_STATUSES.map(async (bookingStatus) => {
+        const result = await supabase
+          .from("booking_requests")
+          .select("*", { count: "exact", head: true })
+          .eq("status", bookingStatus);
+        return {
+          bookingStatus,
+          count: result.count,
+          error: result.error,
+        };
+      }),
+    ),
+    Promise.all(
+      categoryKeys.map(async (category) => {
+        const result = await bookingsByCategoryQuery(supabase, category);
+        return {
+          category,
+          count: result.count,
+          error: result.error,
+        };
+      }),
+    ),
+    sumUnpaidCommission(supabase),
     supabase
       .from("reports")
       .select("*", { count: "exact", head: true })
@@ -36,39 +61,30 @@ export default async function DashboardPage() {
   ]);
 
   // Never render PostgREST text: it names tables, policies, and columns.
-  const queryFailed = [
-    vendorsTotal.error,
-    vendorsPending.error,
-    usersTotal.error,
-    bookingsResult.error,
-    commissionResult.error,
-    reportsOpen.error,
-  ].some((e) => e !== null && e !== undefined);
+  const queryFailed =
+    [
+      vendorsTotal.error,
+      vendorsPending.error,
+      usersTotal.error,
+      bookingsTotal.error,
+      reportsOpen.error,
+      unpaid.error,
+      ...statusCounts.map((r) => r.error),
+      ...categoryCounts.map((r) => r.error),
+    ].some((e) => e !== null && e !== undefined);
 
-  const byCategory = new Map<string, number>();
   const byStatus = new Map<string, number>();
-  for (const row of bookingsResult.data ?? []) {
-    const status = typeof row.status === "string" ? row.status : "pending";
-    byStatus.set(status, (byStatus.get(status) ?? 0) + 1);
-
-    const vendor = firstEmbed(
-      row.vendor_profiles as { category: string } | { category: string }[] | null,
-    );
-    if (!vendor?.category) continue;
-    byCategory.set(vendor.category, (byCategory.get(vendor.category) ?? 0) + 1);
+  for (const row of statusCounts) {
+    byStatus.set(row.bookingStatus, row.count ?? 0);
   }
 
-  const categoryStats = Object.keys(CATEGORY_LABELS).map((key) => ({
+  const categoryStats = categoryKeys.map((key) => ({
     key,
     label: CATEGORY_LABELS[key],
-    count: byCategory.get(key) ?? 0,
+    count: categoryCounts.find((row) => row.category === key)?.count ?? 0,
   }));
 
-  const unpaidCommission = (commissionResult.data ?? []).reduce((sum, row) => {
-    return sum + Number(row.commission_amount_lyd ?? 0);
-  }, 0);
-
-  const bookingCount = bookingsResult.data?.length ?? 0;
+  const bookingCount = bookingsTotal.count ?? 0;
 
   return (
     <div className="space-y-8">
@@ -108,7 +124,7 @@ export default async function DashboardPage() {
         <StatCard label="Booking requests" value={bookingCount} />
         <StatCard
           label="Unpaid commission"
-          value={formatLyd(unpaidCommission)}
+          value={formatLyd(unpaid.sum)}
           href="/commissions?status=unpaid"
         />
       </div>

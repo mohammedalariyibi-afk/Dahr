@@ -5,15 +5,29 @@ import {
 import { ActionError } from "@/components/action-error";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { FilterTabs } from "@/components/filter-tabs";
+import { PageNav } from "@/components/page-nav";
 import {
   CATEGORY_LABELS,
   CITY_LABELS,
   firstEmbed,
   formatPriceRange,
 } from "@/lib/admin";
+import {
+  clampPage,
+  pageHrefs,
+  pageRange,
+  parsePage,
+  withSearchParams,
+} from "@/lib/admin-page";
+import {
+  VENDOR_LIST_SELECT,
+  VENDOR_OWNER_SEARCH_CAP,
+  parseVendorFilter,
+  sanitizeAdminSearch,
+  vendorSearchOr,
+  type VendorApprovalFilter,
+} from "@/lib/vendor-search";
 import { createClient } from "@/lib/supabase/server";
-
-type VendorFilter = "all" | "pending" | "approved";
 
 type ProfileEmbed = {
   full_name: string | null;
@@ -35,45 +49,89 @@ type VendorRow = {
   profiles: ProfileEmbed | ProfileEmbed[] | null;
 };
 
-function matchesQuery(vendor: VendorRow, q: string): boolean {
-  if (!q) return true;
-  const profile = firstEmbed(vendor.profiles);
-  const haystack = [
-    vendor.business_name,
-    vendor.category,
-    CATEGORY_LABELS[vendor.category],
-    vendor.city,
-    CITY_LABELS[vendor.city],
-    vendor.description,
-    vendor.whatsapp_number,
-    profile?.full_name,
-    profile?.phone,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  return haystack.includes(q);
+function applyVendorConstraints(
+  // PostgREST filter builder — kept loose so `select()` string unions stay finite.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  filter: VendorApprovalFilter,
+  orClause: string | null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  if (filter === "pending") query = query.eq("is_approved", false);
+  if (filter === "approved") query = query.eq("is_approved", true);
+  if (orClause) query = query.or(orClause);
+  return query;
 }
 
 export default async function VendorsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; filter?: string; error?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    filter?: string;
+    page?: string;
+    error?: string;
+  }>;
 }) {
   const params = await searchParams;
-  const q = (params.q ?? "").trim().toLowerCase();
-  const filter: VendorFilter =
-    params.filter === "pending" || params.filter === "approved"
-      ? params.filter
-      : "all";
+  const qRaw = (params.q ?? "").trim();
+  const q = sanitizeAdminSearch(qRaw);
+  const filter = parseVendorFilter(params.filter);
+  const requestedPage = parsePage(params.page);
 
   const supabase = await createClient();
-  const { data: vendors, error } = await supabase
-    .from("vendor_profiles")
-    .select(
-      "id, business_name, category, city, description, price_min, price_max, whatsapp_number, is_approved, is_verified, created_at, profiles(full_name, phone)",
-    )
-    .order("created_at", { ascending: false });
+  let ownerIds: string[] = [];
+  if (q) {
+    const { data: owners } = await supabase
+      .from("profiles")
+      .select("id")
+      .or(`full_name.ilike.%${q}%,phone.ilike.%${q}%`)
+      .limit(VENDOR_OWNER_SEARCH_CAP);
+    ownerIds = (owners ?? []).map((row) => row.id);
+  }
+  const orClause = vendorSearchOr(q, ownerIds);
+
+  const [allCount, pendingCount, approvedCount] = await Promise.all(
+    (["all", "pending", "approved"] as const).map(async (tab) => {
+      const result = (await applyVendorConstraints(
+        supabase
+          .from("vendor_profiles")
+          .select("id", { count: "exact", head: true }),
+        tab,
+        orClause,
+      )) as { count: number | null; error: { message: string } | null };
+      return { tab, count: result.count, error: result.error };
+    }),
+  );
+
+  if (allCount.error || pendingCount.error || approvedCount.error) {
+    return (
+      <p className="text-sm text-red-700">Could not load vendors. Try again.</p>
+    );
+  }
+
+  const tabTotal =
+    filter === "pending"
+      ? (pendingCount.count ?? 0)
+      : filter === "approved"
+        ? (approvedCount.count ?? 0)
+        : (allCount.count ?? 0);
+  const page = clampPage(requestedPage, tabTotal);
+  const { from, to } = pageRange(page);
+
+  let listQuery = applyVendorConstraints(
+    supabase
+      .from("vendor_profiles")
+      .select(VENDOR_LIST_SELECT, { count: "exact" }),
+    filter,
+    orClause,
+  );
+  if (filter === "all") {
+    listQuery = listQuery.order("is_approved", { ascending: true });
+  }
+  const { data: vendors, error } = await listQuery
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (error) {
     return (
@@ -81,19 +139,21 @@ export default async function VendorsPage({
     );
   }
 
-  const all = ((vendors ?? []) as VendorRow[]).filter((v) => matchesQuery(v, q));
-  const pending = all.filter((v) => !v.is_approved);
-  const approved = all.filter((v) => v.is_approved);
+  const rows = (vendors ?? []) as unknown as VendorRow[];
+  const pending = rows.filter((v) => !v.is_approved);
+  const approved = rows.filter((v) => v.is_approved);
 
   const query = new URLSearchParams();
-  if (params.q?.trim()) query.set("q", params.q.trim());
-  const qs = (extra?: { filter?: VendorFilter }) => {
-    const next = new URLSearchParams(query);
-    const f = extra?.filter ?? filter;
-    if (f !== "all") next.set("filter", f);
-    const s = next.toString();
-    return s ? `/vendors?${s}` : "/vendors";
-  };
+  if (qRaw) query.set("q", qRaw);
+  if (filter !== "all") query.set("filter", filter);
+
+  const tabHref = (nextFilter: VendorApprovalFilter) =>
+    withSearchParams("/vendors", query, {
+      filter: nextFilter === "all" ? null : nextFilter,
+      page: null,
+    });
+
+  const { prevHref, nextHref } = pageHrefs("/vendors", query, page, tabTotal);
 
   return (
     <div className="space-y-8">
@@ -114,7 +174,7 @@ export default async function VendorsPage({
         <input
           type="search"
           name="q"
-          defaultValue={params.q ?? ""}
+          defaultValue={qRaw}
           placeholder="Search business, city, owner, WhatsApp…"
           className="min-w-[220px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--burgundy)] focus:ring-2 focus:ring-[var(--burgundy-soft)]"
         />
@@ -128,26 +188,33 @@ export default async function VendorsPage({
 
       <FilterTabs
         items={[
-          { href: qs({ filter: "all" }), label: "All", active: filter === "all", count: all.length },
           {
-            href: qs({ filter: "pending" }),
-            label: "Pending",
-            active: filter === "pending",
-            count: pending.length,
+            href: tabHref("all"),
+            label: "All",
+            active: filter === "all",
+            count: allCount.count ?? 0,
           },
           {
-            href: qs({ filter: "approved" }),
+            href: tabHref("pending"),
+            label: "Pending",
+            active: filter === "pending",
+            count: pendingCount.count ?? 0,
+          },
+          {
+            href: tabHref("approved"),
             label: "Approved",
             active: filter === "approved",
-            count: approved.length,
+            count: approvedCount.count ?? 0,
           },
         ]}
       />
 
-      {filter !== "approved" ? (
+      {filter !== "approved" &&
+      (pending.length > 0 || (pendingCount.count ?? 0) === 0) ? (
         <VendorSection
           title="Pending approval"
           vendors={pending}
+          total={pendingCount.count ?? 0}
           empty={
             q
               ? "No pending vendors match this search."
@@ -155,10 +222,12 @@ export default async function VendorsPage({
           }
         />
       ) : null}
-      {filter !== "pending" ? (
+      {filter !== "pending" &&
+      (approved.length > 0 || (approvedCount.count ?? 0) === 0) ? (
         <VendorSection
           title="Approved"
           vendors={approved}
+          total={approvedCount.count ?? 0}
           empty={
             q
               ? "No approved vendors match this search."
@@ -166,6 +235,14 @@ export default async function VendorsPage({
           }
         />
       ) : null}
+
+      <PageNav
+        page={page}
+        total={tabTotal}
+        prevHref={prevHref}
+        nextHref={nextHref}
+        noun={tabTotal === 1 ? "vendor" : "vendors"}
+      />
     </div>
   );
 }
@@ -173,10 +250,12 @@ export default async function VendorsPage({
 function VendorSection({
   title,
   vendors,
+  total,
   empty,
 }: {
   title: string;
   vendors: VendorRow[];
+  total: number;
   empty: string;
 }) {
   return (
@@ -184,7 +263,7 @@ function VendorSection({
       <h2 className="text-lg font-medium text-[var(--ink)]">
         {title}{" "}
         <span className="text-sm font-normal text-[var(--muted)]">
-          ({vendors.length})
+          ({total})
         </span>
       </h2>
       <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
