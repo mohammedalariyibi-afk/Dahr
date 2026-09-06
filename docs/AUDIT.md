@@ -123,7 +123,7 @@ Severity is for a published marketplace whose API key is in the client.
 |------|--------|
 | Bundle / application id `com.dahr.dahr` | On `main` |
 | Email OTP only (no SMS / IAP / ads SDKs) | On `main` |
-| Privacy / terms in-app + admin routes | On `main` — **hosted `{ADMIN_ORIGIN}` still needs a deploy** |
+| Privacy / terms public URLs | Live on GitHub Pages: `https://mohammedalariyibi-afk.github.io/Dahr/privacy` and `https://mohammedalariyibi-afk.github.io/Dahr/terms` (`legal-pages/` + Deploy legal pages). In-app `/legal/*` is the Profile path only |
 | Account deletion in Profile | On `main` |
 | Listing copy + phone screenshots | `docs/store-listing.md`, `docs/store-shots/` |
 | iPad 13″ shots **or** iPhone-only target | Operator choice (`STORE.md`) |
