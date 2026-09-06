@@ -22,6 +22,15 @@
   "otpLabel": "رمز التحقق",
   "verifyOtp": "تأكيد",
   "resendOtp": "إعادة إرسال الرمز",
+  "otpResendSent": "تم إرسال رمز جديد.",
+  "otpResendWait": "أعد الإرسال خلال {seconds} ث",
+  "@otpResendWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "invalidPhone": "رقم هاتف ليبي غير صالح",
   "invalidEmail": "بريد إلكتروني غير صالح",
   "invalidOtp": "رمز غير صالح",

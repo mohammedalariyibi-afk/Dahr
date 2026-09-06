@@ -22,6 +22,15 @@
   "otpLabel": "Verification code",
   "verifyOtp": "Verify",
   "resendOtp": "Resend code",
+  "otpResendSent": "A new code was sent.",
+  "otpResendWait": "Resend in {seconds}s",
+  "@otpResendWait": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
   "invalidPhone": "Invalid Libyan phone number",
   "invalidEmail": "Invalid email address",
   "invalidOtp": "Invalid code",
