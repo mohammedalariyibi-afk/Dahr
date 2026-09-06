@@ -18,6 +18,7 @@ class CouplePlatformFeeCard extends StatelessWidget {
     this.onSubmitTransfer,
     this.submitting = false,
     this.compact = false,
+    this.loadingTransferContext = false,
   });
 
   final double amountLyd;
@@ -28,6 +29,10 @@ class CouplePlatformFeeCard extends StatelessWidget {
   final VoidCallback? onSubmitTransfer;
   final bool submitting;
   final bool compact;
+
+  /// True while transfer notes and/or bank details are still loading.
+  /// Holds the submit form so a null note is not treated as "none yet".
+  final bool loadingTransferContext;
 
   bool get _unpaid => status == CommissionStatus.unpaid;
 
@@ -84,30 +89,39 @@ class CouplePlatformFeeCard extends StatelessWidget {
             ),
             if (!compact) ...[
               const SizedBox(height: 16),
-              _BankDetailsBlock(bankDetails: bankDetails),
-              if (_unpaid) ...[
-                const SizedBox(height: 16),
-                if (submittedNote != null)
-                  Text(
-                    l10n.transferReported,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.success,
-                    ),
-                  )
-                else
-                  _TransferNoteForm(
-                    controller: noteController,
-                    onSubmit: onSubmitTransfer,
-                    submitting: submitting,
+              if (loadingTransferContext)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
-                if (submittedNote != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    submittedNote!.referenceNote,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.inkMuted,
+                )
+              else ...[
+                _BankDetailsBlock(bankDetails: bankDetails),
+                if (_unpaid) ...[
+                  const SizedBox(height: 16),
+                  if (submittedNote != null)
+                    Text(
+                      l10n.transferReported,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.success,
+                      ),
+                    )
+                  else
+                    _TransferNoteForm(
+                      controller: noteController,
+                      onSubmit: onSubmitTransfer,
+                      submitting: submitting,
                     ),
-                  ),
+                  if (submittedNote != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      submittedNote!.referenceNote,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkMuted,
+                      ),
+                    ),
+                  ],
                 ],
               ],
             ],

@@ -99,6 +99,11 @@ class _ConsumerBookingDetailScreenState
               onAction: () => context.go('/bookings'),
             );
           }
+          // Only in-flight loads hold the form. AsyncError falls through to
+          // valueOrNull (unset bank / null note) so the couple is not stuck
+          // on a spinner — same soft-fail as before this gate.
+          final transferContextLoading =
+              notesAsync.isLoading || bankAsync.isLoading;
           final bank = bankAsync.valueOrNull ?? PlatformBankDetails.unset;
           final notes = notesAsync.valueOrNull;
           final latestNote =
@@ -139,6 +144,7 @@ class _ConsumerBookingDetailScreenState
                   noteController: _noteController,
                   onSubmitTransfer: _submitTransfer,
                   submitting: _submitting,
+                  loadingTransferContext: transferContextLoading,
                 ),
               ],
               if (booking.canLeaveReview) ...[

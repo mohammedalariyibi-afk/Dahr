@@ -12,6 +12,7 @@ void main() {
     CommissionTransferNote? note,
     Locale locale = const Locale('en'),
     TextEditingController? controller,
+    bool loadingTransferContext = false,
   }) {
     return MaterialApp(
       theme: AppTheme.dark,
@@ -27,6 +28,7 @@ void main() {
             submittedNote: note,
             noteController: controller,
             onSubmitTransfer: () {},
+            loadingTransferContext: loadingTransferContext,
           ),
         ),
       ),
@@ -85,6 +87,26 @@ void main() {
     expect(find.text('I transferred'), findsNothing);
     expect(find.textContaining('Ref 9988'), findsOneWidget);
     expect(find.text('Paid'), findsNothing);
+  });
+
+  testWidgets('holds transfer form while notes are still loading',
+      (tester) async {
+    await tester.pumpWidget(
+      host(
+        bank: PlatformBankDetails.unset,
+        loadingTransferContext: true,
+      ),
+    );
+    expect(find.text('Dahr platform fee (10%)'), findsOneWidget);
+    expect(find.text('I transferred'), findsNothing);
+    expect(find.text('Bank details coming from ops.'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+  });
+
+  testWidgets('error soft-fail still shows the transfer form', (tester) async {
+    await tester.pumpWidget(host(bank: PlatformBankDetails.unset));
+    expect(find.text('I transferred'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('renders Arabic unpaid fee and pending bank copy', (tester) async {
