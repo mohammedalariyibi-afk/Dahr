@@ -729,4 +729,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportReview => 'Report review';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
 }

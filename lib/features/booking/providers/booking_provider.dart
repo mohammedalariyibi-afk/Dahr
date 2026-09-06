@@ -167,41 +167,33 @@ final platformBankDetailsProvider =
     FutureProvider<PlatformBankDetails>((ref) async {
   final uid = ref.watch(authProvider).session?.user.id;
   if (uid == null) return PlatformBankDetails.unset;
-  try {
-    final row = await DahrSupabase.client
-        .from(PlatformBankDetails.table)
-        .select(PlatformBankDetails.select)
-        .eq('id', PlatformBankDetails.singletonId)
-        .maybeSingle();
-    return PlatformBankDetails.fromJson(
-      row == null ? null : Map<String, dynamic>.from(row),
-    );
-  } catch (_) {
-    return PlatformBankDetails.unset;
-  }
+  final row = await DahrSupabase.client
+      .from(PlatformBankDetails.table)
+      .select(PlatformBankDetails.select)
+      .eq('id', PlatformBankDetails.singletonId)
+      .maybeSingle();
+  return PlatformBankDetails.fromJson(
+    row == null ? null : Map<String, dynamic>.from(row),
+  );
 });
 
 final transferNotesByBookingProvider = FutureProvider.family<
     List<CommissionTransferNote>, String>((ref, bookingId) async {
   final uid = ref.watch(authProvider).session?.user.id;
   if (uid == null) return const [];
-  try {
-    final rows = await DahrSupabase.client
-        .from(CommissionTransferWrite.notesTable)
-        .select(CommissionTransferNote.select)
-        .eq('booking_id', bookingId)
-        .eq('consumer_id', uid)
-        .order('created_at', ascending: false);
-    return (rows as List)
-        .map(
-          (e) => CommissionTransferNote.fromJson(
-            Map<String, dynamic>.from(e as Map),
-          ),
-        )
-        .toList();
-  } catch (_) {
-    return const [];
-  }
+  final rows = await DahrSupabase.client
+      .from(CommissionTransferWrite.notesTable)
+      .select(CommissionTransferNote.select)
+      .eq('booking_id', bookingId)
+      .eq('consumer_id', uid)
+      .order('created_at', ascending: false);
+  return (rows as List)
+      .map(
+        (e) => CommissionTransferNote.fromJson(
+          Map<String, dynamic>.from(e as Map),
+        ),
+      )
+      .toList();
 });
 
 /// Couple name + WhatsApp for the vendor inbox.

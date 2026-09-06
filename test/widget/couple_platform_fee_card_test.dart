@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dahr/core/models/models.dart';
 import 'package:dahr/core/theme/app_theme.dart';
@@ -13,6 +14,8 @@ void main() {
     Locale locale = const Locale('en'),
     TextEditingController? controller,
     bool loadingTransferContext = false,
+    String? transferContextError,
+    VoidCallback? onRetryTransferContext,
   }) {
     return MaterialApp(
       theme: AppTheme.dark,
@@ -29,6 +32,8 @@ void main() {
             noteController: controller,
             onSubmitTransfer: () {},
             loadingTransferContext: loadingTransferContext,
+            transferContextError: transferContextError,
+            onRetryTransferContext: onRetryTransferContext,
           ),
         ),
       ),
@@ -103,10 +108,63 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
-  testWidgets('error soft-fail still shows the transfer form', (tester) async {
-    await tester.pumpWidget(host(bank: PlatformBankDetails.unset));
-    expect(find.text('I transferred'), findsOneWidget);
+  testWidgets('load error surfaces instead of ops-pending or empty note',
+      (tester) async {
+    var retried = false;
+    await tester.pumpWidget(
+      host(
+        bank: PlatformBankDetails.unset,
+        transferContextError: 'Something went wrong. Try again.',
+        onRetryTransferContext: () => retried = true,
+      ),
+    );
+    expect(find.text('Something went wrong. Try again.'), findsOneWidget);
+    expect(find.text('I transferred'), findsNothing);
+    expect(find.text('Bank details coming from ops.'), findsNothing);
     expect(find.byType(CircularProgressIndicator), findsNothing);
+    await tester.tap(find.text('Retry'));
+    expect(retried, isTrue);
+  });
+
+  testWidgets('copying a bank row shows a clipboard snackbar', (tester) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async => null,
+    );
+    await tester.pumpWidget(
+      host(
+        bank: const PlatformBankDetails(
+          bankName: 'Example Bank',
+          accountHolder: 'Dahr Operator',
+          accountNumber: 'PLACEHOLDER-ONLY',
+        ),
+      ),
+    );
+    await tester.ensureVisible(find.byIcon(Icons.copy_outlined).first);
+    await tester.tap(find.byIcon(Icons.copy_outlined).first);
+    await tester.pump();
+    expect(find.text('Copied to clipboard'), findsOneWidget);
+  });
+
+  testWidgets('Arabic copy snackbar uses the AR string', (tester) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async => null,
+    );
+    await tester.pumpWidget(
+      host(
+        bank: const PlatformBankDetails(
+          bankName: 'Example Bank',
+          accountHolder: 'Dahr Operator',
+          accountNumber: 'PLACEHOLDER-ONLY',
+        ),
+        locale: const Locale('ar'),
+      ),
+    );
+    await tester.ensureVisible(find.byIcon(Icons.copy_outlined).first);
+    await tester.tap(find.byIcon(Icons.copy_outlined).first);
+    await tester.pump();
+    expect(find.text('تم النسخ إلى الحافظة'), findsOneWidget);
   });
 
   testWidgets('renders Arabic unpaid fee and pending bank copy', (tester) async {

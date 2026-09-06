@@ -245,5 +245,6 @@
   "editProfile": "تعديل الملف",
   "phoneForWhatsappHint": "يستخدم المورّد هذا الرقم للتواصل عبر واتساب حول الحجز. لا يُستخدم لتسجيل الدخول.",
   "coupleContactUnknown": "الزوجان",
-  "reportReview": "الإبلاغ عن التقييم"
+  "reportReview": "الإبلاغ عن التقييم",
+  "copiedToClipboard": "تم النسخ إلى الحافظة"
 }
