@@ -5,24 +5,16 @@ Ship target: **Saturday 5 Sep 2026** (Africa/Tripoli). Screenshots and listing c
 ## Before you open the consoles
 
 1. Pull latest `main`.
-2. Confirm `.env` / `admin/.env.local` point at **Dahr LY** (`cccusktgxrizfwpixddu`) with **anon key only** (never commit; never put `service_role` in the app).
+2. Confirm `.env` / `admin/.env.local` point at **Dahr LY** (`https://cccusktgxrizfwpixddu.supabase.co`) with **anon key only** (never commit; never put `service_role` in the app). Run `dart run tool/check_store_env.dart` before the Play AAB.
 3. **Do not `db push`.** Every migration file is already on live Dahr LY, including booking integrity and `booking_party_contact` (Syber confirmed; live versions `20260904172502` / `20260904172239` — timestamps differ from git filenames). History still needs a one-time `supabase migration repair` before automatic deploys; see [`docs/supabase-github.md`](supabase-github.md). Do **not** re-push overnight / freeze-admin files.
 4. **Smoke the signed-out app** — open Discover without signing in and confirm listings, a vendor page, its photos, and its reviews (with author names) all load. This is the first screen a store reviewer sees.
 5. Preferred: one **quoted-booking smoke** (accept with amount → commission fields). Do not block the whole submit on this if time is tight — note result in the room.
-6. Privacy / terms public URLs must resolve:
-   - `{ADMIN_ORIGIN}/privacy`
-   - `{ADMIN_ORIGIN}/terms`
-   - Routes exist on `main`; hosting still needs a deploy (Vercel or equivalent). In-app `/legal/privacy` and `/legal/terms` cover Profile links meanwhile.
-7. Have WhatsApp business number + email `mohammedalariyibi@gmail.com` for store support / contact fields.
-8. Optional for 10% collection path: bank / WhatsApp details for offline commission (not required for store listing).
-2. Confirm `.env` / `admin/.env.local` point at **Dahr LY** (`https://cccusktgxrizfwpixddu.supabase.co`) with **anon key only** (never commit; never put `service_role` in the app). Run `dart run tool/check_store_env.dart` before the Play AAB.
-3. Preferred: one **quoted-booking smoke** (accept with amount → commission fields). Do not block the whole submit on this if time is tight — note result in the room.
-4. Privacy / terms public URLs must resolve (GitHub Pages, not Vercel / not dahr.ly):
+6. Privacy / terms public URLs are live on GitHub Pages (use these in store consoles; not Vercel / not dahr.ly):
    - `https://mohammedalariyibi-afk.github.io/Dahr/privacy`
    - `https://mohammedalariyibi-afk.github.io/Dahr/terms`
-   - After merge: if those 404, set **Settings → Pages → Source: GitHub Actions**. In-app `/legal/privacy` and `/legal/terms` do **not** satisfy the store fields.
-5. Have WhatsApp business number + email `mohammedalariyibi@gmail.com` for store support / contact fields.
-6. Optional for 10% collection path: paste real Dahr bank details in admin Settings after Syber applies `20260904005000_customer_pays_dahr_fee.sql` (not required for store listing).
+   - Source: `legal-pages/` via the Deploy legal pages workflow. In-app `/legal/privacy` and `/legal/terms` remain the Profile path; they do **not** satisfy the store public-URL fields.
+7. Have WhatsApp business number + email `mohammedalariyibi@gmail.com` for store support / contact fields.
+8. Optional for 10% collection path: paste real Dahr bank details in admin Settings after Syber applies `20260904005000_customer_pays_dahr_fee.sql` (not required for store listing).
 
 ## Assets already in repo
 
