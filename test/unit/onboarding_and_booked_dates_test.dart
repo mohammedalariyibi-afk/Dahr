@@ -42,7 +42,11 @@ void main() {
         'Future<void> completeProfile(',
       );
       expect(setRole.contains('_roleChosenBy = uid'), isTrue);
+      expect(setRole.contains('remember(uid)'), isTrue);
       expect(setRole.contains('await refreshProfile()'), isTrue);
+      expect(authProvider.contains('RoleChoiceStore'), isTrue);
+      expect(authProvider.contains('isRoleChosenForUser'), isTrue);
+      expect(authProvider.contains('_hydrateAndSync'), isTrue);
     });
 
     test('every profiles write fails closed on zero rows', () {

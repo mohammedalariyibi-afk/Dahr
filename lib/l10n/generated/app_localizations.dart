@@ -230,6 +230,18 @@ abstract class AppLocalizations {
   /// **'إعادة إرسال الرمز'**
   String get resendOtp;
 
+  /// No description provided for @otpResendSent.
+  ///
+  /// In ar, this message translates to:
+  /// **'تم إرسال رمز جديد.'**
+  String get otpResendSent;
+
+  /// No description provided for @otpResendWait.
+  ///
+  /// In ar, this message translates to:
+  /// **'أعد الإرسال خلال {seconds} ث'**
+  String otpResendWait(int seconds);
+
   /// No description provided for @invalidPhone.
   ///
   /// In ar, this message translates to:

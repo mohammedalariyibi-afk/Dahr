@@ -76,6 +76,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get resendOtp => 'Resend code';
 
   @override
+  String get otpResendSent => 'A new code was sent.';
+
+  @override
+  String otpResendWait(int seconds) {
+    return 'Resend in ${seconds}s';
+  }
+
+  @override
   String get invalidPhone => 'Invalid Libyan phone number';
 
   @override

@@ -7,6 +7,7 @@ import '../constants/app_constants.dart';
 import '../models/models.dart';
 import '../supabase/supabase_client.dart';
 import '../supabase/write_guard.dart';
+import 'role_choice_store.dart';
 
 enum AuthFlowStatus {
   unknown,
@@ -58,23 +59,53 @@ final authProvider =
 });
 
 class AuthController extends StateNotifier<AppAuthState> {
-  AuthController()
-      : super(const AppAuthState(status: AuthFlowStatus.unknown)) {
+  AuthController({RoleChoiceStore? roleChoice})
+      : _roleChoice = roleChoice,
+        super(const AppAuthState(status: AuthFlowStatus.unknown)) {
+    _roleChosenBy = roleChoice?.chosenBy;
     _authSub = DahrSupabase.auth.onAuthStateChange.listen((data) {
       _syncFromSession(data.session);
     });
-    _syncFromSession(DahrSupabase.auth.currentSession);
+    _hydrateAndSync();
   }
 
   late final StreamSubscription<AuthState> _authSub;
 
   /// User id that picked a role on this device since sign-in.
+  /// Hydrated from [RoleChoiceStore] so a kill-app before the name is saved
+  /// still reports the pick to [resolveAuthFlowStatus].
   String? _roleChosenBy;
+
+  RoleChoiceStore? _roleChoice;
 
   /// Bumped by every sync. A profile fetch that finishes after a newer sync
   /// started must not write its result — otherwise a fetch still in flight
   /// when the user signs out would resurrect the signed-in state.
   int _syncGeneration = 0;
+
+  Future<RoleChoiceStore?> _ensureStore() async {
+    if (_roleChoice != null) return _roleChoice;
+    try {
+      _roleChoice = await RoleChoiceStore.open();
+    } catch (_) {
+      return null;
+    }
+    return _roleChoice;
+  }
+
+  Future<void> _hydrateAndSync() async {
+    final store = await _ensureStore();
+    _roleChosenBy ??= store?.chosenBy;
+    await _syncFromSession(DahrSupabase.auth.currentSession);
+  }
+
+  bool _roleChosenFor(String userId) {
+    return isRoleChosenForUser(
+      userId: userId,
+      inMemoryChosenBy: _roleChosenBy,
+      persistedChosenBy: _roleChoice?.chosenBy,
+    );
+  }
 
   Future<void> _syncFromSession(Session? session) async {
     final generation = ++_syncGeneration;
@@ -85,13 +116,17 @@ class AuthController extends StateNotifier<AppAuthState> {
       return;
     }
 
+    await _ensureStore();
+    if (!_isCurrent(generation, session)) return;
+    _roleChosenBy ??= _roleChoice?.chosenBy;
+
     try {
       final profile = await fetchProfile(session.user.id);
       if (!_isCurrent(generation, session)) return;
       state = AppAuthState(
         status: resolveAuthFlowStatus(
           profile: profile,
-          roleChosen: _roleChosenBy == session.user.id,
+          roleChosen: _roleChosenFor(session.user.id),
         ),
         session: session,
         profile: profile,
@@ -105,7 +140,7 @@ class AuthController extends StateNotifier<AppAuthState> {
         state = AppAuthState(
           status: resolveAuthFlowStatus(
             profile: known,
-            roleChosen: _roleChosenBy == session.user.id,
+            roleChosen: _roleChosenFor(session.user.id),
           ),
           session: session,
           profile: known,
@@ -175,6 +210,11 @@ class AuthController extends StateNotifier<AppAuthState> {
     // pick here keeps that true for every later refresh in this session, not
     // just the one below.
     _roleChosenBy = uid;
+    try {
+      await (await _ensureStore())?.remember(uid);
+    } catch (_) {
+      // In-memory pick still advances this session; persist is best-effort.
+    }
     // Keep a complete profile authenticated (e.g. consumer becoming vendor).
     await refreshProfile();
   }
@@ -228,6 +268,9 @@ class AuthController extends StateNotifier<AppAuthState> {
   Future<void> signOut() async {
     await DahrSupabase.auth.signOut();
     _roleChosenBy = null;
+    try {
+      await (await _ensureStore())?.forget();
+    } catch (_) {}
     state = const AppAuthState(status: AuthFlowStatus.unauthenticated);
   }
 
