@@ -7,13 +7,20 @@ export type FilterTab = {
   count?: number;
 };
 
-export function FilterTabs({ items }: { items: FilterTab[] }) {
+export function FilterTabs({
+  items,
+  ariaLabel = "Filter navigation",
+}: {
+  items: FilterTab[];
+  ariaLabel?: string;
+}) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <nav aria-label={ariaLabel} className="flex flex-wrap gap-2">
       {items.map((item) => (
         <Link
           key={item.href}
           href={item.href}
+          aria-current={item.active ? "page" : undefined}
           className={`rounded-lg px-3 py-1.5 text-sm transition ${
             item.active
               ? "bg-[var(--burgundy-soft)] font-medium text-[var(--burgundy)]"
@@ -22,10 +29,13 @@ export function FilterTabs({ items }: { items: FilterTab[] }) {
         >
           {item.label}
           {item.count !== undefined ? (
-            <span className="ms-1 tabular-nums opacity-80">({item.count})</span>
+            <span className="ms-1 tabular-nums opacity-80">
+              <span className="sr-only"> ({item.count})</span>
+              <span aria-hidden="true">({item.count})</span>
+            </span>
           ) : null}
         </Link>
       ))}
-    </div>
+    </nav>
   );
 }
