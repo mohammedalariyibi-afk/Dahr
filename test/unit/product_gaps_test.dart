@@ -181,7 +181,9 @@ void main() {
         'lib/features/vendor_profile/screens/vendor_edit_profile_screen.dart',
       ).readAsStringSync();
       expect(edit, contains('Icons.chevron_right'));
-      expect(edit, contains('matchTextDirection: true'));
+      expect(edit, contains('Transform.flip'));
+      expect(edit, contains('TextDirection.rtl'));
+      expect(edit, isNot(contains('matchTextDirection')));
     });
 
     test('vendor detail can report a review', () {

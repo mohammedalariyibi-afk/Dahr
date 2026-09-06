@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:dahr/core/models/models.dart';
 import 'package:dahr/core/theme/app_theme.dart';
@@ -126,6 +127,10 @@ void main() {
   });
 
   testWidgets('copying a bank row shows a clipboard snackbar', (tester) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async => null,
+    );
     await tester.pumpWidget(
       host(
         bank: const PlatformBankDetails(
@@ -135,12 +140,17 @@ void main() {
         ),
       ),
     );
+    await tester.ensureVisible(find.byIcon(Icons.copy_outlined).first);
     await tester.tap(find.byIcon(Icons.copy_outlined).first);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('Copied to clipboard'), findsOneWidget);
   });
 
   testWidgets('Arabic copy snackbar uses the AR string', (tester) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async => null,
+    );
     await tester.pumpWidget(
       host(
         bank: const PlatformBankDetails(
@@ -151,8 +161,9 @@ void main() {
         locale: const Locale('ar'),
       ),
     );
+    await tester.ensureVisible(find.byIcon(Icons.copy_outlined).first);
     await tester.tap(find.byIcon(Icons.copy_outlined).first);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(find.text('تم النسخ إلى الحافظة'), findsOneWidget);
   });
 

@@ -35,14 +35,36 @@ Widget _host({Locale locale = const Locale('en')}) {
 }
 
 void main() {
-  testWidgets('photos row chevron mirrors with text direction', (tester) async {
+  testWidgets('photos row chevron flips on the X axis in Arabic RTL',
+      (tester) async {
     await tester.pumpWidget(_host(locale: const Locale('ar')));
     await tester.pumpAndSettle();
 
     expect(find.text('إدارة الصور'), findsOneWidget);
-    final icon = tester.widget<Icon>(find.byIcon(Icons.chevron_right));
-    expect(icon.matchTextDirection, isTrue);
-    expect(Directionality.of(tester.element(find.byIcon(Icons.chevron_right))),
-        TextDirection.rtl);
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(
+      Directionality.of(tester.element(find.byIcon(Icons.chevron_right))),
+      TextDirection.rtl,
+    );
+    final flip = tester.widget<Transform>(
+      find.byKey(const ValueKey('editListingPhotosChevron')),
+    );
+    expect(flip.transform.entry(0, 0), -1.0);
+  });
+
+  testWidgets('photos row chevron is not flipped in English LTR',
+      (tester) async {
+    await tester.pumpWidget(_host());
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(
+      Directionality.of(tester.element(find.byIcon(Icons.chevron_right))),
+      TextDirection.ltr,
+    );
+    final flip = tester.widget<Transform>(
+      find.byKey(const ValueKey('editListingPhotosChevron')),
+    );
+    expect(flip.transform.entry(0, 0), 1.0);
   });
 }

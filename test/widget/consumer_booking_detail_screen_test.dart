@@ -7,7 +7,7 @@ import 'package:dahr/features/booking/providers/booking_provider.dart';
 import 'package:dahr/features/booking/screens/consumer_booking_detail_screen.dart';
 import 'package:dahr/l10n/generated/app_localizations.dart';
 
-const _booking = BookingRequest(
+final _booking = BookingRequest(
   id: 'b1',
   vendorId: 'v1',
   consumerId: 'c1',
@@ -16,7 +16,7 @@ const _booking = BookingRequest(
   quotedAmountLyd: 2500,
   commissionAmountLyd: 250,
   commissionStatus: CommissionStatus.unpaid,
-  vendor: VendorProfile(
+  vendor: const VendorProfile(
     id: 'v1',
     profileId: 'p1',
     businessName: 'Studio Noor',
