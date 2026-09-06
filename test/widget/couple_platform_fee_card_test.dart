@@ -103,6 +103,12 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
   });
 
+  testWidgets('error soft-fail still shows the transfer form', (tester) async {
+    await tester.pumpWidget(host(bank: PlatformBankDetails.unset));
+    expect(find.text('I transferred'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
   testWidgets('renders Arabic unpaid fee and pending bank copy', (tester) async {
     await tester.pumpWidget(
       host(bank: PlatformBankDetails.unset, locale: const Locale('ar')),

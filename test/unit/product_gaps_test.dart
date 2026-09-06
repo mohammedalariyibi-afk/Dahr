@@ -144,8 +144,10 @@ void main() {
         'lib/features/booking/screens/consumer_booking_detail_screen.dart',
       ).readAsStringSync();
       expect(detail, contains('loadingTransferContext'));
-      expect(detail, contains('!notesAsync.hasValue'));
-      expect(detail, contains('!bankAsync.hasValue'));
+      expect(detail, contains('notesAsync.isLoading'));
+      expect(detail, contains('bankAsync.isLoading'));
+      expect(detail, isNot(contains('!notesAsync.hasValue')));
+      expect(detail, isNot(contains('!bankAsync.hasValue')));
     });
 
     test('vendor detail can report a review', () {
