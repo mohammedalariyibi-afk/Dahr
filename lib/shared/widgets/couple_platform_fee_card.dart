@@ -5,6 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/models/models.dart';
 import '../../core/theme/app_colors.dart';
 import '../../l10n/generated/app_localizations.dart';
+import 'glass_panel.dart';
 
 /// Couple-facing 10% Dahr fee. Bank transfer only — no Pay now / cards.
 class CouplePlatformFeeCard extends StatelessWidget {
@@ -49,96 +50,92 @@ class CouplePlatformFeeCard extends StatelessWidget {
     final amount = AppConstants.formatPrice(amountLyd);
     final theme = Theme.of(context);
 
-    return Card(
-      color: AppColors.creamDark,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.platformFeeTitle,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: AppColors.burgundy,
-                fontWeight: FontWeight.w700,
-              ),
+    return GlassPanel(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.platformFeeTitle,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: AppColors.iceBlue,
+              fontWeight: FontWeight.w700,
             ),
-            const SizedBox(height: 6),
-            Text(
-              amount,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: AppColors.ink,
-                fontWeight: FontWeight.w800,
-              ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            amount,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
             ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.platformFeeBody(amount),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkMuted,
-              ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.platformFeeBody(amount),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.textMuted,
             ),
-            const SizedBox(height: 6),
-            Text(
-              l10n.platformFeeVendorRest,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkMuted,
-              ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            l10n.platformFeeVendorRest,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.textMuted,
             ),
-            const SizedBox(height: 8),
-            Text(
-              '${l10n.commissionStatusLabel}: ${_statusLabel(l10n)}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: _unpaid ? AppColors.warning : AppColors.success,
-                fontWeight: FontWeight.w600,
-              ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '${l10n.commissionStatusLabel}: ${_statusLabel(l10n)}',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: _unpaid ? AppColors.warning : AppColors.success,
+              fontWeight: FontWeight.w600,
             ),
-            if (!compact) ...[
-              const SizedBox(height: 16),
-              if (loadingTransferContext)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Center(
-                    child: CircularProgressIndicator(),
+          ),
+          if (!compact) ...[
+            const SizedBox(height: 16),
+            if (loadingTransferContext)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (transferContextError != null)
+              _TransferContextError(
+                message: transferContextError!,
+                onRetry: onRetryTransferContext,
+              )
+            else ...[
+              _BankDetailsBlock(bankDetails: bankDetails),
+              if (_unpaid) ...[
+                const SizedBox(height: 16),
+                if (submittedNote != null)
+                  Text(
+                    l10n.transferReported,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.success,
+                    ),
+                  )
+                else
+                  _TransferNoteForm(
+                    controller: noteController,
+                    onSubmit: onSubmitTransfer,
+                    submitting: submitting,
                   ),
-                )
-              else if (transferContextError != null)
-                _TransferContextError(
-                  message: transferContextError!,
-                  onRetry: onRetryTransferContext,
-                )
-              else ...[
-                _BankDetailsBlock(bankDetails: bankDetails),
-                if (_unpaid) ...[
-                  const SizedBox(height: 16),
-                  if (submittedNote != null)
-                    Text(
-                      l10n.transferReported,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.success,
-                      ),
-                    )
-                  else
-                    _TransferNoteForm(
-                      controller: noteController,
-                      onSubmit: onSubmitTransfer,
-                      submitting: submitting,
+                if (submittedNote != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    submittedNote!.referenceNote,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textDim,
                     ),
-                  if (submittedNote != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      submittedNote!.referenceNote,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.inkMuted,
-                      ),
-                    ),
-                  ],
+                  ),
                 ],
               ],
             ],
           ],
-        ),
+        ],
       ),
     );
   }

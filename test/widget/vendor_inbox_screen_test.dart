@@ -68,10 +68,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Dahr commission (10%): 250 LYD'), findsOneWidget);
+    expect(find.text("Couple's Dahr fee (10%): 250 LYD"), findsOneWidget);
     expect(find.textContaining('Commission status: Unpaid'), findsOneWidget);
     expect(
-      find.textContaining('The couple pays that fee to Dahr by bank transfer'),
+      find.textContaining('You pay Dahr nothing'),
       findsOneWidget,
     );
   });
@@ -90,9 +90,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Dahr commission (10%): 250 LYD'), findsOneWidget);
+    expect(find.text("Couple's Dahr fee (10%): 250 LYD"), findsOneWidget);
     expect(
-      find.textContaining('The couple pays that fee to Dahr by bank transfer'),
+      find.textContaining('You pay Dahr nothing'),
       findsNothing,
     );
   });
@@ -113,7 +113,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.textContaining('يدفع الزوجان هذه الرسوم لدهر بتحويل بنكي'),
+      find.textContaining('أنت لا تدفع لدهر شيئاً'),
       findsOneWidget,
     );
   });
