@@ -76,6 +76,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get resendOtp => 'إعادة إرسال الرمز';
 
   @override
+  String get otpResendSent => 'تم إرسال رمز جديد.';
+
+  @override
+  String otpResendWait(int seconds) {
+    return 'أعد الإرسال خلال $seconds ث';
+  }
+
+  @override
   String get invalidPhone => 'رقم هاتف ليبي غير صالح';
 
   @override
