@@ -1,7 +1,15 @@
 import { setCommissionStatus } from "@/app/(admin)/actions";
 import { ActionError } from "@/components/action-error";
+import { FilterTabs } from "@/components/filter-tabs";
+import { PageNav } from "@/components/page-nav";
+import { sumUnpaidCommission } from "@/lib/admin-aggregates";
+import {
+  clampPage,
+  pageHrefs,
+  pageRange,
+  parsePage,
+} from "@/lib/admin-page";
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
 
 type CommissionFilter = "all" | "unpaid" | "paid" | "waived";
 
@@ -57,19 +65,56 @@ function statusBadgeClass(status: CommissionRow["commission_status"]): string {
 export default async function CommissionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; error?: string }>;
+  searchParams: Promise<{ status?: string; page?: string; error?: string }>;
 }) {
-  const { status: rawStatus, error: actionError } = await searchParams;
+  const {
+    status: rawStatus,
+    page: rawPage,
+    error: actionError,
+  } = await searchParams;
   const filter: CommissionFilter =
     rawStatus === "unpaid" || rawStatus === "paid" || rawStatus === "waived"
       ? rawStatus
       : "all";
+  const requestedPage = parsePage(rawPage);
 
   const supabase = await createClient();
+  const quoted = () =>
+    supabase
+      .from("booking_requests")
+      .select("*", { count: "exact", head: true })
+      .not("quoted_amount_lyd", "is", null);
+
+  const [
+    unpaid,
+    allCount,
+    unpaidCount,
+    paidCount,
+    waivedCount,
+  ] = await Promise.all([
+    sumUnpaidCommission(supabase),
+    quoted(),
+    quoted().eq("commission_status", "unpaid"),
+    quoted().eq("commission_status", "paid"),
+    quoted().eq("commission_status", "waived"),
+  ]);
+
+  const tabTotal =
+    filter === "unpaid"
+      ? (unpaidCount.count ?? 0)
+      : filter === "paid"
+        ? (paidCount.count ?? 0)
+        : filter === "waived"
+          ? (waivedCount.count ?? 0)
+          : (allCount.count ?? 0);
+  const page = clampPage(requestedPage, tabTotal);
+  const { from, to } = pageRange(page);
+
   let query = supabase
     .from("booking_requests")
     .select(
       "id, event_date, status, quoted_amount_lyd, commission_rate, commission_amount_lyd, commission_status, commission_paid_at, created_at, vendor_profiles(business_name, category, city)",
+      { count: "exact" },
     )
     .not("quoted_amount_lyd", "is", null)
     .order("created_at", { ascending: false });
@@ -78,9 +123,9 @@ export default async function CommissionsPage({
     query = query.eq("commission_status", filter);
   }
 
-  const { data, error } = await query;
+  const { data, error } = await query.range(from, to);
 
-  if (error) {
+  if (error || unpaid.error) {
     return (
       <p className="text-sm text-red-700">
         Could not load commissions. Try again.
@@ -105,16 +150,15 @@ export default async function CommissionsPage({
       }
     }
   }
-  const unpaidTotal = rows
-    .filter((r) => r.commission_status === "unpaid")
-    .reduce((sum, r) => sum + Number(r.commission_amount_lyd ?? 0), 0);
 
-  const filters: { id: CommissionFilter; label: string }[] = [
-    { id: "all", label: "All" },
-    { id: "unpaid", label: "Unpaid" },
-    { id: "paid", label: "Paid" },
-    { id: "waived", label: "Waived" },
-  ];
+  const listParams = new URLSearchParams();
+  if (filter !== "all") listParams.set("status", filter);
+  const { prevHref, nextHref } = pageHrefs(
+    "/commissions",
+    listParams,
+    page,
+    tabTotal,
+  );
 
   return (
     <div className="space-y-8">
@@ -130,32 +174,40 @@ export default async function CommissionsPage({
       <ActionError message={actionError} />
 
       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
-        <p className="text-sm text-[var(--muted)]">Unpaid on this list</p>
+        <p className="text-sm text-[var(--muted)]">Unpaid commission</p>
         <p className="mt-2 font-display text-4xl text-[var(--burgundy)] tabular-nums">
-          {unpaidTotal.toFixed(2)} LYD
+          {unpaid.sum.toFixed(2)} LYD
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {filters.map((f) => {
-          const href =
-            f.id === "all" ? "/commissions" : `/commissions?status=${f.id}`;
-          const active = filter === f.id;
-          return (
-            <Link
-              key={f.id}
-              href={href}
-              className={`rounded-lg px-3 py-1.5 text-sm transition ${
-                active
-                  ? "bg-[var(--burgundy-soft)] font-medium text-[var(--burgundy)]"
-                  : "border border-[var(--border)] text-[var(--muted)] hover:text-[var(--ink)]"
-              }`}
-            >
-              {f.label}
-            </Link>
-          );
-        })}
-      </div>
+      <FilterTabs
+        items={[
+          {
+            href: "/commissions",
+            label: "All",
+            active: filter === "all",
+            count: allCount.count ?? 0,
+          },
+          {
+            href: "/commissions?status=unpaid",
+            label: "Unpaid",
+            active: filter === "unpaid",
+            count: unpaidCount.count ?? 0,
+          },
+          {
+            href: "/commissions?status=paid",
+            label: "Paid",
+            active: filter === "paid",
+            count: paidCount.count ?? 0,
+          },
+          {
+            href: "/commissions?status=waived",
+            label: "Waived",
+            active: filter === "waived",
+            count: waivedCount.count ?? 0,
+          },
+        ]}
+      />
 
       <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
         {rows.length === 0 ? (
@@ -261,6 +313,14 @@ export default async function CommissionsPage({
           </div>
         )}
       </div>
+
+      <PageNav
+        page={page}
+        total={tabTotal}
+        prevHref={prevHref}
+        nextHref={nextHref}
+        noun={tabTotal === 1 ? "commission" : "commissions"}
+      />
     </div>
   );
 }
