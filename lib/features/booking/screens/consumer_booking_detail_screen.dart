@@ -99,6 +99,8 @@ class _ConsumerBookingDetailScreenState
               onAction: () => context.go('/bookings'),
             );
           }
+          final transferContextLoading =
+              !notesAsync.hasValue || !bankAsync.hasValue;
           final bank = bankAsync.valueOrNull ?? PlatformBankDetails.unset;
           final notes = notesAsync.valueOrNull;
           final latestNote =
@@ -139,6 +141,7 @@ class _ConsumerBookingDetailScreenState
                   noteController: _noteController,
                   onSubmitTransfer: _submitTransfer,
                   submitting: _submitting,
+                  loadingTransferContext: transferContextLoading,
                 ),
               ],
               if (booking.canLeaveReview) ...[

@@ -131,6 +131,23 @@ void main() {
       );
     });
 
+    test('language toggle surfaces updateLocale failures', () {
+      final profile = File('lib/features/auth/screens/profile_tab_screen.dart')
+          .readAsStringSync();
+      expect(profile, contains('updateLocale'));
+      expect(profile, contains('SafeUserError.of'));
+      expect(profile, isNot(contains('catch (_) {}')));
+    });
+
+    test('couple booking detail waits for transfer notes before the form', () {
+      final detail = File(
+        'lib/features/booking/screens/consumer_booking_detail_screen.dart',
+      ).readAsStringSync();
+      expect(detail, contains('loadingTransferContext'));
+      expect(detail, contains('!notesAsync.hasValue'));
+      expect(detail, contains('!bankAsync.hasValue'));
+    });
+
     test('vendor detail can report a review', () {
       final detail = File(
         'lib/features/vendor_profile/screens/vendor_detail_screen.dart',

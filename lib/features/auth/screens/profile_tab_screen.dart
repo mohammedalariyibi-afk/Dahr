@@ -6,6 +6,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/models/enums.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../core/providers/locale_provider.dart';
+import '../../../core/security/safe_user_error.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../l10n/generated/app_localizations.dart';
 import 'delete_account_dialog.dart';
@@ -93,7 +94,16 @@ class ProfileTabScreen extends ConsumerWidget {
                 await ref.read(authProvider.notifier).updateLocale(
                       ref.read(localeProvider).languageCode,
                     );
-              } catch (_) {}
+              } catch (e) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      SafeUserError.of(AppLocalizations.of(context), e),
+                    ),
+                  ),
+                );
+              }
             },
           ),
           if (auth.isVendor) ...[

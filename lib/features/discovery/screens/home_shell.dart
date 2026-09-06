@@ -5,18 +5,25 @@ import 'package:go_router/go_router.dart';
 import '../../../core/providers/auth_provider.dart';
 import '../../../l10n/generated/app_localizations.dart';
 
+/// Bottom-nav index for the current shell location.
+///
+/// Vendors have Inbox at index 2, not Bookings. A vendor who opened
+/// `/bookings` from Profile keeps Profile selected so Inbox is not
+/// highlighted as the active destination. Couples on `/bookings` still
+/// highlight Bookings. Inbox always stays index 2 for both roles.
+int homeShellIndexForLocation(String loc, {required bool isVendor}) {
+  if (loc.startsWith('/discover')) return 0;
+  if (loc.startsWith('/favorites')) return 1;
+  if (loc.startsWith('/inbox')) return 2;
+  if (loc.startsWith('/bookings')) return isVendor ? 3 : 2;
+  if (loc.startsWith('/profile')) return 3;
+  return 0;
+}
+
 class HomeShell extends ConsumerWidget {
   const HomeShell({super.key, required this.child});
 
   final Widget child;
-
-  int _indexForLocation(String loc, bool isVendor) {
-    if (loc.startsWith('/discover')) return 0;
-    if (loc.startsWith('/favorites')) return 1;
-    if (loc.startsWith('/bookings') || loc.startsWith('/inbox')) return 2;
-    if (loc.startsWith('/profile')) return 3;
-    return 0;
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,7 +31,7 @@ class HomeShell extends ConsumerWidget {
     final auth = ref.watch(authProvider);
     final isVendor = auth.isVendor;
     final loc = GoRouterState.of(context).matchedLocation;
-    final index = _indexForLocation(loc, isVendor);
+    final index = homeShellIndexForLocation(loc, isVendor: isVendor);
 
     return Scaffold(
       body: child,
