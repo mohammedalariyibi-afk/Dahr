@@ -19,6 +19,7 @@ import {
   parsePage,
   withSearchParams,
 } from "@/lib/admin-page";
+import Link from "next/link";
 import {
   VENDOR_LIST_SELECT,
   VENDOR_OWNER_SEARCH_CAP,
@@ -167,13 +168,14 @@ export default async function VendorsPage({
 
       <ActionError message={params.error} />
 
-      <form className="flex flex-wrap gap-2" action="/vendors" method="get">
+      <form className="flex flex-wrap items-center gap-2" action="/vendors" method="get">
         {filter !== "all" ? (
           <input type="hidden" name="filter" value={filter} />
         ) : null}
         <input
           type="search"
           name="q"
+          aria-label="Search vendors"
           defaultValue={qRaw}
           placeholder="Search business, city, owner, WhatsApp…"
           className="min-w-[220px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--burgundy)] focus:ring-2 focus:ring-[var(--burgundy-soft)]"
@@ -184,6 +186,14 @@ export default async function VendorsPage({
         >
           Search
         </button>
+        {qRaw ? (
+          <Link
+            href={tabHref(filter)}
+            className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--muted)] hover:border-[var(--burgundy)] hover:text-[var(--burgundy)]"
+          >
+            Clear
+          </Link>
+        ) : null}
       </form>
 
       <FilterTabs
