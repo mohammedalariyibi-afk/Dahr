@@ -21,7 +21,10 @@ export function PageNav({
   const needsButtons = total > pageSize;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--muted)]">
+    <nav
+      aria-label="Pagination"
+      className="flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--muted)]"
+    >
       <p>
         Showing{" "}
         <span className="tabular-nums text-[var(--ink)]">
@@ -39,7 +42,10 @@ export function PageNav({
               Previous
             </Link>
           ) : (
-            <span className="rounded-lg border border-[var(--border)] px-3 py-1.5 opacity-40">
+            <span
+              aria-disabled="true"
+              className="rounded-lg border border-[var(--border)] px-3 py-1.5 opacity-40 select-none cursor-not-allowed"
+            >
               Previous
             </span>
           )}
@@ -51,12 +57,15 @@ export function PageNav({
               Next
             </Link>
           ) : (
-            <span className="rounded-lg border border-[var(--border)] px-3 py-1.5 opacity-40">
+            <span
+              aria-disabled="true"
+              className="rounded-lg border border-[var(--border)] px-3 py-1.5 opacity-40 select-none cursor-not-allowed"
+            >
               Next
             </span>
           )}
         </div>
       ) : null}
-    </div>
+    </nav>
   );
 }
