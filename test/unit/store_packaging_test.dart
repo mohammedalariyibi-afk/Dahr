@@ -93,4 +93,13 @@ void main() {
       isNot(contains('otherwise debug signing so `flutter run --release`')),
     );
   });
+
+  test('web platform is present so browser smoke tests can load assets', () {
+    final index = File('web/index.html');
+    expect(index.existsSync(), isTrue);
+    final html = index.readAsStringSync();
+    expect(html, contains('Dahr'));
+    expect(html, contains('flutter_bootstrap.js'));
+    expect(File('web/manifest.json').existsSync(), isTrue);
+  });
 }
