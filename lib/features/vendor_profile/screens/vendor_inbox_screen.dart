@@ -237,7 +237,7 @@ class VendorInboxScreen extends ConsumerWidget {
                               if (b.isCommissionUnpaid) ...[
                                 const SizedBox(height: 6),
                                 Text(
-                                  l10n.commissionNoteVendor,
+                                  l10n.vendorDahrFeeHint,
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall

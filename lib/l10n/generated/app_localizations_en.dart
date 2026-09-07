@@ -455,7 +455,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quotedAmountHint => 'Amount agreed with the couple';
 
   @override
-  String get commissionDueLabel => 'Dahr commission (10%)';
+  String get commissionDueLabel => 'Couple\'s Dahr fee (10%)';
 
   @override
   String get acceptBookingTitle => 'Accept booking';
@@ -476,7 +476,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commissionWaived => 'Waived';
 
   @override
-  String get unpaidCommissionOwed => 'Dahr fee (unpaid)';
+  String get unpaidCommissionOwed => 'Couple’s Dahr fee (unpaid)';
 
   @override
   String get noUnpaidCommission => 'No unpaid Dahr fee';
@@ -486,7 +486,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commissionNoteVendor =>
-      'Dahr records 10% of this quote. The couple pays that fee to Dahr by bank transfer. You settle the rest with them off-platform.';
+      'Dahr records 10% of this quote. The couple pays that fee to Dahr by bank transfer. You settle the quote with them off-platform. You pay Dahr nothing.';
 
   @override
   String get invalidQuotedAmount => 'Enter a valid amount in LYD';
@@ -646,7 +646,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get acceptQuoteSuccess =>
-      'Booking accepted. The couple pays Dahr’s 10% fee by bank transfer.';
+      'Booking accepted. The couple pays Dahr’s 10% fee by bank transfer. You pay Dahr nothing.';
 
   @override
   String get roleNotAssignable =>
@@ -703,7 +703,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vendorDahrFeeHint =>
-      'Status only. The couple pays this 10% fee to Dahr by bank transfer.';
+      'Status only. The couple pays this 10% fee to Dahr by bank transfer. You pay Dahr nothing.';
 
   @override
   String get guestCountInvalid => 'Guest count must be at least 1';

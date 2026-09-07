@@ -454,7 +454,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get quotedAmountHint => 'المبلغ المتفق عليه مع الزوجين';
 
   @override
-  String get commissionDueLabel => 'عمولة دهر (10%)';
+  String get commissionDueLabel => 'رسوم دهر على الزوجين (10%)';
 
   @override
   String get acceptBookingTitle => 'قبول الحجز';
@@ -475,7 +475,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get commissionWaived => 'معفاة';
 
   @override
-  String get unpaidCommissionOwed => 'رسوم دهر (غير مدفوعة)';
+  String get unpaidCommissionOwed => 'رسوم دهر على الزوجين (غير مدفوعة)';
 
   @override
   String get noUnpaidCommission => 'لا توجد رسوم دهر غير مدفوعة';
@@ -485,7 +485,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get commissionNoteVendor =>
-      'يسجّل دهر 10٪ من هذا المبلغ. يدفع الزوجان هذه الرسوم لدهر بتحويل بنكي. تُسوّى بقية المبلغ معهم خارج المنصة.';
+      'يسجّل دهر 10٪ من هذا المبلغ. يدفع الزوجان هذه الرسوم لدهر بتحويل بنكي. تُسوّى قيمة العرض معهم خارج المنصة. أنت لا تدفع لدهر شيئاً.';
 
   @override
   String get invalidQuotedAmount => 'أدخل مبلغاً صالحاً بالدينار الليبي';
@@ -641,7 +641,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get acceptQuoteSuccess =>
-      'تم قبول الحجز. يدفع الزوجان رسوم دهر 10٪ بتحويل بنكي.';
+      'تم قبول الحجز. يدفع الزوجان رسوم دهر 10٪ بتحويل بنكي. أنت لا تدفع لدهر شيئاً.';
 
   @override
   String get roleNotAssignable =>
@@ -698,7 +698,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vendorDahrFeeHint =>
-      'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي.';
+      'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي. أنت لا تدفع لدهر شيئاً.';
 
   @override
   String get guestCountInvalid => 'عدد الضيوف يجب أن يكون 1 على الأقل';

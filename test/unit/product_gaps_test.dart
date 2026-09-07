@@ -169,8 +169,14 @@ void main() {
     });
 
     test('vendor inbox unpaid commission includes couple-pays framing', () {
+      final inbox = File(
+        'lib/features/vendor_profile/screens/vendor_inbox_screen.dart',
+      ).readAsStringSync();
+      // Status-only couple-pays hint — not the accept-dialog vendor note.
+      expect(inbox, contains('vendorDahrFeeHint'));
+      expect(inbox, isNot(contains('commissionNoteVendor')));
       expect(
-        File('lib/features/vendor_profile/screens/vendor_inbox_screen.dart')
+        File('lib/features/vendor_profile/widgets/accept_booking_dialog.dart')
             .readAsStringSync(),
         contains('commissionNoteVendor'),
       );

@@ -983,7 +983,7 @@ abstract class AppLocalizations {
   /// No description provided for @commissionDueLabel.
   ///
   /// In ar, this message translates to:
-  /// **'عمولة دهر (10%)'**
+  /// **'رسوم دهر على الزوجين (10%)'**
   String get commissionDueLabel;
 
   /// No description provided for @acceptBookingTitle.
@@ -1025,7 +1025,7 @@ abstract class AppLocalizations {
   /// No description provided for @unpaidCommissionOwed.
   ///
   /// In ar, this message translates to:
-  /// **'رسوم دهر (غير مدفوعة)'**
+  /// **'رسوم دهر على الزوجين (غير مدفوعة)'**
   String get unpaidCommissionOwed;
 
   /// No description provided for @noUnpaidCommission.
@@ -1043,7 +1043,7 @@ abstract class AppLocalizations {
   /// No description provided for @commissionNoteVendor.
   ///
   /// In ar, this message translates to:
-  /// **'يسجّل دهر 10٪ من هذا المبلغ. يدفع الزوجان هذه الرسوم لدهر بتحويل بنكي. تُسوّى بقية المبلغ معهم خارج المنصة.'**
+  /// **'يسجّل دهر 10٪ من هذا المبلغ. يدفع الزوجان هذه الرسوم لدهر بتحويل بنكي. تُسوّى قيمة العرض معهم خارج المنصة. أنت لا تدفع لدهر شيئاً.'**
   String get commissionNoteVendor;
 
   /// No description provided for @invalidQuotedAmount.
@@ -1337,7 +1337,7 @@ abstract class AppLocalizations {
   /// No description provided for @acceptQuoteSuccess.
   ///
   /// In ar, this message translates to:
-  /// **'تم قبول الحجز. يدفع الزوجان رسوم دهر 10٪ بتحويل بنكي.'**
+  /// **'تم قبول الحجز. يدفع الزوجان رسوم دهر 10٪ بتحويل بنكي. أنت لا تدفع لدهر شيئاً.'**
   String get acceptQuoteSuccess;
 
   /// No description provided for @roleNotAssignable.
@@ -1439,7 +1439,7 @@ abstract class AppLocalizations {
   /// No description provided for @vendorDahrFeeHint.
   ///
   /// In ar, this message translates to:
-  /// **'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي.'**
+  /// **'للحالة فقط. يدفع الزوجان رسوم 10٪ لدهر بتحويل بنكي. أنت لا تدفع لدهر شيئاً.'**
   String get vendorDahrFeeHint;
 
   /// No description provided for @guestCountInvalid.

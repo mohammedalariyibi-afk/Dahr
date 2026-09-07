@@ -47,10 +47,10 @@ void main() {
     await tester.pump();
 
     expect(find.text('Quote: 2500 LYD'), findsOneWidget);
-    expect(find.text('Dahr commission (10%): 250 LYD'), findsOneWidget);
+    expect(find.text("Couple's Dahr fee (10%): 250 LYD"), findsOneWidget);
     expect(find.textContaining('You pay 10%'), findsNothing);
     expect(
-      find.textContaining('The couple pays that fee to Dahr by bank transfer'),
+      find.textContaining('You pay Dahr nothing'),
       findsOneWidget,
     );
     expect(find.textContaining('Pay now'), findsNothing);
