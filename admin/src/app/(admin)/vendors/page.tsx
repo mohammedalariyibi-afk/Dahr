@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   setVendorApproved,
   toggleVendorVerified,
@@ -175,6 +176,7 @@ export default async function VendorsPage({
           type="search"
           name="q"
           defaultValue={qRaw}
+          aria-label="Search vendors"
           placeholder="Search business, city, owner, WhatsApp…"
           className="min-w-[220px] flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--burgundy)] focus:ring-2 focus:ring-[var(--burgundy-soft)]"
         />
@@ -184,9 +186,18 @@ export default async function VendorsPage({
         >
           Search
         </button>
+        {qRaw ? (
+          <Link
+            href={tabHref(filter)}
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)] hover:border-[var(--burgundy)] hover:text-[var(--ink)]"
+          >
+            Clear
+          </Link>
+        ) : null}
       </form>
 
       <FilterTabs
+        ariaLabel="Filter vendors by status"
         items={[
           {
             href: tabHref("all"),
