@@ -43,7 +43,7 @@ Dahr is a wedding marketplace for Libya. Couples discover approved vendors, save
 
 What you can do
 
-• Discover venues, photography, catering, dresses, beauty, music, cars, decor, and more in Tripoli and Benghazi
+• Discover venues, photography, catering, dresses, music, cars, decor, and more in Tripoli and Benghazi
 • Open a vendor page for photos, price range in LYD, and reviews
 • Request a booking for a free date and add a message
 • Message the vendor on WhatsApp (opens WhatsApp; Dahr does not store those chats)
@@ -91,7 +91,7 @@ Operator: Mohammed Alariyibi. Product: Dahr.
 
 ماذا يمكنك أن تفعل
 
-• اكتشف القاعات، التصوير، الضيافة، الفساتين، التجميل، الموسيقى، السيارات، الديكور وغيرها في طرابلس وبنغازي
+• اكتشف القاعات، التصوير، الضيافة، الفساتين، الموسيقى، السيارات، الديكور وغيرها في طرابلس وبنغازي
 • افتح صفحة المورّد للصور ونطاق السعر بالدينار الليبي والتقييمات
 • اطلب حجزاً في تاريخ متاح وأضف رسالة
 • تواصل مع المورّد عبر واتساب (يُفتح واتساب؛ دهر لا يحفظ تلك المحادثات)

@@ -8,8 +8,8 @@ import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { FilterTabs } from "@/components/filter-tabs";
 import { PageNav } from "@/components/page-nav";
 import {
-  CATEGORY_LABELS,
   CITY_LABELS,
+  categoryLabel,
   firstEmbed,
   formatPriceRange,
 } from "@/lib/admin";
@@ -329,7 +329,7 @@ function VendorSection({
                       </p>
                     </td>
                     <td className="px-4 py-3 text-[var(--ink)]">
-                      {CATEGORY_LABELS[vendor.category] ?? vendor.category}
+                      {categoryLabel(vendor.category)}
                     </td>
                     <td className="px-4 py-3 text-[var(--ink)]">
                       {CITY_LABELS[vendor.city] ?? vendor.city}

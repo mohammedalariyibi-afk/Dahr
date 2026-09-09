@@ -177,9 +177,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get categoryDresses => 'فساتين';
 
   @override
-  String get categoryBeauty => 'تجميل';
-
-  @override
   String get categoryMusic => 'موسيقى';
 
   @override

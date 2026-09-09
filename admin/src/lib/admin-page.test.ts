@@ -11,6 +11,7 @@ import {
   showingRange,
   withSearchParams,
 } from "./admin-page";
+import { CATEGORY_LABELS, categoryLabel } from "./admin";
 import { sanitizeAdminSearch, vendorSearchOr } from "./vendor-search";
 
 describe("admin pagination", () => {
@@ -68,6 +69,15 @@ describe("vendor search", () => {
     assert.match(clause, /category\.eq\.photography/);
     assert.match(clause, /profile_id\.in\.\(aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee\)/);
     assert.equal(vendorSearchOr(""), null);
+  });
+
+  it("does not search or label the retired beauty category", () => {
+    assert.equal("beauty" in CATEGORY_LABELS, false);
+    assert.equal(categoryLabel("beauty"), "Other");
+    assert.equal(categoryLabel("venues"), "Venues");
+    const clause = vendorSearchOr("beauty");
+    assert.ok(clause);
+    assert.doesNotMatch(clause, /category\.eq\.beauty/);
   });
 });
 

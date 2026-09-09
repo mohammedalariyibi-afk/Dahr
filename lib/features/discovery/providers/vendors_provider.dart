@@ -114,7 +114,8 @@ class VendorsNotifier extends AsyncNotifier<List<VendorProfile>> {
     var query = DahrSupabase.client
         .from('vendor_profiles')
         .select('*, vendor_photos(*)')
-        .eq('is_approved', true);
+        .eq('is_approved', true)
+        .neq('category', VendorCategory.retiredBeautyDb);
 
     if (filters.category != null) {
       query = query.eq('category', filters.category!.name);
