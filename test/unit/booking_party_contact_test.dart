@@ -29,7 +29,6 @@ void main() {
 
   test('sits after guest-read and is unique', () {
     expect(migrationNames, contains(_migration));
-    expect(migrationNames.last, _migration);
     expect(
       migrationNames.indexOf(_migration),
       greaterThan(

@@ -77,9 +77,20 @@ void main() {
   test('seed and migration recategorize beauty instead of dropping the enum', () {
     final seed = File('supabase/seed.sql').readAsStringSync();
     expect(seed, isNot(contains("'beauty'")));
-    final sql = File(
-      'supabase/migrations/20260909120000_retire_beauty_category.sql',
-    ).readAsStringSync();
+    const name = '20260909120000_retire_beauty_category.sql';
+    final migrations = Directory('supabase/migrations')
+        .listSync()
+        .whereType<File>()
+        .map((f) => f.uri.pathSegments.last)
+        .toList()
+      ..sort();
+    expect(migrations, contains(name));
+    expect(migrations.last, name);
+    expect(
+      migrations.where((n) => n.contains('retire_beauty_category')),
+      hasLength(1),
+    );
+    final sql = File('supabase/migrations/$name').readAsStringSync();
     expect(sql, contains("SET category = 'other'"));
     expect(sql, contains("WHERE category = 'beauty'"));
     expect(sql.toLowerCase(), isNot(contains('drop type')));

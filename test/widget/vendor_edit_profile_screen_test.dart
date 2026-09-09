@@ -67,4 +67,17 @@ void main() {
     );
     expect(flip.transform.entry(0, 0), 1.0);
   });
+
+  testWidgets('category dropdown does not offer Beauty', (tester) async {
+    await tester.pumpWidget(_host());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(DropdownButtonFormField<VendorCategory>));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Photography'), findsWidgets);
+    expect(find.text('Venues'), findsOneWidget);
+    expect(find.text('Other'), findsOneWidget);
+    expect(find.text('Beauty'), findsNothing);
+  });
 }
