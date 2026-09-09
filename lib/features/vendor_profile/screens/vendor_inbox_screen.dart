@@ -177,8 +177,11 @@ class VendorInboxScreen extends ConsumerWidget {
             child: AsyncBody<List<BookingRequest>>(
               value: async,
               onRetry: () => ref.read(vendorInboxProvider.notifier).refresh(),
-              emptyWhen: (list) =>
-                  list.where((b) => filter == null || b.status == filter).isEmpty,
+              // Bolt Optimization: Use short-circuiting !list.any() when filtering instead of
+              // list.where().isEmpty to avoid creating intermediate WhereIterable objects and fully scanning the list.
+              emptyWhen: (list) => filter == null
+                  ? list.isEmpty
+                  : !list.any((b) => b.status == filter),
               empty: EmptyState(
                 title: l10n.inboxEmptyTitle,
                 message: _emptyMessage(l10n, filter),
