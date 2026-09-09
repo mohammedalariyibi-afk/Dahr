@@ -87,10 +87,8 @@ class _VendorDetailScreenState extends ConsumerState<VendorDetailScreen> {
     final vendorAsync = ref.watch(vendorDetailProvider(vendorId));
     final reviewsAsync = ref.watch(vendorReviewsProvider(vendorId));
     final favIds = ref.watch(favoritesProvider);
-    final isFav = favIds.maybeWhen(
-      data: (ids) => ids.contains(vendorId),
-      orElse: () => false,
-    );
+    // Bolt Optimization: Avoid pattern matching and closure allocations from AsyncValue.maybeWhen on build
+    final isFav = favIds.valueOrNull?.contains(vendorId) ?? false;
     final currentUserId = ref.watch(authProvider).session?.user.id;
 
     return Scaffold(
