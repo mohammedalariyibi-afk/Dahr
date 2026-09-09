@@ -20,7 +20,6 @@ import {
   parsePage,
   withSearchParams,
 } from "@/lib/admin-page";
-import Link from "next/link";
 import {
   VENDOR_LIST_SELECT,
   VENDOR_OWNER_SEARCH_CAP,
@@ -176,7 +175,6 @@ export default async function VendorsPage({
         <input
           type="search"
           name="q"
-          aria-label="Search vendors"
           defaultValue={qRaw}
           aria-label="Search vendors"
           placeholder="Search business, city, owner, WhatsApp…"
@@ -192,7 +190,6 @@ export default async function VendorsPage({
           <Link
             href={tabHref(filter)}
             className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--muted)] hover:border-[var(--burgundy)] hover:text-[var(--ink)]"
-            className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--muted)] hover:border-[var(--burgundy)] hover:text-[var(--burgundy)]"
           >
             Clear
           </Link>
