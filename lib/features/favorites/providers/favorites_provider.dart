@@ -33,8 +33,10 @@ final favoriteVendorsProvider =
       .inFilter('id', ids.toList())
       .eq('is_approved', true)
       .neq('category', VendorCategory.retiredBeautyDb);
+  // Bolt Optimization: PostgREST rows returned in Dart as List<dynamic> already contain
+  // Map<String, dynamic> items. Direct casting avoids unnecessary intermediate Map allocations.
   final vendors = (rows as List)
-      .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
+      .map((e) => VendorProfile.fromJson(e as Map<String, dynamic>))
       .toList();
   return attachVendorRatings(vendors);
 });
