@@ -428,12 +428,6 @@ abstract class AppLocalizations {
   /// **'فساتين'**
   String get categoryDresses;
 
-  /// No description provided for @categoryBeauty.
-  ///
-  /// In ar, this message translates to:
-  /// **'تجميل'**
-  String get categoryBeauty;
-
   /// No description provided for @categoryMusic.
   ///
   /// In ar, this message translates to:

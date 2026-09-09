@@ -39,8 +39,6 @@ class _DiscoverHomeScreenState extends ConsumerState<DiscoverHomeScreen> {
         return l10n.categoryCatering;
       case VendorCategory.dresses:
         return l10n.categoryDresses;
-      case VendorCategory.beauty:
-        return l10n.categoryBeauty;
       case VendorCategory.music:
         return l10n.categoryMusic;
       case VendorCategory.cars:

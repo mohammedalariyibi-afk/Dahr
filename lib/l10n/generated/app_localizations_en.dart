@@ -177,9 +177,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categoryDresses => 'Dresses';
 
   @override
-  String get categoryBeauty => 'Beauty';
-
-  @override
   String get categoryMusic => 'Music';
 
   @override

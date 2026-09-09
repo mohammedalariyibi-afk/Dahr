@@ -20,13 +20,17 @@ enum VendorCategory {
   photography,
   catering,
   dresses,
-  beauty,
   music,
   cars,
   decor,
   other;
 
+  /// Retired vertical. Postgres enum still allows the value; listings are
+  /// remapped to [other] and excluded from Discover / Favorites.
+  static const retiredBeautyDb = 'beauty';
+
   static VendorCategory fromString(String? value) {
+    if (value == retiredBeautyDb) return VendorCategory.other;
     return VendorCategory.values.firstWhere(
       (e) => e.name == value,
       orElse: () => VendorCategory.other,

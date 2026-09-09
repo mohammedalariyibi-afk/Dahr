@@ -3,12 +3,17 @@ export const CATEGORY_LABELS: Record<string, string> = {
   photography: "Photography",
   catering: "Catering",
   dresses: "Dresses",
-  beauty: "Beauty",
   music: "Music",
   cars: "Cars",
   decor: "Decor",
   other: "Other",
 };
+
+/** Retired vertical. Postgres still allows `beauty`; leftover rows show as Other. */
+export function categoryLabel(category: string): string {
+  if (category === "beauty") return CATEGORY_LABELS.other;
+  return CATEGORY_LABELS[category] ?? category;
+}
 
 export const CITY_LABELS: Record<string, string> = {
   tripoli: "Tripoli",

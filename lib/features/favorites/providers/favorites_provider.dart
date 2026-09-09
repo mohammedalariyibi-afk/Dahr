@@ -31,7 +31,8 @@ final favoriteVendorsProvider =
       .from('vendor_profiles')
       .select('*, vendor_photos(*)')
       .inFilter('id', ids.toList())
-      .eq('is_approved', true);
+      .eq('is_approved', true)
+      .neq('category', VendorCategory.retiredBeautyDb);
   final vendors = (rows as List)
       .map((e) => VendorProfile.fromJson(Map<String, dynamic>.from(e as Map)))
       .toList();
